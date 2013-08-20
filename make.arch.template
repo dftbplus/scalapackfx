@@ -1,0 +1,26 @@
+############################################################################
+# Architecture dependent makefile settings
+############################################################################
+
+# Fortran 2003 compiler
+FXX = mpif90
+
+# Fortran compiler otions
+FXXOPT =
+
+# Linker
+LN = $(FXX)
+
+# Linker options
+LNOPT = 
+
+# M4 interpreter
+M4 = m4
+
+# M4 interpreter options
+M4OPT = ""
+
+# How to link the Scalapack library
+# Only needed for the test programs, you can leave it empty, if you only
+# compile the library.
+LIB_SCALAPACK = -lscalapack -llapack -lblas

@@ -1,0 +1,7 @@
+*~
+*.o
+*.a
+*.mod
+_extlib_*
+make.arch
+

@@ -1,0 +1,46 @@
+###############################################################################
+#
+# Library makefile
+#
+# Needs following variables:
+#     FXX: Fortran 2003 compiler
+#     FXXOPT: Options for the Fortran 2003 compiler
+#     M4: M4 preprocessor path
+#     M4OPT: Options for the M4 preprocessor
+#     VPATH: The path to this directory, if you invoke the makefile from
+#         somewhere else.
+#
+###############################################################################
+
+.SUFFIXES:
+.SUFFIXES: .f90 .F90 .o
+
+TARGETLIB = libscalapackfx.a
+
+.PHONY: all
+all: $(TARGETLIB)
+
+include Makefile.dep
+
+$(TARGETLIB): $(libscalapackfx.o)
+	ar r $@ $^
+
+%.f90: %.F90
+	$(M4) $(M4OPT) $< > $@
+
+%.o: %.f90
+	$(FXX) $(FXXOPT) -c $<
+
+
+.PHONY: clean realclean
+clean:
+	rm -f *.o
+
+distclean: clean
+	rm -f *.mod
+	rm -f $(TARGETLIB)
+
+
+### Local Variables:
+### mode:makefile
+### End:

@@ -1,0 +1,12 @@
+test_desc: $(test_desc.o)
+	$(link-target)
+
+test_diag: $(test_diag.o)
+	$(link-target)
+
+test_psyr_pher: $(test_psyr_pher.o)
+	$(link-target)
+
+test_subgrids: $(test_subgrids.o)
+	$(link-target)
+
