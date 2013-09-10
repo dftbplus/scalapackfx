@@ -142,6 +142,9 @@ subroutine scalafx_psyev_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(work0, int(rtmp(1)), lwork, work)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = 0.0_$2  
   call psyev(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, info0)
   call handle_infoflag(info0, "psyev in scalafx_psyev_$1", info)
@@ -222,6 +225,10 @@ subroutine scalafx_pheev_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(rwork0, lrwork_tmp, lrwork, rwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = cmplx(0, kind=$2)
+  rwork0(:) = 0.0_$2
   call pheev(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, rwork0, lrwork, info0)
   call handle_infoflag(info0, "pheev in scalafx_pheev_$1", info)
@@ -338,6 +345,10 @@ subroutine scalafx_psyevd_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(iwork0, liwmin, liwork, iwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = 0.0_$2
+  iwork0(:) = 0
   call psyevd(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, iwork0, liwork, info0)
   call handle_infoflag(info0, "psyevd in scalafx_psyevd_$1", info)
@@ -467,6 +478,11 @@ subroutine scalafx_pheevd_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(iwork0, liwmin, liwork, iwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = cmplx(0, kind=$2)
+  rwork0(:) = 0.0_$2
+  iwork0(:) = 0
   call pheevd(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, rwork0, lrwork, iwork0, liwork, info0)
   call handle_infoflag(info0, "pheevd in scalafx_pheevd_$1", info)
