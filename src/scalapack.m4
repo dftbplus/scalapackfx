@@ -20,6 +20,44 @@ end subroutine p$2potrf
 ')
 
 dnl ************************************************************************
+dnl *** ppotri
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_ppotri',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments type
+!> Inversion of a Cholesky decomposed symmetric/Hermitian matrix ($1).
+subroutine p$2potri(uplo, nn, aa, ia, ja, desca, info)
+  import
+  character, intent(in) :: uplo
+  integer, intent(in) :: nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  $3, intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(out) :: info
+end subroutine p$2potri
+')
+
+dnl ************************************************************************
+dnl *** ptrtri
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_ptrtri',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments type
+!> Inversion of a Cholesky decomposed symmetric/Hermitian matrix ($1).
+subroutine p$2trtri(uplo, diag, nn, aa, ia, ja, desca, info)
+  import
+  character, intent(in) :: uplo, diag
+  integer, intent(in) :: nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  $3, intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(out) :: info
+end subroutine p$2trtri
+')
+
+dnl ************************************************************************
 dnl *** psygst
 dnl ************************************************************************ 
 

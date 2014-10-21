@@ -10,6 +10,8 @@ module pblasfx_module
   public :: pblasfx_psyr, pblasfx_pher
   public :: pblasfx_psyrk, pblasfx_pherk
   public :: pblasfx_psymv, pblasfx_phemv
+  public :: pblasfx_pgemm
+  public :: pblasfx_ptrmm
 
 
   interface pblasfx_psyr
@@ -36,6 +38,17 @@ module pblasfx_module
     module procedure pblasfx_phemv_complex, pblasfx_phemv_dcomplex
   end interface pblasfx_phemv
 
+  interface pblasfx_ptrmm
+    module procedure pblasfx_ptrmm_real, pblasfx_ptrmm_dreal, &
+        & pblasfx_ptrmm_complex, pblasfx_ptrmm_dcomplex
+  end interface pblasfx_ptrmm
+
+  interface pblasfx_pgemm
+    module procedure pblasfx_pgemm_real, pblasfx_pgemm_dreal, &
+        & pblasfx_pgemm_complex, pblasfx_pgemm_dcomplex
+  end interface pblasfx_pgemm
+
+
 contains
 
   _subroutine_pblasfx_psyr_pher(psyr_real, real, sp, real, psyr)
@@ -52,5 +65,16 @@ contains
   _subroutine_pblasfx_psymv_phemv(psymv_dreal, real, dp, real, psymv)
   _subroutine_pblasfx_psymv_phemv(phemv_complex, complex, sp, cmplx, phemv)
   _subroutine_pblasfx_psymv_phemv(phemv_dcomplex, complex, dp, cmplx, phemv)
+
+  _subroutine_pblasfx_pgemm(real, real, sp, real)
+  _subroutine_pblasfx_pgemm(dreal, real, dp, real)
+  _subroutine_pblasfx_pgemm(complex, complex, sp, cmplx)
+  _subroutine_pblasfx_pgemm(dcomplex, complex, dp, cmplx)
+
+  _subroutine_pblasfx_ptrmm(real, real, sp, real)
+  _subroutine_pblasfx_ptrmm(dreal, real, dp, real)
+  _subroutine_pblasfx_ptrmm(complex, complex, sp, cmplx)
+  _subroutine_pblasfx_ptrmm(dcomplex, complex, dp, cmplx)
+
   
 end module pblasfx_module
