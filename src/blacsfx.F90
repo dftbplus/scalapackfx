@@ -262,7 +262,8 @@ contains
       call blacs_exit(0)
     end if
 
-  end subroutine blacsfx_exit
+  end subroutine blacsfx_exit    
+    
 
 
 end module blacsfx_module

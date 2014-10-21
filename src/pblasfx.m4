@@ -138,7 +138,6 @@ subroutine pblasfx_$1(aa, desca, cc, descc, uplo, trans, alpha, beta,&
 end subroutine pblasfx_$1
 ')
 
-
 dnl ************************************************************************
 dnl *** psymm/phemm
 dnl ************************************************************************
@@ -195,4 +194,191 @@ subroutine pblasfx_$1(aa, desca, bb, descb, cc, descc, side, uplo, &
       & bb, ib0, jb0, descb, beta0, cc, ic0, jc0, descc)
 
 end subroutine pblasfx_$1
+')
+
+dnl ************************************************************************
+dnl *** pgemm
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_pgemm',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+!> Matrix matrix product: alpha * A * B + beta * C.
+!!
+!! \see PBLAS documentation (p?gemm routines)
+!!
+subroutine pblasfx_pgemm_$1(aa, desca, bb, descb, cc, descc, alpha, beta, &
+    & transa, transb, ia, ja, ib, jb, ic, jc, mm, nn, kk)
+
+  !> Left operand matrix A.
+  $2($3), intent(in) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Right operand matrix B.
+  $2($3), intent(in) :: bb(:,:)
+
+  !> Descriptor of B.
+  integer, intent(in) :: descb(DLEN_)
+
+  !> Added matrix C.
+  $2($3), intent(inout) :: cc(:,:)
+
+  !> Descriptor of C.
+  integer, intent(in) :: descc(DLEN_)
+
+  !> Prefactor alpha (alpha * A * B). Default: 1.0
+  $2($3), intent(in), optional :: alpha
+
+  !> Prefactor beta (beta * C). Default: 0.0
+  $2($3), intent(in), optional :: beta
+
+  !> Whether A should be unchanged ("N"), transposed ("T") or transposed
+  !! conjugated ("C"). Default: "N".
+  character, intent(in), optional :: transa
+
+  !> Whether B should be unchanged ("N"), transposed ("T") or transposed
+  !! conjugated ("C"). Default: "N".
+  character, intent(in), optional :: transb
+
+  !> First row of submatrix of A. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of submatrix of A. Default: 1
+  integer, intent(in), optional :: ja
+  
+  !> First row of submatrix of B. Default: 1
+  integer, intent(in), optional :: ib
+
+  !> First column of submatrix of B. Default: 1
+  integer, intent(in), optional :: jb
+
+  !> First row of submatrix of C. Default: 1
+  integer, intent(in), optional :: ic
+
+  !> First column of submatrix of C. Default: 1
+  integer, intent(in), optional :: jc
+
+  !> Number of rows in the submatrix of A and C. Default: desca(M_)
+  integer, intent(in), optional :: mm
+
+  !> Number of colums in the submatrix of B and C. Default: descb(N_)
+  integer, intent(in), optional :: nn
+
+  !> Number of columns/rows in the submatrix A, B. Default: desca(N_)
+  integer, intent(in), optional :: kk
+
+  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  $2($3) :: alpha0, beta0
+  integer :: ia0, ja0, ib0, jb0, ic0, jc0, mm0, nn0, kk0
+  character :: transa0, transb0
+  
+  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
+  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ib0, ib, 1)
+  _handle_inoptflag(jb0, jb, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, descb(N_))
+  _handle_inoptflag(kk0, kk, desca(N_))
+  _handle_inoptflag(transa0, transa, "N")
+  _handle_inoptflag(transb0, transb, "N")
+
+  call pgemm(transa0, transb0, mm0, nn0, kk0, alpha0, aa, ia0, ja0, desca, &
+      & bb, ib0, jb0, descb, beta0, cc, ic0, jc0, descc)
+
+end subroutine pblasfx_pgemm_$1
+')
+
+dnl ************************************************************************
+dnl *** ptrmm
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptrmm',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+!> Computes matrix-matrix product with one triangle matrix
+!!
+!! \see BLACS documentation (routines p?trmm)
+!!
+subroutine pblasfx_ptrmm_$1(aa, desca, bb, descb, alpha, side, uplo, transa, &
+    & diag, ia, ja, ib, jb, mm, nn)
+
+  !> Unit or non-unit lower or upper triangular matrix A
+  $2($3), intent(in) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Second operand (general matrix) B on entry, result on exit.
+  $2($3), intent(inout) :: bb(:,:)
+
+  !> Descriptor of B.
+  integer, intent(in) :: descb(DLEN_)
+
+  !> Prefactor. Default: 1.0
+  $2($3), intent(in), optional :: alpha
+
+  !> From which side is B multiplied by A ("L"/"R"). Default: "L"
+  character, intent(in), optional :: side
+
+  !> Whether A is upper ("U") or lower("L") triangle. Default: "L".
+  character, intent(in), optional :: uplo
+
+  !> Whether A should be unchanged ("N"), transposed ("T") or transposed
+  !! conjugated ("C"). Default: "N".
+  character, intent(in), optional :: transa
+
+  !> Whether A is unit triangular ("U") or not ("N"). Default: "N".
+  character, intent(in), optional :: diag
+
+  !> First row of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ja
+  
+  !> First row of matrix B to consider. Default: 1
+  integer, intent(in), optional :: ib
+
+  !> First column of matrix B to consider. Default: 1
+  integer, intent(in), optional :: jb
+
+  !> Number of rows for matrix A. Default: desca(M_)
+  integer, intent(in), optional :: mm
+  
+  !> Number of columns for matrix A. Default: desca(N_)
+  integer, intent(in), optional :: nn
+
+  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  integer :: ia0, ja0, ib0, jb0, mm0, nn0
+  $2($3) :: alpha0
+  character :: side0, uplo0, transa0, diag0
+
+  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
+  _handle_inoptflag(side0, side, "L")
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(transa0, transa, "N")
+  _handle_inoptflag(diag0, diag, "N")
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ib0, ib, 1)
+  _handle_inoptflag(jb0, jb, 1)
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+
+  call ptrmm(side0, uplo0, transa0, diag0, mm0, nn0, alpha0, aa, ia0, ja0, &
+      & desca, bb, ib0, jb0, descb)
+
+end subroutine pblasfx_ptrmm_$1
 ')

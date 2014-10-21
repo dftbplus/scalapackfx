@@ -10,7 +10,9 @@ module pblas_module
   public :: psyrk, pherk
   public :: psymv, phemv
   public :: psymm, phemm
-  
+  public :: pgemm
+  public :: ptrmm
+
   !> Symmetric rank one update.
   interface psyr
     _subroutine_interface_psyr_pher(real, pssyr, real, sp)
@@ -59,4 +61,20 @@ module pblas_module
     _subroutine_interface_psymm_phemm(dcomplex, pzhemm, complex, dp)
   end interface phemm
   
+  !> Triangular matrix matrix product
+  interface ptrmm
+    _subroutine_interface_ptrmm(real, pstrmm, real, sp)
+    _subroutine_interface_ptrmm(dreal, pdtrmm, real, dp)
+    _subroutine_interface_ptrmm(complex, pctrmm, complex, sp)
+    _subroutine_interface_ptrmm(dcomplex, pztrmm, complex, dp)
+  end interface ptrmm
+
+  !> Genereal matrix matrix product
+  interface pgemm
+    _subroutine_interface_pgemm(real, psgemm, real, sp)
+    _subroutine_interface_pgemm(dreal, pdgemm, real, dp)
+    _subroutine_interface_pgemm(complex, pcgemm, complex, sp)
+    _subroutine_interface_pgemm(dcomplex, pzgemm, complex, dp)
+  end interface pgemm
+
 end module pblas_module

@@ -6,7 +6,8 @@ module scalapack_module
   implicit none
   private
 
-  public :: ppotrf, psygst, phegst, psyev, pheev, psyevd, pheevd, ptrsm
+  public :: psygst, phegst, psyev, pheev, psyevd, pheevd, ptrsm
+  public :: ppotrf, ppotri, ptrtri
   public :: sl_init, numroc, infog2l, descinit
 
 
@@ -21,6 +22,22 @@ module scalapack_module
     _subroutine_interface_ppotrf(complex, c, complex(sp))
     _subroutine_interface_ppotrf(dcomplex, z, complex(dp))
   end interface ppotrf
+
+  !> Inversion of a Cholesky decomposed symmetric/Hermitian matrix.
+  interface ppotri
+    _subroutine_interface_ppotri(real, s, real(sp))
+    _subroutine_interface_ppotri(dreal, d, real(dp))
+    _subroutine_interface_ppotri(complex, c, complex(sp))
+    _subroutine_interface_ppotri(dcomplex, z, complex(dp))
+  end interface ppotri
+
+  !> Inversion of a triangular matrix.
+  interface ptrtri
+    _subroutine_interface_ptrtri(real, s, real(sp))
+    _subroutine_interface_ptrtri(dreal, d, real(dp))
+    _subroutine_interface_ptrtri(complex, c, complex(sp))
+    _subroutine_interface_ptrtri(dcomplex, z, complex(dp))
+  end interface ptrtri
 
   !> Reduces generalized symmetric eigenvalue problem to standard form.
   interface psygst
