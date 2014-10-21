@@ -139,6 +139,64 @@ end subroutine pblasfx_$1
 ')
 
 dnl ************************************************************************
+dnl *** psymm/phemm
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_psymm_phemm',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+dnl $5 blacs subroutine name
+!> Symmetric/Hermitian matrix with general matrix product 
+!! \param aa  Symmetric/Hermitian matrix.
+!! \param desca  Descriptor of aa.
+!! \param bb  general matrix.
+!! \param descb  Descriptor of bb.
+!! \param cc  Matrix to store result
+!! \param descc  Descriptor of cc.
+!! \param side "L" for for left, "R" for right (default: "L"), 
+!!        if "L" C := alpha * A * B + beta*C
+!!        if "R" C := alpha * B * A + beta*C
+!! \param uplo "U" for for upper, "L" for lower triangle matrix (default: "L").
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, bb, descb, cc, descc, side, uplo, &
+    & alpha, beta, mm, nn, ia, ja, ib, jb, ic, jc)
+  $2($3), intent(in) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(in) :: bb(:,:)
+  integer, intent(in) :: descb(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  character, intent(in), optional :: side
+  character, intent(in), optional :: uplo
+  $2($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn, ia, ja, ib, jb, ic, jc
+  
+  $2($3) :: alpha0, beta0
+  character :: side0, uplo0
+  integer :: mm0, nn0, ia0, ja0, ib0, jb0, ic0, jc0
+  
+  _handle_inoptflag(side0, side, "L")
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
+  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ib0, ib, 1)
+  _handle_inoptflag(jb0, jb, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(side0, uplo0, mm0, nn0, alpha0, aa, ia0, ja0, desca, &
+      & bb, ib0, jb0, descb, beta0, cc, ic0, jc0, descc)
+
+end subroutine pblasfx_$1
+')
+
+dnl ************************************************************************
 dnl *** pgemm
 dnl ************************************************************************
 
@@ -238,7 +296,6 @@ subroutine pblasfx_pgemm_$1(aa, desca, bb, descb, cc, descc, alpha, beta, &
 
 end subroutine pblasfx_pgemm_$1
 ')
-
 
 dnl ************************************************************************
 dnl *** ptrmm

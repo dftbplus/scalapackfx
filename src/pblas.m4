@@ -8,6 +8,7 @@ define(`_subroutine_interface_psyr_pher',`
 dnl $1: comment
 dnl $2: subroutine name
 dnl $3: dummy arguments type
+dnl $4: dummy arguments kind
 !> Symmetric/hermitian rank one update ($1).
 subroutine $2(uplo, nn, alpha, xx, ix, jx, descx, incx, aa, ia, ja, desca)
   import
@@ -58,6 +59,7 @@ define(`_subroutine_interface_psymv_phemv',`
 dnl $1: comment
 dnl $2: subroutine name
 dnl $3: dummy arguments type
+dnl $4: dummy arguments kind
 !> Symmetric/hermitian matrix vector product ($1).
 subroutine $2(uplo, nn, alpha, aa, ia, ja, desca, xx, ix, jx, descx, incx, &
     & beta, yy, iy, jy, descy, incy)
@@ -79,6 +81,37 @@ end subroutine $2
 ')
 
 dnl ************************************************************************
+dnl *** psymm / phemm
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_psymm_phemm',`
+dnl $1: comment
+dnl $2: subroutine name
+dnl $3: dummy arguments type
+dnl $4: dummy arguments kind
+!> Symmetric/hermitian matrix with general matrix product ($1).
+subroutine $2(side, uplo, mm, nn, alpha, aa, ia, ja, desca, &
+    & bb, ib, jb, descb, beta, cc, ic, jc, descc)
+  import
+  character, intent(in) :: side
+  character, intent(in) :: uplo
+  integer, intent(in) :: mm
+  integer, intent(in) :: nn
+  $3($4), intent(in) :: alpha
+  integer, intent(in) :: desca(DLEN_)
+  $3($4), intent(in) :: aa(desca(LLD_), *)
+  integer, intent(in) :: ia, ja
+  $3($4), intent(in) :: beta
+  integer, intent(in) :: descb(DLEN_)
+  $3($4), intent(in) :: bb(descb(LLD_), *)
+  integer, intent(in) :: ib, jb
+  integer, intent(in) :: descc(DLEN_)
+  $3($4), intent(in) :: cc(descc(LLD_), *)
+  integer, intent(in) :: ic, jc
+end subroutine $2
+')
+
+dnl ************************************************************************
 dnl *** ptrmm
 dnl ************************************************************************ 
 
@@ -86,7 +119,6 @@ define(`_subroutine_interface_ptrmm',`
 dnl $1: comment
 dnl $2: subroutine name
 dnl $3: dummy arguments type
-dnl $4: dummy arguments kind
 !> Symmetric/hermitian matrix vector product ($1).
 subroutine $2(side, uplo, transa, diag, mm, nn, alpha, aa, ia, ja, desca, &
     & bb, ib, jb, descb)
