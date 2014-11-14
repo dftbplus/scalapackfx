@@ -345,6 +345,7 @@ subroutine scalafx_pheev_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
 end subroutine scalafx_pheev_$1
 ')
 
+
 dnl ************************************************************************
 dnl *** psyevd
 dnl ************************************************************************
@@ -415,7 +416,7 @@ subroutine scalafx_psyevd_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   integer, allocatable :: iwork0(:)
   logical :: allocfix0
 
-  ! Handle optinal flags
+  ! Handle optional flags
   _handle_inoptflag(uplo0, uplo, "L")
   _handle_inoptflag(jobz0, jobz, "V")
   _handle_inoptflag(ia0, ia, 1)
@@ -600,6 +601,195 @@ end subroutine scalafx_pheevd_$1
 ')
 
 dnl ************************************************************************
+dnl *** psyevr
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_psyevr',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument kind
+!> Solves symmetric eigenvalue problem by the MRRR algorithm.
+!!
+!! \param aa  Matrix to diagonalize (A).
+!! \param desca  Descriptor of matrix A.
+!! \param ww  Eigenvalues on exit.
+!! \param zz  Eigenvectors on exit (Z).
+!! \param descz  Descriptor of the eigenvector matrix.
+!! \param jobz  Job type (default: "V")
+!! \param uplo  Upper or lower diagonal matrix (default: "L")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param iz  First row of the submatrix Z (default: 1)
+!! \param jz  First column of the submatrix Z (default: 1)
+!! \param work  Working array (if not specified, allocated automatically)
+!! \param iwork Integer working array (if not specified, allocated
+!!     automatically)
+!! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+!!     subroutine stops.
+!!
+!! \see SCALAPACK documentation (routine p?syevr).
+!!
+subroutine scalafx_psyevr_$1(aa, desca, ww, zz, descz, range, vl, vu, il, iu, &
+    & m, nz, jobz, uplo, ia, ja, iz, jz, work, iwork, info)
+  real($2), intent(inout) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  real($2), intent(out) :: ww(:)
+  real($2), intent(out) :: zz(:,:)
+  integer, intent(in) :: descz(DLEN_)
+  character, intent(in) :: range
+  real($2), intent(in) :: vl, vu
+  integer, intent(in) :: il, iu
+  integer, intent(out) :: m, nz
+  character, intent(in), optional :: jobz, uplo
+  integer, intent(in), optional :: ia, ja, iz, jz
+  real($2), intent(inout), allocatable, optional :: work(:)
+  integer, intent(inout), allocatable, optional :: iwork(:)
+  integer, intent(out), optional :: info
+  
+  integer :: nn, liwork, lwork, lwmin, liwmin, info0, ia0, ja0, iz0, jz0
+  character :: uplo0, jobz0
+  integer :: itmp(1)
+  real($2) :: rtmp(1), rtmp2(1)
+  real($2), allocatable :: work0(:)
+  integer, allocatable :: iwork0(:)
+  
+  ! Handle optional flags
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(jobz0, jobz, "V")
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(iz0, iz, 1)
+  _handle_inoptflag(jz0, jz, 1)
+  
+  ! Allocate workspaces
+  nn = desca(M_)
+  call psyevr(jobz0, range, uplo0, nn, aa, ia0, ja0, desca, vl, vu, il, iu, &
+      & m, nz, ww, zz, iz0, jz0, descz, rtmp, -1, itmp, -1, info0)
+  call handle_infoflag(info0, "psevr in scalafx_psyevr", info)
+  
+  ! Check workspace size of psyevr() and take that.
+  lwmin = int(rtmp(1))
+  liwmin = itmp(1)
+  
+  _move_minoptalloc(work0, lwmin, lwork, work)
+  _move_minoptalloc(iwork0, liwmin, liwork, iwork)
+  
+  ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = 0.0_$2
+  iwork0(:) = 0
+  call psyevr(jobz0, range, uplo0, nn, aa, ia0, ja0, desca, vl, vu, il, iu, &
+      & m, nz, ww, zz, iz0, jz0, descz,&
+      & work0, lwork, iwork0, liwork, info0)
+  call handle_infoflag(info0, "psyevr in scalafx_psyevr_$1", info)
+  
+  ! Save work space allocations, if dummy arguments present
+  _optmovealloc(iwork0, iwork)
+  _optmovealloc(work0, work)
+  
+end subroutine scalafx_psyevr_$1
+')
+
+dnl ************************************************************************
+dnl *** pheevr
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_pheevr',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument kind
+!> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
+!!
+!! \param aa  Matrix to diagonalize (A).
+!! \param desca  Descriptor of matrix A.
+!! \param ww  Eigenvalues on exit.
+!! \param zz  Eigenvectors on exit (Z).
+!! \param descz  Descriptor of the eigenvector matrix.
+!! \param jobz  Job type (default: "V")
+!! \param uplo  Upper or lower diagonal matrix (default: "L")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param iz  First row of the submatrix Z (default: 1)
+!! \param jz  First column of the submatrix Z (default: 1)
+!! \param work  Complex working array (if not specified, allocated
+!!     automatically)
+!! \param rwork Real working array (if not specified, allocated automatically)
+!! \param iwork Integer working array (if not specified, allocated
+!!     automatically)
+!! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+!!     subroutine stops.
+!!
+!! \see SCALAPACK documentation (routine p?heevr).
+!!
+subroutine scalafx_pheevr_$1(aa, desca, ww, zz, descz, range, vl, vu, il, iu, &
+    & m, nz, jobz, uplo, ia, ja, iz, jz, work, rwork, iwork, info)
+  complex($2), intent(inout) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  real($2), intent(out) :: ww(:)
+  complex($2), intent(out) :: zz(:,:)
+  integer, intent(in) :: descz(DLEN_)
+  character, intent(in) :: range
+  real($2), intent(in) :: vl, vu
+  integer, intent(in) :: il, iu
+  integer, intent(out) :: m, nz
+  character, intent(in), optional :: jobz, uplo
+  integer, intent(in), optional :: ia, ja, iz, jz
+  complex($2), intent(inout), allocatable, optional :: work(:)
+  real($2), intent(inout), allocatable, optional :: rwork(:)
+  integer, intent(inout), allocatable, optional :: iwork(:)
+  integer, intent(out), optional :: info
+  
+  integer :: nn, liwork, lwork, lrwork, info0, ia0, ja0, iz0, jz0
+  integer :: lwmin, lrwmin, liwmin
+  character :: uplo0, jobz0
+  real($2) :: rtmp(1), rtmp2(1)
+  complex($2) :: ctmp(1), ctmp2(1)
+  integer :: itmp(1)
+  complex($2), allocatable :: work0(:)
+  real($2), allocatable :: rwork0(:)
+  integer, allocatable :: iwork0(:)
+  
+  ! Handle optional flags
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(jobz0, jobz, "V")
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(iz0, iz, 1)
+  _handle_inoptflag(jz0, jz, 1)
+  
+  ! Allocate workspaces
+  nn = desca(M_)
+  call pheevr(jobz0, range, uplo0, nn, aa, ia0, ja0, desca, vl, vu, il, iu, &
+      & m, nz, ww, zz, iz0, jz0, descz, ctmp, -1, rtmp, -1, itmp, -1, info0)
+  call handle_infoflag(info0, "pheevr in scalafx_pheevr", info)
+    
+  lwmin = int(ctmp(1))
+  lrwmin = int(rtmp(1))
+  liwmin = itmp(1)
+  
+  _move_minoptalloc(work0, lwmin, lwork, work)
+  _move_minoptalloc(rwork0, lrwmin, lrwork, rwork)
+  _move_minoptalloc(iwork0, liwmin, liwork, iwork)
+  
+  ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = cmplx(0, kind=$2)
+  rwork0(:) = 0.0_$2
+  iwork0(:) = 0
+  call pheevr(jobz0, range, uplo0, nn, aa, ia0, ja0, desca, vl, vu, il, iu, &
+      & m, nz, ww, zz, iz0, jz0, descz, &
+      & work0, lwork, rwork0, lrwork, iwork0, liwork, info0)
+  call handle_infoflag(info0, "pheevr in scalafx_pheevr_$1", info)
+  
+  ! Save work space allocations, if dummy arguments present
+  _optmovealloc(work0, work)
+  _optmovealloc(rwork0, rwork)
+  _optmovealloc(iwork0, iwork)
+  
+end subroutine scalafx_pheevr_$1
+')
+
+dnl ************************************************************************
 dnl *** psygv
 dnl ************************************************************************
 
@@ -632,7 +822,7 @@ dnl $2 dummy argument kind
 !!     Array bb must have the Cholesky transformed form.
 !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
 !!     subroutine stops.
-!! \see SCALAPACK documentation (routines p?potrf, p?hegst, p?heev, p?trsm).	
+!! \see SCALAPACK documentation (routines p?potrf, p?hegst, p?heev, p?trsm).
 subroutine scalafx_psygv_$1(aa, desca, bb, descb, ww, zz, descz, jobz, uplo,&
     & ia, ja, ib, jb, iz, jz, work, skipchol, info)
   real($2), intent(inout) :: aa(:,:)
@@ -711,7 +901,7 @@ dnl $2 dummy argument kind
 !!     Array bb must have the Cholesky transformed form.
 !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
 !!     subroutine stops.
-!! \see SCALAPACK documentation (routines p?potrf, p?hegst, p?heev, p?trsm).	
+!! \see SCALAPACK documentation (routines p?potrf, p?hegst, p?heev, p?trsm).
 subroutine scalafx_phegv_$1(aa, desca, bb, descb, ww, zz, descz, jobz, uplo,&
     & ia, ja, ib, jb, iz, jz, work, rwork, skipchol, info)
   complex($2), intent(inout) :: aa(:,:)
@@ -934,6 +1124,190 @@ subroutine scalafx_phegvd_$1(aa, desca, bb, descb, ww, zz, descz, jobz, uplo,&
   end if
 
 end subroutine scalafx_phegvd_$1
+')
+
+dnl ************************************************************************
+dnl *** psygvr
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_psygvr',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument kind
+!> Solves real generalized eigenvalue problem by the MRRR algorithm.
+!!
+!! \details Invokes SCALAPACK routines p?potrf, p?sygst, p?syevr, p?trsm in
+!! order to transform the general eigenvalue problem to the standard form
+!! and transform the eigenvectors back. Currently all eigenvalues calculated.
+!! \param aa  Matrix to diagonalize (A), transformed matrix on exit.
+!! \param desca  Descriptor of matrix A.
+!! \param bb  Matrix on the right hand side (B), transformed matrix on exit.
+!! \param descb  Descriptor of matrix B.
+!! \param ww  Eigenvalues on exit.
+!! \param zz  Eigenvectors on exit (Z).
+!! \param descz  Descriptor of the eigenvector matrix.
+!! \param jobz  Job type (default: "V")
+!! \param uplo  Upper or lower diagonal matrix (default: "L")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param ib  First row of the submatrix B (default: 1)
+!! \param jb  First column of the submatrix B (default: 1)
+!! \param iz  First row of the submatrix Z (default: 1)
+!! \param jz  First column of the submatrix Z (default: 1)
+!! \param work  Working array (if not specified, allocated automatically)
+!! \param iwork Integer working array (if not specified, allocated
+!!     automatically)
+!! \param skipchol  If true, the Cholesky transformation will be skipped.
+!!     Array bb must have the Cholesky transformed form.
+!! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+!!     subroutine stops.
+!! \see SCALAPACK documentation (routines p?potrf, p?sygst, p?syevr, p?trsm).
+subroutine scalafx_psygvr_$1(aa, desca, bb, descb, ww, zz, descz, &
+    & jobz, uplo, ia, ja, ib, jb, iz, jz, work, iwork, skipchol, info)
+  real($2), intent(inout) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  real($2), intent(inout) :: bb(:,:)
+  integer, intent(in) :: descb(DLEN_)
+  real($2), intent(out) :: ww(:)
+  real($2), intent(out) :: zz(:,:)
+  integer, intent(in) :: descz(DLEN_)
+  character, intent(in), optional :: jobz, uplo
+  integer, intent(in), optional :: ia, ja, ib, jb, iz, jz
+  real($2), intent(inout), allocatable, optional :: work(:)
+  integer, intent(inout), allocatable, optional :: iwork(:)
+  logical, intent(in), optional :: skipchol
+  integer, intent(out), optional :: info
+  
+  real($2) :: scale
+  character :: jobz0, transa, uplo0, range0
+  logical :: skipchol0
+  ! would be arguments for range /= "A" cases :
+  real($2) :: vl, vu
+  integer :: il, iu
+  integer :: m
+  integer :: nz
+  
+  _handle_inoptflag(jobz0, jobz, "V")
+  _handle_inoptflag(uplo0, uplo, "L")
+  range0 = "A" ! all eigenvalue/vectors - need to generalise this
+  _handle_inoptflag(skipchol0, skipchol, .false.)
+  
+  ! Cholesky transformation of B
+  if (.not. skipchol0) then
+    call scalafx_ppotrf(bb, descb, uplo=uplo0, ia=ib, ja=jb, info=info)
+  end if
+  ! Reducing to standard form
+  call scalafx_psygst(1, aa, desca, bb, descb, scale, uplo=uplo0, ia=ia, ja=ja,&
+      & ib=ib, jb=jb, info=info)
+  ! Solving eigenvalue problem.
+  call scalafx_psyevr(aa, desca, ww, zz, descz, range0, vl, vu, il, iu, m, nz,&
+      & jobz=jobz0, uplo=uplo0, ia=ia, ja=ja, iz=iz, jz=jz, work=work, &
+      & iwork=iwork, info=info)
+  ! Transforming eigenvectors back
+  if (jobz0 == "V") then
+    if (uplo0 == "L" .or. uplo0 == "l") then
+       transa = "T"
+    else
+       transa = "N"
+    end if 
+    call scalafx_ptrsm(bb, descb, zz, descz, side="L", uplo=uplo0,&
+        & transa=transa, diag="N", ia=ib, ja=jb, ib=iz, jb=jz)
+  end if
+
+end subroutine scalafx_psygvr_$1
+')
+
+dnl ************************************************************************
+dnl *** phegvr
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_phegvr',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument kind
+!> Solves Hermitian eigenvalue problem by the MRRR algorithm.
+!!
+!! \details Invokes SCALAPACK routines p?potrf, p?hegst, p?heevr, p?trsm in
+!! order to transform the general eigenvalue problem to the standard form
+!! and transform the eigenvectors back. Currently all eigenvalues calculated.
+!!
+!! \param aa  Matrix to diagonalize (A), transformed matrix on exit.
+!! \param desca  Descriptor of matrix A.
+!! \param bb  Matrix on the right hand side (B), transformed matrix on exit.
+!! \param descb  Descriptor of matrix B.
+!! \param ww  Eigenvalues on exit.
+!! \param zz  Eigenvectors on exit (Z).
+!! \param descz  Descriptor of the eigenvector matrix.
+!! \param jobz  Job type (default: "V")
+!! \param uplo  Upper or lower diagonal matrix (default: "L")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param ib  First row of the submatrix B (default: 1)
+!! \param jb  First column of the submatrix B (default: 1)
+!! \param iz  First row of the submatrix Z (default: 1)
+!! \param jz  First column of the submatrix Z (default: 1)
+!! \param work  Complex working array (if not specified, allocated
+!!     automatically)
+!! \param rwork Real working array (if not specified, allocated automatically)
+!! \param iwork Integer working array (if not specified, allocated
+!!     automatically)
+!! \param skipchol  If true, the Cholesky transformation will be skipped.
+!!     Array bb must have the Cholesky transformed form.
+!! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+!!     subroutine stops.
+!! \see SCALAPACK documentation (routines p?potrf, p?hegst, p?heevr, p?trsm).
+subroutine scalafx_phegvr_$1(aa, desca, bb, descb, ww, zz, descz, jobz, uplo,&
+    & ia, ja, ib, jb, iz, jz, work, rwork, iwork, skipchol, info)
+  complex($2), intent(inout) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  complex($2), intent(inout) :: bb(:,:)
+  integer, intent(in) :: descb(DLEN_)
+  real($2), intent(out) :: ww(:)
+  complex($2), intent(out) :: zz(:,:)
+  integer, intent(in) :: descz(DLEN_)
+  character, intent(in), optional :: jobz, uplo
+  integer, intent(in), optional :: ia, ja, ib, jb, iz, jz
+  complex($2), intent(inout), allocatable, optional :: work(:)
+  real($2), intent(inout), allocatable, optional :: rwork(:)
+  integer, intent(inout), allocatable, optional :: iwork(:)
+  logical, intent(in), optional :: skipchol
+  integer, intent(out), optional :: info
+  
+  real($2) :: scale
+  character :: jobz0, transa, uplo0, range0
+  logical :: skipchol0
+  ! would be arguments for range /= "A" cases :
+  real($2) :: vl, vu
+  integer :: il, iu
+  integer :: m
+  integer :: nz
+    
+  _handle_inoptflag(jobz0, jobz, "V")
+  _handle_inoptflag(uplo0, uplo, "L")  
+  range0 = "A" ! all eigenvalue/vectors - need to generalise this
+  _handle_inoptflag(skipchol0, skipchol, .false.)
+  
+  ! Cholesky transformation of B.
+  if (.not. skipchol0) then
+    call scalafx_ppotrf(bb, descb, uplo=uplo0, ia=ib, ja=jb, info=info)
+  end if
+  ! Reducing to standard form
+  call scalafx_phegst(1, aa, desca, bb, descb, scale, uplo=uplo0, ia=ia, ja=ja,&
+      & ib=ib, jb=jb, info=info)
+  ! Solving eigenvalue problem.
+  call scalafx_pheevr(aa, desca, ww, zz, descz, range0, vl, vu, il, iu, m, nz,&
+      & jobz=jobz0, uplo=uplo0, ia=ia, ja=ja, iz=iz, jz=jz, work=work, &
+      & rwork=rwork, iwork=iwork, info=info)
+  ! Transforming eigenvectors back
+  if (jobz0 == "V") then
+    if (uplo0 == "L" .or. uplo0 == "l") then
+       transa = "C"
+    else
+       transa = "N"
+    end if
+    call scalafx_ptrsm(bb, descb, zz, descz, side="L", uplo=uplo0,&
+        & transa=transa, diag="N", ia=ib, ja=jb, ib=iz, jb=jz)
+  end if
+
+end subroutine scalafx_phegvr_$1
 ')
 
 dnl ************************************************************************
