@@ -233,7 +233,7 @@ subroutine p$2syevr(jobz, range, uplo, nn, aa, ia, ja, desca, vl, vu, il, iu, &
   integer, intent(out) :: mm, nz
   real($3), intent(out) :: ww(nn)
   integer, intent(in) :: descz(DLEN_)
-  real($3), initent(out) :: zz(descz(LLD_),*)
+  real($3), intent(out) :: zz(descz(LLD_),*)
   integer, intent(in) :: iz, jz
   real($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
