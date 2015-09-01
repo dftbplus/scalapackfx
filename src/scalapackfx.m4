@@ -36,6 +36,110 @@ end subroutine scalafx_ppotrf_$1
 ')
 
 dnl ************************************************************************
+dnl *** ppotri
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_ppotri',`
+dnl
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl
+!> Computes the inverse of a symmetric/Hermitian positive definite matrix.
+!!
+subroutine scalafx_ppotri_$1(aa, desca, uplo, ia, ja, nn, info)
+
+  !> Cholesky decomposed matrix A on entry, inverse on exit.
+  $2, intent(inout) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Specifies whether lower ("L") or upper ("U") part of A contains the
+  !! matrix. Default: "L".
+  character, intent(in), optional :: uplo
+
+  !> First row of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ja
+
+  !> Number of columns in the submatrix of A. Default: desca(M_)
+  integer, intent(in), optional :: nn
+
+  !> Info flag. If not specified and error occurs, the subroutine stops.
+  integer, intent(out), optional :: info
+
+  !------------------------------------------------------------------------
+
+  character :: uplo0
+  integer :: ia0, ja0, nn0, info0
+
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(nn0, nn, desca(M_))
+  call ppotri(uplo0, nn0, aa, ia0, ja0, desca, info0)
+  call handle_infoflag(info0, "ppotri in scalafx_ppotri_$1", info)
+
+end subroutine scalafx_ppotri_$1
+')
+
+dnl ************************************************************************
+dnl *** ptrtri
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_ptrtri',`
+dnl
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl
+!> Computes the inverse of a symmetric/Hermitian positive definite matrix.
+!!
+subroutine scalafx_ptrtri_$1(aa, desca, uplo, diag, ia, ja, nn, info)
+
+  !> Cholesky decomposed matrix A on entry, inverse on exit.
+  $2, intent(inout) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Specifies whether lower ("L") or upper ("U") part of A contains the
+  !! matrix. Default: "L".
+  character, intent(in), optional :: uplo
+
+  !> Specifies whether A is unit triangular ("U") or not ("N"). Default: "N".
+  character, intent(in), optional :: diag
+
+  !> First row of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ja
+
+  !> Number of columns in the submatrix of A. Default: desca(M_).
+  integer, intent(in), optional :: nn
+
+  !> Info flag. If not specified and error occurs, the subroutine stops.
+  integer, intent(out), optional :: info
+
+  !------------------------------------------------------------------------
+
+  character :: uplo0, diag0
+  integer :: ia0, ja0, nn0, info0
+
+  _handle_inoptflag(uplo0, uplo, "L")
+  _handle_inoptflag(diag0, diag, "N")
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(nn0, nn, desca(M_))
+  call ptrtri(uplo0, diag0, nn0, aa, ia0, ja0, desca, info0)
+  call handle_infoflag(info0, "ptrtri in scalafx_ptrtri_$1", info)
+
+end subroutine scalafx_ptrtri_$1
+')
+
+dnl ************************************************************************
 dnl *** psygst / phegst
 dnl ************************************************************************
 
@@ -142,6 +246,9 @@ subroutine scalafx_psyev_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(work0, int(rtmp(1)), lwork, work)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = 0.0_$2  
   call psyev(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, info0)
   call handle_infoflag(info0, "psyev in scalafx_psyev_$1", info)
@@ -222,6 +329,10 @@ subroutine scalafx_pheev_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(rwork0, lrwork_tmp, lrwork, rwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = cmplx(0, kind=$2)
+  rwork0(:) = 0.0_$2
   call pheev(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, rwork0, lrwork, info0)
   call handle_infoflag(info0, "pheev in scalafx_pheev_$1", info)
@@ -338,6 +449,10 @@ subroutine scalafx_psyevd_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(iwork0, liwmin, liwork, iwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = 0.0_$2
+  iwork0(:) = 0
   call psyevd(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, iwork0, liwork, info0)
   call handle_infoflag(info0, "psyevd in scalafx_psyevd_$1", info)
@@ -467,6 +582,11 @@ subroutine scalafx_pheevd_$1(aa, desca, ww, zz, descz, jobz, uplo, ia, ja, iz,&
   _move_minoptalloc(iwork0, liwmin, liwork, iwork)
 
   ! Diagonalization
+  ! Initializing workspace as SCALAPACK apparently accesses uninitialized
+  ! elements in it (nagfors -nan flag causes *sometimes* arithmetic exception)
+  work0(:) = cmplx(0, kind=$2)
+  rwork0(:) = 0.0_$2
+  iwork0(:) = 0
   call pheevd(jobz0, uplo0, nn, aa, ia0, ja0, desca, ww, zz, iz0, jz0, descz,&
       & work0, lwork, rwork0, lrwork, iwork0, liwork, info0)
   call handle_infoflag(info0, "pheevd in scalafx_pheevd_$1", info)

@@ -9,6 +9,9 @@ module pblas_module
   public :: psyr, pher
   public :: psyrk, pherk
   public :: psymv, phemv
+  public :: psymm, phemm
+  public :: pgemm
+  public :: ptrmm
   public :: ptran, ptranu
   public :: ptranc
 
@@ -42,11 +45,39 @@ module pblas_module
     _subroutine_interface_psymv_phemv(dreal, pdsymv, real, dp)
   end interface psymv
 
-  !> Symmetric matrix vector product
+  !> Hermitian matrix vector product
   interface phemv
     _subroutine_interface_psymv_phemv(complex, pchemv, complex, sp)
     _subroutine_interface_psymv_phemv(dcomplex, pzhemv, complex, dp)
   end interface phemv
+
+  !> Symmetric matrix general matrix product
+  interface psymm
+    _subroutine_interface_psymm_phemm(real, pssymm, real, sp)
+    _subroutine_interface_psymm_phemm(dreal, pdsymm, real, dp)
+  end interface psymm
+
+  !> Hermitian matrix general matrix product
+  interface phemm
+    _subroutine_interface_psymm_phemm(complex, pchemm, complex, sp)
+    _subroutine_interface_psymm_phemm(dcomplex, pzhemm, complex, dp)
+  end interface phemm
+
+  !> Triangular matrix matrix product
+  interface ptrmm
+    _subroutine_interface_ptrmm(real, pstrmm, real, sp)
+    _subroutine_interface_ptrmm(dreal, pdtrmm, real, dp)
+    _subroutine_interface_ptrmm(complex, pctrmm, complex, sp)
+    _subroutine_interface_ptrmm(dcomplex, pztrmm, complex, dp)
+  end interface ptrmm
+
+  !> Genereal matrix matrix product
+  interface pgemm
+    _subroutine_interface_pgemm(real, psgemm, real, sp)
+    _subroutine_interface_pgemm(dreal, pdgemm, real, dp)
+    _subroutine_interface_pgemm(complex, pcgemm, complex, sp)
+    _subroutine_interface_pgemm(dcomplex, pzgemm, complex, dp)
+  end interface pgemm
 
   !> Real matrix transpose.
   interface ptran

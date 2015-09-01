@@ -1,7 +1,7 @@
 About SCALAPACKFX
 =================
 
-`SCALAPACKFX <http://www.bitbucket.org/aradi/scalapackfx/>`_ is a library
+`SCALAPACKFX <http://www.bitbucket.org/dftbplus/scalapackfx/>`_ is a library
 containing modern Fortran (Fortran 2003) wrappers around SCALAPACK, PBLAS and
 BLACS routines. The goal is to make the use of those libraries as simple as
 possible in Fortran.
@@ -43,4 +43,4 @@ A few routines are already covered (see :ref:`sec_routines`). If your desired
 routine is not among them yet, you are cordially invited to extend SCALAPACKFX
 and to share it in order to let others profit from your work (SCALAPACKFX is
 licensed under the simplified BSD license). For more details see the `project
-home page <http://www.bitbucket.org/aradi/scalapackfx/>`_.
+home page <http://www.bitbucket.org/dftbplus/scalapackfx/>`_.
