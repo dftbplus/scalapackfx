@@ -9,7 +9,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 subroutine pblasfx_$1(aa, desca, xx, descx, yy, descy, uplo, alpha, beta, &
     & nn, ia, ja, ix, jx, incx, iy, jy, incy)
   $2($3), intent(in) :: aa(:,:)
@@ -54,7 +54,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 subroutine pblasfx_$1(xx, descx, aa, desca, uplo, nn, alpha, ix, jx, incx,&
     & ia, ja)
   $2($3), intent(in) :: xx(:,:)
@@ -93,7 +93,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 !> Symmetric/Hermitian rank-k update.
 !! \param aa  Matrix to update with.
 !! \param desca  Descriptor of aa.
@@ -135,5 +135,51 @@ subroutine pblasfx_$1(aa, desca, cc, descc, uplo, trans, alpha, beta,&
   call $5(uplo0, trans0, nn0, kk0, alpha0, aa, ia0, ja0, desca, beta0,&
       & cc, ic0, jc0, descc)
   
+end subroutine pblasfx_$1
+')
+
+dnl ************************************************************************
+dnl *** ptran
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptran',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+dnl $5 pblas subroutine name
+!> Matrix transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
+  $2($3), intent(in) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  real($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
+
+  real($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
+
+  _handle_inoptflag(alpha0, alpha, real(1, kind=$3))
+  _handle_inoptflag(beta0, beta, real(0, kind=$3))
+
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
+
 end subroutine pblasfx_$1
 ')

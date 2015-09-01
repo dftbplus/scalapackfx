@@ -16,3 +16,5 @@ test_subgrids.o = test_subgrids.o $($(_modobj_libscalapackfx_module))
 test_diag.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
 test_diag.o = test_diag.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
 
+test_tran.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_tran.o = test_tran.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))

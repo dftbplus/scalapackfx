@@ -10,7 +10,7 @@ module pblasfx_module
   public :: pblasfx_psyr, pblasfx_pher
   public :: pblasfx_psyrk, pblasfx_pherk
   public :: pblasfx_psymv, pblasfx_phemv
-
+  public :: pblasfx_ptran
 
   interface pblasfx_psyr
     module procedure pblasfx_psyr_real, pblasfx_psyr_dreal
@@ -36,6 +36,10 @@ module pblasfx_module
     module procedure pblasfx_phemv_complex, pblasfx_phemv_dcomplex
   end interface pblasfx_phemv
 
+  interface pblasfx_ptran
+    module procedure pblasfx_ptran_real, pblasfx_ptran_dreal
+  end interface pblasfx_ptran
+
 contains
 
   _subroutine_pblasfx_psyr_pher(psyr_real, real, sp, real, psyr)
@@ -52,5 +56,8 @@ contains
   _subroutine_pblasfx_psymv_phemv(psymv_dreal, real, dp, real, psymv)
   _subroutine_pblasfx_psymv_phemv(phemv_complex, complex, sp, cmplx, phemv)
   _subroutine_pblasfx_psymv_phemv(phemv_dcomplex, complex, dp, cmplx, phemv)
-  
+
+  _subroutine_pblasfx_ptran(ptran_real, real, sp, real, ptran)
+  _subroutine_pblasfx_ptran(ptran_dreal, real, dp, real, ptran)
+
 end module pblasfx_module

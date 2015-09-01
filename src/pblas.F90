@@ -9,6 +9,7 @@ module pblas_module
   public :: psyr, pher
   public :: psyrk, pherk
   public :: psymv, phemv
+  public :: ptran
 
   !> Symmetric rank one update.
   interface psyr
@@ -46,5 +47,10 @@ module pblas_module
     _subroutine_interface_psymv_phemv(dcomplex, pzhemv, complex, dp)
   end interface phemv
 
+  !> Real matrix transpose.
+  interface ptran
+    _subroutine_interface_ptran(real, pstran, real, sp)
+    _subroutine_interface_ptran(dreal, pdtran, real, dp)
+  end interface ptran
 
 end module pblas_module
