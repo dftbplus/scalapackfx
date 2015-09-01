@@ -11,10 +11,14 @@ module test_common_module
   integer, parameter :: sp = kind(1.0)
   integer, parameter :: dp = kind(1.0d0)
 
+  interface writetofile
+    module procedure writetofile_real
+    module procedure writetofile_cmplx
+  end interface writetofile
 
 contains
-  
-    
+
+
   !> Read distributed matrix from file.
   !! \param mygrid  BLACS descriptor
   !! \param fname  Name of the file to read the matrix from.
@@ -56,7 +60,7 @@ contains
   !! \param fname  Name of the file to write the matrix to.
   !! \param mtxloc  Local part of the matrix.
   !! \param desc  Matrix descriptor
-  subroutine writetofile(mygrid, fname, mtxloc, desc)
+  subroutine writetofile_real(mygrid, fname, mtxloc, desc)
     type(blacsgrid), intent(in) :: mygrid
     character(*), intent(in) :: fname
     real(dp), intent(in) :: mtxloc(:,:)
@@ -71,7 +75,29 @@ contains
       call writearray_slave(mygrid, desc, mtxloc)
     end if
 
-  end subroutine writetofile
+  end subroutine writetofile_real
+
+  !> Write distributed matrix to file.
+  !! \param mygrid  BlACS descriptor
+  !! \param fname  Name of the file to write the matrix to.
+  !! \param mtxloc  Local part of the matrix.
+  !! \param desc  Matrix descriptor
+  subroutine writetofile_cmplx(mygrid, fname, mtxloc, desc)
+    type(blacsgrid), intent(in) :: mygrid
+    character(*), intent(in) :: fname
+    complex(dp), intent(in) :: mtxloc(:,:)
+    integer, intent(in) :: desc(DLEN_)
+
+    if (mygrid%master) then
+      open(12, file=fname, form="formatted", status="replace")
+      write(12, "(I0,1X,I0)") desc(M_), desc(N_)
+      call writearray_master(mygrid, 12, desc, mtxloc, elemformat="(ES23.15)")
+      close(12)
+    else
+      call writearray_slave(mygrid, desc, mtxloc)
+    end if
+
+  end subroutine writetofile_cmplx
 
 
 end module test_common_module

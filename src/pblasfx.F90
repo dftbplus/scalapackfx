@@ -10,8 +10,9 @@ module pblasfx_module
   public :: pblasfx_psyr, pblasfx_pher
   public :: pblasfx_psyrk, pblasfx_pherk
   public :: pblasfx_psymv, pblasfx_phemv
-  public :: pblasfx_ptran
-
+  public :: pblasfx_ptran, pblasfx_ptranu
+  public :: pblasfx_ptranc
+  
   interface pblasfx_psyr
     module procedure pblasfx_psyr_real, pblasfx_psyr_dreal
   end interface pblasfx_psyr
@@ -39,6 +40,14 @@ module pblasfx_module
   interface pblasfx_ptran
     module procedure pblasfx_ptran_real, pblasfx_ptran_dreal
   end interface pblasfx_ptran
+  
+  interface pblasfx_ptranu
+    module procedure pblasfx_ptranu_complex, pblasfx_ptranu_dcomplex
+  end interface pblasfx_ptranu
+  
+  interface pblasfx_ptranc
+    module procedure pblasfx_ptranc_complex, pblasfx_ptranc_dcomplex
+  end interface pblasfx_ptranc
 
 contains
 
@@ -59,5 +68,10 @@ contains
 
   _subroutine_pblasfx_ptran(ptran_real, real, sp, real, ptran)
   _subroutine_pblasfx_ptran(ptran_dreal, real, dp, real, ptran)
+  _subroutine_pblasfx_ptranu(ptranu_complex, complex, sp, complex, ptranu)
+  _subroutine_pblasfx_ptranu(ptranu_dcomplex, complex, dp, complex, ptranu)
+  _subroutine_pblasfx_ptranc(ptranc_complex, complex, sp, complex, ptranc)
+  _subroutine_pblasfx_ptranc(ptranc_dcomplex, complex, dp, complex, ptranc)
+
 
 end module pblasfx_module

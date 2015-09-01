@@ -79,10 +79,10 @@ end subroutine $2
 ')
 
 dnl ************************************************************************
-dnl *** ptran
+dnl *** ptran / ptranu / ptranc
 dnl ************************************************************************
 
-define(`_subroutine_interface_ptran',`
+define(`_subroutine_interface_ptranx',`
 dnl $1: comment
 dnl $2: subroutine name
 dnl $3: dummy arguments type

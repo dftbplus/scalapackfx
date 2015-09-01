@@ -183,3 +183,95 @@ subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
 
 end subroutine pblasfx_$1
 ')
+
+dnl ************************************************************************
+dnl *** ptranu
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptranu',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+dnl $5 pblas subroutine name
+!> Matrix transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
+  $2($3), intent(in) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  complex($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
+
+  complex($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
+
+  _handle_inoptflag(alpha0, alpha, cmplx(1, 0, kind=$3))
+  _handle_inoptflag(beta0, beta, cmplx(0, 0, kind=$3))
+
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
+
+end subroutine pblasfx_$1
+')
+
+dnl ************************************************************************
+dnl *** ptranc
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptranc',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+dnl $5 pblas subroutine name
+!> Matrix hermitian transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
+  $2($3), intent(in) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  complex($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
+
+  complex($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
+
+  _handle_inoptflag(alpha0, alpha, cmplx(1, 0, kind=$3))
+  _handle_inoptflag(beta0, beta, cmplx(0, 0, kind=$3))
+
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
+
+end subroutine pblasfx_$1
+')
