@@ -148,7 +148,7 @@ dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
 dnl $5 pblas subroutine name
-!> Matrix transpose.
+!> Real matrix transpose.
 !! \param aa  Matrix to update with.
 !! \param desca  Descriptor of aa.
 !! \param cc  Matrix to be updated.
@@ -194,7 +194,7 @@ dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
 dnl $5 pblas subroutine name
-!> Matrix transpose.
+!> Complex matrix transpose.
 !! \param aa  Matrix to update with.
 !! \param desca  Descriptor of aa.
 !! \param cc  Matrix to be updated.
@@ -240,7 +240,7 @@ dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
 dnl $5 pblas subroutine name
-!> Matrix hermitian transpose.
+!> Complex matrix hermitian transpose.
 !! \param aa  Matrix to update with.
 !! \param desca  Descriptor of aa.
 !! \param cc  Matrix to be updated.
