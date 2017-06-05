@@ -9,7 +9,7 @@ module scalapackfx_common_module
   public :: DLEN_
   public :: DT_, CTXT_, M_, N_, MB_, NB_, RSRC_, CSRC_, LLD_
   public :: sp, dp
-  public :: handle_infoflag
+  public :: error, handle_infoflag
 
   !> Descriptor length for distributed matrices
   integer, parameter :: DLEN_ = 9
@@ -50,6 +50,20 @@ module scalapackfx_common_module
 contains
 
 
+  !> Issues error and stops code execution.
+  !!
+  !! \param msg  Error message to print.
+  !!
+  subroutine error(msg)
+    character(*), intent(in) :: msg
+
+    write(*, "(A)") "!!! ERROR !!!"
+    write(*, "(A)") msg
+    stop
+    
+  end subroutine error
+  
+
   !> Handles optional info flag.
   !!
   !! \param info0  Info flag as returned by some routine.
@@ -66,7 +80,7 @@ contains
     if (present(info)) then
       info = info0
     elseif (info0 /= 0) then
-      write(*, "(A)") "Operation failed!"
+      write(*, "(A)") "Scalapack operation failed!"
       write(*, "(A)") msg
       write(*, "(A,I0)") "Info: ", info0
       stop

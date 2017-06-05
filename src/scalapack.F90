@@ -6,9 +6,9 @@ module scalapack_module
   implicit none
   private
 
-  public :: psygst, phegst, psyev, pheev, psyevd, pheevd, ptrsm
-  public :: ppotrf, ppotri, ptrtri
-  public :: sl_init, numroc, infog2l, descinit
+  public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
+  public :: ptrsm, ppotrf, ppotri, ptrtri
+  public :: sl_init, numroc, infog2l, indxl2g, descinit
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -74,7 +74,19 @@ module scalapack_module
     _subroutine_interface_pheevd(complex, c, sp)
     _subroutine_interface_pheevd(dcomplex, z, dp)
   end interface pheevd
-
+  
+  !> Solves the symmetric eigenvalue problem by the MRRR algorithm.
+  interface psyevr
+    _subroutine_interface_psyevr(real, s, sp)
+    _subroutine_interface_psyevr(dreal, d, dp)
+  end interface psyevr
+  
+  !> Solves the Hermitian eigenvalue problem by the MRRR algorithm.
+  interface pheevr
+    _subroutine_interface_pheevr(complex, c, sp)
+    _subroutine_interface_pheevr(dcomplex, z, dp)
+  end interface pheevr
+  
   !> Linear system of equation for triangular matrix.
   interface ptrsm
     _subroutine_interface_ptrsm(real, s, real(sp))
@@ -101,7 +113,7 @@ module scalapack_module
       integer, intent(in) :: nn, nb, iproc, isrcproc, nproc
       integer :: numroc
     end function numroc
-
+    
     !> Converts global matrix index into local.
     subroutine infog2l(grindx, gcindx, desc, nprow, npcol, myrow, mycol,&
         & lrindx, lcindx, rsrc, csrc)
@@ -110,7 +122,13 @@ module scalapack_module
       integer, intent(in) :: nprow, npcol, myrow, mycol
       integer, intent(out) :: lrindx, lcindx, rsrc, csrc
     end subroutine infog2l
-
+    
+    !> Converts local matrix index into global.
+    function indxl2g(indxglob, nb, iproc, isrcproc, nprocs)
+      integer :: indxl2g
+      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs      
+    end function indxl2g
+    
     !> Initializes a descriptor for a distributed array.
     subroutine descinit(desc, mm, nn, mb, nb, irsrc, icsrc, ictxt, lld, info)
       import DLEN_

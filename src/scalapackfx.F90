@@ -22,10 +22,15 @@ module scalapackfx_module
   public :: scalafx_psygvd
   public :: scalafx_pheevd
   public :: scalafx_phegvd
+  public :: scalafx_psyevr
+  public :: scalafx_pheevr
+  public :: scalafx_psygvr
+  public :: scalafx_phegvr
   public :: scalafx_ptrsm
   public :: scalafx_getdescriptor
   public :: scalafx_getlocalshape
   public :: scalafx_infog2l
+  public :: scalafx_indxl2g
   public :: scalafx_localindices
   public :: scalafx_creatematrix
 
@@ -99,7 +104,29 @@ module scalapackfx_module
   interface scalafx_phegvd
     module procedure scalafx_phegvd_complex, scalafx_phegvd_dcomplex
   end interface scalafx_phegvd
-
+  
+  !> Solves symmetric eigenvalue problem by the divide and conquer algorithm.
+  interface scalafx_psyevr
+    module procedure scalafx_psyevr_real, scalafx_psyevr_dreal
+  end interface scalafx_psyevr
+  
+  !> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
+  interface scalafx_pheevr
+    module procedure scalafx_pheevr_complex, scalafx_pheevr_dcomplex
+  end interface scalafx_pheevr
+  
+  !> Solves generalized symmetric eigenvalue problem by the divide and conquer
+  !! algorithm.
+  interface scalafx_psygvr
+    module procedure scalafx_psygvr_real, scalafx_psygvr_dreal
+  end interface scalafx_psygvr
+  
+  !> Solves generalized Hermitian eigenvalue problem by the divide and conquer
+  !! algorithm.
+  interface scalafx_phegvr
+    module procedure scalafx_phegvr_complex, scalafx_phegvr_dcomplex
+  end interface scalafx_phegvr
+  
   !> Solves triangular matrix equation.
   interface scalafx_ptrsm
     module procedure scalafx_ptrsm_real, scalafx_ptrsm_dreal
@@ -154,7 +181,17 @@ contains
   _subroutine_scalafx_psygvd(dreal, dp)
   _subroutine_scalafx_phegvd(complex, sp)
   _subroutine_scalafx_phegvd(dcomplex, dp)
-
+  
+  _subroutine_scalafx_psyevr(real, sp)
+  _subroutine_scalafx_psyevr(dreal, dp)
+  _subroutine_scalafx_pheevr(complex, sp)
+  _subroutine_scalafx_pheevr(dcomplex, dp)
+  
+  _subroutine_scalafx_psygvr(real, sp)
+  _subroutine_scalafx_psygvr(dreal, dp)
+  _subroutine_scalafx_phegvr(complex, sp)
+  _subroutine_scalafx_phegvr(dcomplex, dp)
+  
   _subroutine_scalafx_ptrsm(real, real(sp), real(1.0, sp))
   _subroutine_scalafx_ptrsm(dreal, real(dp), real(1.0, dp))
   _subroutine_scalafx_ptrsm(complex, complex(sp), cmplx(1, 0, sp))
@@ -168,6 +205,7 @@ contains
 
 
   !> Returns descriptor and size for the local part of a distributed matrix.
+  !!
   !! \param mygrid  BLACS descriptor.
   !! \param mm  Number of rows of global matrix.
   !! \param nn  Number of columns of global matrix.
@@ -181,6 +219,7 @@ contains
   !! \param csrc  Process column, over which first column is distributed
   !!     (default: master column).
   !! \param info  Info flag.
+  !!
   subroutine scalafx_getdescriptor(mygrid, mm, nn, mb, nb, desc, rsrc, csrc, &
       & info)
     type(blacsgrid), intent(in) :: mygrid
@@ -224,6 +263,7 @@ contains
 
 
   !> Maps global position in a distributed matrix to local one.
+  !!
   !! \param mygrid  BLACS descriptor.
   !! \param desc  Descriptor of the distributed matrix.
   !! \param grow  Global row index.
@@ -232,6 +272,7 @@ contains
   !! \param lcol  Local column index on output.
   !! \param rsrc  Row of the process owning the local matrix.
   !! \param csrc  Column of the process owning the local matrix.
+  !!
   subroutine scalafx_infog2l(mygrid, desc, grow, gcol, lrow, lcol, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: desc(DLEN_)
@@ -244,33 +285,42 @@ contains
 
   end subroutine scalafx_infog2l
 
+  
+  !> Maps local row or column index onto global matrix position.
+  !!
+  !! \param indxloc  Local index on input.
+  !! \param mygrid  BLACS descriptor.
+  !! \param blocksize  Block size for direction (row or column)
+  !!
+  function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    integer :: scalafx_indxl2g
+    integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
+    
+    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    
+  end function scalafx_indxl2g
 
+  
   !> Maps a global position in a distributed matrix to local one.
   !!
+  !! \param mygrid  BLACS descriptor.
+  !! \param desc  Descriptor of the distributed matrix.
+  !! \param grow  Global row index.
+  !! \param gcol  Global column index.
+  !! \param local Indicates whether given global index is local for the process.
+  !! \param lrow  Row index in the local matrix (or 0 if global index is not
+  !!     local)
+  !! \param lcol  Column index in the local matrix (or 0 if global index is not
+  !!   local)
+  !!
   subroutine scalafx_localindices(mygrid, desc, grow, gcol, local, lrow, lcol)
-    
-    !> BLACS descriptor.
     type(blacsgrid), intent(in) :: mygrid
-
-    !> Descriptor of the distributed matrix.
     integer, intent(in) :: desc(DLEN_)
-
-    !> Global row index.
     integer, intent(in) :: grow
-
-    !> Global column index
     integer, intent(in) :: gcol
-
-    !> Indicates whether given global index is local for the process.
     logical, intent(out) :: local
-
-    !> Row index in the local matrix (or 0 if global index is not local)
     integer, intent(out) :: lrow
-
-    !> Column index in the local matrix (or 0 if global index is not local)
     integer, intent(out) :: lcol
-
-    !------------------------------------------------------------------------
     
     integer :: rsrc, csrc
 
