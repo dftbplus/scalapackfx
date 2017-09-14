@@ -63,4 +63,5 @@ _FORCED_SUBMAKE_:
             FXX="$(FXX)" FXXOPT="$(FXXOPT)" \
             LN="$(LN)" LNOPT="$(LNOPT)" \
             M4="$(M4)" M4OPT="$(M4OPT)" \
+            SRCDIR=. \
             -C $(SRCDIR) -f Makefile.lib

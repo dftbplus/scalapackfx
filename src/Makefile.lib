@@ -2,13 +2,14 @@
 #
 # Library makefile
 #
+# Compiles and links scalapackfx in the current directory.
+#
 # Needs following variables:
 #     FXX: Fortran 2003 compiler
 #     FXXOPT: Options for the Fortran 2003 compiler
-#     M4: M4 preprocessor path
-#     M4OPT: Options for the M4 preprocessor
-#     VPATH: The path to this directory, if you invoke the makefile from
-#         somewhere else.
+#     M4: M4 macro processor
+#     M4OPT: Options for the M4 macro processor.
+#     SRCDIR: Folder where source files can be found
 #
 ###############################################################################
 
@@ -17,16 +18,18 @@
 
 TARGETLIB = libscalapackfx.a
 
+vpath % $(SRCDIR)
+
 .PHONY: all
 all: $(TARGETLIB)
 
-include Makefile.dep
+include $(SRCDIR)/Makefile.dep
 
 $(TARGETLIB): $(libscalapackfx.o)
 	ar r $@ $^
 
 %.f90: %.F90
-	$(M4) $(M4OPT) $< > $@
+	$(M4) -I$(SRCDIR) $(M4OPT) $< > $@
 
 %.o: %.f90
 	$(FXX) $(FXXOPT) -c $<
