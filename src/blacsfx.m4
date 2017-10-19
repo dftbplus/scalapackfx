@@ -100,7 +100,7 @@ subroutine blacsfx_gebr_$2`2'(mygrid, aa, scope, top, rsrc, csrc)
   character :: scope0, top0
   integer :: rsrc0, csrc0
 
-  _handle_inoptflag(scope0,scope, "A")
+  _handle_inoptflag(scope0, scope, "A")
   _handle_inoptflag(top0, top, " ")
   _handle_inoptflag(rsrc0, rsrc, mygrid%masterrow)
   _handle_inoptflag(csrc0, csrc, mygrid%mastercol)
@@ -389,6 +389,7 @@ subroutine blacsfx_gsum_$2`0'(mygrid, aa, scope, top, rdest, cdest)
 
   $3 :: buffer(1,1)
 
+  buffer(1,1) = aa
   call blacsfx_gsum(mygrid, buffer, scope, top, rdest, cdest)
   aa = buffer(1,1)
 

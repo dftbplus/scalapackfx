@@ -6,8 +6,9 @@ module scalapack_module
   implicit none
   private
 
-  public :: ppotrf, psygst, phegst, psyev, pheev, psyevd, pheevd, ptrsm
-  public :: sl_init, numroc, infog2l, descinit
+  public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
+  public :: ptrsm, ppotrf, ppotri, ptrtri
+  public :: sl_init, numroc, infog2l, indxl2g, descinit
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -21,6 +22,22 @@ module scalapack_module
     _subroutine_interface_ppotrf(complex, c, complex(sp))
     _subroutine_interface_ppotrf(dcomplex, z, complex(dp))
   end interface ppotrf
+
+  !> Inversion of a Cholesky decomposed symmetric/Hermitian matrix.
+  interface ppotri
+    _subroutine_interface_ppotri(real, s, real(sp))
+    _subroutine_interface_ppotri(dreal, d, real(dp))
+    _subroutine_interface_ppotri(complex, c, complex(sp))
+    _subroutine_interface_ppotri(dcomplex, z, complex(dp))
+  end interface ppotri
+
+  !> Inversion of a triangular matrix.
+  interface ptrtri
+    _subroutine_interface_ptrtri(real, s, real(sp))
+    _subroutine_interface_ptrtri(dreal, d, real(dp))
+    _subroutine_interface_ptrtri(complex, c, complex(sp))
+    _subroutine_interface_ptrtri(dcomplex, z, complex(dp))
+  end interface ptrtri
 
   !> Reduces generalized symmetric eigenvalue problem to standard form.
   interface psygst
@@ -57,7 +74,19 @@ module scalapack_module
     _subroutine_interface_pheevd(complex, c, sp)
     _subroutine_interface_pheevd(dcomplex, z, dp)
   end interface pheevd
-
+  
+  !> Solves the symmetric eigenvalue problem by the MRRR algorithm.
+  interface psyevr
+    _subroutine_interface_psyevr(real, s, sp)
+    _subroutine_interface_psyevr(dreal, d, dp)
+  end interface psyevr
+  
+  !> Solves the Hermitian eigenvalue problem by the MRRR algorithm.
+  interface pheevr
+    _subroutine_interface_pheevr(complex, c, sp)
+    _subroutine_interface_pheevr(dcomplex, z, dp)
+  end interface pheevr
+  
   !> Linear system of equation for triangular matrix.
   interface ptrsm
     _subroutine_interface_ptrsm(real, s, real(sp))
@@ -84,7 +113,7 @@ module scalapack_module
       integer, intent(in) :: nn, nb, iproc, isrcproc, nproc
       integer :: numroc
     end function numroc
-
+    
     !> Converts global matrix index into local.
     subroutine infog2l(grindx, gcindx, desc, nprow, npcol, myrow, mycol,&
         & lrindx, lcindx, rsrc, csrc)
@@ -93,7 +122,13 @@ module scalapack_module
       integer, intent(in) :: nprow, npcol, myrow, mycol
       integer, intent(out) :: lrindx, lcindx, rsrc, csrc
     end subroutine infog2l
-
+    
+    !> Converts local matrix index into global.
+    function indxl2g(indxglob, nb, iproc, isrcproc, nprocs)
+      integer :: indxl2g
+      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs      
+    end function indxl2g
+    
     !> Initializes a descriptor for a distributed array.
     subroutine descinit(desc, mm, nn, mb, nb, irsrc, icsrc, ictxt, lld, info)
       import DLEN_

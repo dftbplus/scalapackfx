@@ -10,6 +10,8 @@ module scalapackfx_module
 
   public :: DLEN_, DT_, CTXT_, M_, N_, MB_, NB_, RSRC_, CSRC_, LLD_
   public :: scalafx_ppotrf
+  public :: scalafx_ppotri
+  public :: scalafx_ptrtri
   public :: scalafx_psygst
   public :: scalafx_phegst
   public :: scalafx_psyev
@@ -20,10 +22,16 @@ module scalapackfx_module
   public :: scalafx_psygvd
   public :: scalafx_pheevd
   public :: scalafx_phegvd
+  public :: scalafx_psyevr
+  public :: scalafx_pheevr
+  public :: scalafx_psygvr
+  public :: scalafx_phegvr
   public :: scalafx_ptrsm
   public :: scalafx_getdescriptor
   public :: scalafx_getlocalshape
   public :: scalafx_infog2l
+  public :: scalafx_indxl2g
+  public :: scalafx_localindices
   public :: scalafx_creatematrix
 
 
@@ -32,6 +40,18 @@ module scalapackfx_module
     module procedure scalafx_ppotrf_real, scalafx_ppotrf_dreal
     module procedure scalafx_ppotrf_complex, scalafx_ppotrf_dcomplex
   end interface scalafx_ppotrf
+
+  !> Inverse of a Cholesky decomposed symmetric/Hermitian matrix.
+  interface scalafx_ppotri
+    module procedure scalafx_ppotri_real, scalafx_ppotri_dreal
+    module procedure scalafx_ppotri_complex, scalafx_ppotri_dcomplex
+  end interface scalafx_ppotri
+  
+  !> Inverse of a triangular matrix
+  interface scalafx_ptrtri
+    module procedure scalafx_ptrtri_real, scalafx_ptrtri_dreal
+    module procedure scalafx_ptrtri_complex, scalafx_ptrtri_dcomplex
+  end interface scalafx_ptrtri
   
   !> Reduces symmetric definite generalized eigenvalue problem to standard form.
   interface scalafx_psygst
@@ -84,7 +104,29 @@ module scalapackfx_module
   interface scalafx_phegvd
     module procedure scalafx_phegvd_complex, scalafx_phegvd_dcomplex
   end interface scalafx_phegvd
-
+  
+  !> Solves symmetric eigenvalue problem by the divide and conquer algorithm.
+  interface scalafx_psyevr
+    module procedure scalafx_psyevr_real, scalafx_psyevr_dreal
+  end interface scalafx_psyevr
+  
+  !> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
+  interface scalafx_pheevr
+    module procedure scalafx_pheevr_complex, scalafx_pheevr_dcomplex
+  end interface scalafx_pheevr
+  
+  !> Solves generalized symmetric eigenvalue problem by the divide and conquer
+  !! algorithm.
+  interface scalafx_psygvr
+    module procedure scalafx_psygvr_real, scalafx_psygvr_dreal
+  end interface scalafx_psygvr
+  
+  !> Solves generalized Hermitian eigenvalue problem by the divide and conquer
+  !! algorithm.
+  interface scalafx_phegvr
+    module procedure scalafx_phegvr_complex, scalafx_phegvr_dcomplex
+  end interface scalafx_phegvr
+  
   !> Solves triangular matrix equation.
   interface scalafx_ptrsm
     module procedure scalafx_ptrsm_real, scalafx_ptrsm_dreal
@@ -104,6 +146,16 @@ contains
   _subroutine_scalafx_ppotrf(dreal, real(dp))
   _subroutine_scalafx_ppotrf(complex, complex(sp))
   _subroutine_scalafx_ppotrf(dcomplex, complex(dp))
+
+  _subroutine_scalafx_ppotri(real, real(sp))
+  _subroutine_scalafx_ppotri(dreal, real(dp))
+  _subroutine_scalafx_ppotri(complex, complex(sp))
+  _subroutine_scalafx_ppotri(dcomplex, complex(dp))
+
+  _subroutine_scalafx_ptrtri(real, real(sp))
+  _subroutine_scalafx_ptrtri(dreal, real(dp))
+  _subroutine_scalafx_ptrtri(complex, complex(sp))
+  _subroutine_scalafx_ptrtri(dcomplex, complex(dp))
 
   _subroutine_scalafx_psygst_phegst(real, real(sp), real(sp), psygst)
   _subroutine_scalafx_psygst_phegst(dreal, real(dp), real(dp), psygst)
@@ -129,7 +181,17 @@ contains
   _subroutine_scalafx_psygvd(dreal, dp)
   _subroutine_scalafx_phegvd(complex, sp)
   _subroutine_scalafx_phegvd(dcomplex, dp)
-
+  
+  _subroutine_scalafx_psyevr(real, sp)
+  _subroutine_scalafx_psyevr(dreal, dp)
+  _subroutine_scalafx_pheevr(complex, sp)
+  _subroutine_scalafx_pheevr(dcomplex, dp)
+  
+  _subroutine_scalafx_psygvr(real, sp)
+  _subroutine_scalafx_psygvr(dreal, dp)
+  _subroutine_scalafx_phegvr(complex, sp)
+  _subroutine_scalafx_phegvr(dcomplex, dp)
+  
   _subroutine_scalafx_ptrsm(real, real(sp), real(1.0, sp))
   _subroutine_scalafx_ptrsm(dreal, real(dp), real(1.0, dp))
   _subroutine_scalafx_ptrsm(complex, complex(sp), cmplx(1, 0, sp))
@@ -196,8 +258,7 @@ contains
         & mygrid%ncol)
 
   end subroutine scalafx_getlocalshape
-
-
+  
   !> Maps global position in a distributed matrix to local one.
   !! \param mygrid  BLACS descriptor.
   !! \param desc  Descriptor of the distributed matrix.
@@ -219,5 +280,57 @@ contains
 
   end subroutine scalafx_infog2l
 
+  !> Maps local row or column index onto global matrix position.
+  !! \param indxloc Local index on input.
+  !! \param mygrid BLACS descriptor.
+  !! \param blocksize Block size for direction (row or column)
+  function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    integer :: scalafx_indxl2g
+    integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
+    
+    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, &
+        & ncr)
+    
+  end function scalafx_indxl2g
+  
+  !> Maps a global position in a distributed matrix to local one.
+  !!
+  subroutine scalafx_localindices(mygrid, desc, grow, gcol, local, lrow, lcol)
+    
+    !> BLACS descriptor.
+    type(blacsgrid), intent(in) :: mygrid
+
+    !> Descriptor of the distributed matrix.
+    integer, intent(in) :: desc(DLEN_)
+
+    !> Global row index.
+    integer, intent(in) :: grow
+
+    !> Global column index
+    integer, intent(in) :: gcol
+
+    !> Indicates whether given global index is local for the process.
+    logical, intent(out) :: local
+
+    !> Row index in the local matrix (or 0 if global index is not local)
+    integer, intent(out) :: lrow
+
+    !> Column index in the local matrix (or 0 if global index is not local)
+    integer, intent(out) :: lcol
+
+    !------------------------------------------------------------------------
+    
+    integer :: rsrc, csrc
+
+    call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
+        & mygrid%mycol, lrow, lcol, rsrc, csrc)
+    local = (rsrc == mygrid%myrow .and. csrc == mygrid%mycol)
+    if (.not. local) then
+      lrow = 0
+      lcol = 0
+    end if
+
+  end subroutine scalafx_localindices
+    
 
 end module scalapackfx_module

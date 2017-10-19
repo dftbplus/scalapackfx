@@ -20,6 +20,44 @@ end subroutine p$2potrf
 ')
 
 dnl ************************************************************************
+dnl *** ppotri
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_ppotri',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments type
+!> Inversion of a Cholesky decomposed symmetric/Hermitian matrix ($1).
+subroutine p$2potri(uplo, nn, aa, ia, ja, desca, info)
+  import
+  character, intent(in) :: uplo
+  integer, intent(in) :: nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  $3, intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(out) :: info
+end subroutine p$2potri
+')
+
+dnl ************************************************************************
+dnl *** ptrtri
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_ptrtri',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments type
+!> Inversion of a Cholesky decomposed symmetric/Hermitian matrix ($1).
+subroutine p$2trtri(uplo, diag, nn, aa, ia, ja, desca, info)
+  import
+  character, intent(in) :: uplo, diag
+  integer, intent(in) :: nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  $3, intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(out) :: info
+end subroutine p$2trtri
+')
+
+dnl ************************************************************************
 dnl *** psygst
 dnl ************************************************************************ 
 
@@ -171,6 +209,70 @@ subroutine p$2heevd(jobz, uplo, nn, aa, ia, ja, desca, ww, zz, iz, jz,&
   integer, intent(in) :: liwork
   integer, intent(out) :: info
 end subroutine p$2heevd
+')
+
+dnl ************************************************************************
+dnl *** psyevr
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_psyevr',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments kind
+!> Eigenvalues and eigenvectors by MRRR algorithm ($1)
+subroutine p$2syevr(jobz, range, uplo, nn, aa, ia, ja, desca, vl, vu, il, iu, &
+    & mm, nz, ww, zz, iz, jz, descz, work, lwork, iwork, liwork, info)
+  import
+  character, intent(in) :: jobz, range, uplo
+  integer, intent(in) :: nn
+  integer, intent(in) :: desca(DLEN_), descz(DLEN_)
+  integer, intent(in) :: ia, ja
+  real($3), intent(inout) :: aa(desca(LLD_), *)
+  real($3), intent(in) :: vl, vu
+  integer, intent(in) :: il, iu
+  integer, intent(out) :: mm, nz
+  real($3), intent(out) :: ww(nn), zz(descz(LLD_),*)
+  integer, intent(in) :: iz, jz
+  real($3), intent(inout) :: work(*)
+  integer, intent(in) :: lwork
+  integer, intent(inout) :: iwork(*)
+  integer, intent(in) :: liwork
+  integer, intent(out) :: info
+end subroutine p$2syevr
+')
+
+dnl ************************************************************************
+dnl *** pheevr
+dnl ************************************************************************ 
+
+define(`_subroutine_interface_pheevr',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments kind
+!> Eigenvalues and eigenvectors by MRRR algorithm ($1)
+subroutine p$2heevr(jobz, range, uplo, nn, aa, ia, ja, desca,vl, vu, il, iu, &
+    & mm, nz, ww, zz, iz, jz, descz, work, lwork, rwork, lrwork, iwork, liwork,&
+    & info)
+  import
+  character, intent(in) :: jobz, range, uplo
+  integer, intent(in) :: nn
+  integer, intent(in) :: desca(DLEN_), descz(DLEN_)
+  complex($3), intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(in) :: ia, ja
+  real($3), intent(in) :: vl, vu
+  integer, intent(in) :: il, iu
+  integer, intent(out) :: mm, nz
+  real($3), intent(out) :: ww(nn)
+  complex($3), intent(out) ::  zz(descz(LLD_),*)
+  integer, intent(in) :: iz, jz
+  complex($3), intent(inout) :: work(*)
+  integer, intent(in) :: lwork
+  real($3), intent(inout) :: rwork(*)
+  integer, intent(in) :: lrwork
+  integer, intent(inout) :: iwork(*)
+  integer, intent(in) :: liwork
+  integer, intent(out) :: info
+end subroutine p$2heevr
 ')
 
 dnl ************************************************************************
