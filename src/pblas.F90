@@ -12,6 +12,7 @@ module pblas_module
   public :: psymm, phemm
   public :: pgemm
   public :: ptrmm
+  public :: ptran, ptranc
 
   !> Symmetric rank one update.
   interface psyr
@@ -76,5 +77,19 @@ module pblas_module
     _subroutine_interface_pgemm(complex, pcgemm, complex, sp)
     _subroutine_interface_pgemm(dcomplex, pzgemm, complex, dp)
   end interface pgemm
+
+  !> Matrix transpose
+  interface ptran
+    _subroutine_interface_ptran(real, pstran, real, sp)
+    _subroutine_interface_ptran(dreal, pdtran, real, dp)
+    _subroutine_interface_ptran(complex, pctranu, complex, sp)
+    _subroutine_interface_ptran(dcomplex, pztranu, complex, dp)    
+  end interface ptran
+
+  !> Conjugated matrix transpose
+  interface ptranc
+    _subroutine_interface_ptranc(complex, pctranc, complex, sp)
+    _subroutine_interface_ptranc(dcomplex, pztranc, complex, dp)    
+  end interface ptranc
 
 end module pblas_module

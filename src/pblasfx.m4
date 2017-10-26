@@ -382,3 +382,147 @@ subroutine pblasfx_ptrmm_$1(aa, desca, bb, descb, alpha, side, uplo, transa, &
 
 end subroutine pblasfx_ptrmm_$1
 ')
+
+
+dnl ************************************************************************
+dnl *** ptran
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptran',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+!> Computes transpose and adds to the matrix.
+!!
+!! \see BLACS documentation (routines p?tran)
+!!
+subroutine pblasfx_ptran_$1(aa, desca, bb, descb, alpha, beta, ia, ja, ib, jb, mm, nn)
+
+  !> Matrix to transpose
+  $2($3), intent(in) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Matrix to which transpose(A) should be added to.
+  $2($3), intent(inout) :: bb(:,:)
+
+  !> Descriptor of B
+  integer, intent(in) :: descb(DLEN_)
+
+  !> Prefactor of the transposed matrix. Default: 1.0
+  $2($3), intent(in), optional :: alpha
+
+  !> Prefactor of the output matrix. Default: 0.0
+  $2($3), intent(in), optional :: beta
+
+  !> First row of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ja
+  
+  !> First row of matrix B to consider. Default: 1
+  integer, intent(in), optional :: ib
+
+  !> First column of matrix B to consider. Default: 1
+  integer, intent(in), optional :: jb
+
+  !> Number of rows for matrix B. Default: descb(M_)
+  integer, intent(in), optional :: mm
+  
+  !> Number of columns for matrix B. Default: descb(N_)
+  integer, intent(in), optional :: nn
+
+  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  integer :: ia0, ja0, ib0, jb0, mm0, nn0
+  $2($3) :: alpha0, beta0
+
+  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
+  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ib0, ib, 1)
+  _handle_inoptflag(jb0, jb, 1)
+  _handle_inoptflag(mm0, mm, descb(M_))
+  _handle_inoptflag(nn0, nn, descb(N_))
+
+  call ptran(mm0, nn0, alpha0, aa, ia0, ja0, &
+      & desca, beta0, bb, ib0, jb0, descb)
+
+end subroutine pblasfx_ptran_$1
+')
+
+
+dnl ************************************************************************
+dnl *** ptranc
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptranc',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+!> Computes conjugated transpose and adds to the matrix.
+!!
+!! \see BLACS documentation (routines p?tran)
+!!
+subroutine pblasfx_ptranc_$1(aa, desca, bb, descb, alpha, beta, ia, ja, ib, jb, mm, nn)
+
+  !> Matrix to transpose
+  $2($3), intent(in) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Matrix to which transpose(A) should be added to.
+  $2($3), intent(inout) :: bb(:,:)
+
+  !> Descriptor of B
+  integer, intent(in) :: descb(DLEN_)
+
+  !> Prefactor of the transposed matrix. Default: 1.0
+  $2($3), intent(in), optional :: alpha
+
+  !> Prefactor of the output matrix. Default: 0.0
+  $2($3), intent(in), optional :: beta
+
+  !> First row of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of matrix A to consider. Default: 1
+  integer, intent(in), optional :: ja
+  
+  !> First row of matrix B to consider. Default: 1
+  integer, intent(in), optional :: ib
+
+  !> First column of matrix B to consider. Default: 1
+  integer, intent(in), optional :: jb
+
+  !> Number of rows for matrix B. Default: descb(M_)
+  integer, intent(in), optional :: mm
+  
+  !> Number of columns for matrix B. Default: descb(N_)
+  integer, intent(in), optional :: nn
+
+  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+  integer :: ia0, ja0, ib0, jb0, mm0, nn0
+  $2($3) :: alpha0, beta0
+
+  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
+  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ib0, ib, 1)
+  _handle_inoptflag(jb0, jb, 1)
+  _handle_inoptflag(mm0, mm, descb(M_))
+  _handle_inoptflag(nn0, nn, descb(N_))
+
+  call ptranc(mm0, nn0, alpha0, aa, ia0, ja0, &
+      & desca, beta0, bb, ib0, jb0, descb)
+
+end subroutine pblasfx_ptranc_$1
+')
