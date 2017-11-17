@@ -16,6 +16,7 @@ module scalapackfx_tools_module
   private
 
   public :: scalafx_cpl2g, scalafx_cpg2l, scalafx_addl2g, scalafx_addg2l
+  public :: scalafx_islocal
   public :: writearray_master, writearray_slave
   public :: readarray_master, readarray_slave
   public :: blocklist, size
@@ -243,6 +244,38 @@ contains
   _subroutine_readarray_slave(dreal, real(dp))
   _subroutine_readarray_slave(complex, complex(sp))
   _subroutine_readarray_slave(dcomplex, complex(dp))
-  
 
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Other routines
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  
+  !> Returns whether a given global position can be found in the local part
+  !! of the distributed matrix.
+  !!
+  !! \param grid  Grid on which the matrix is distributed.
+  !! \param desc  Matrix descriptor
+  !! \param ii  Row of the global position
+  !! \param jj  Column of the global position
+  !! \param local  Whether the position is local
+  !! \param iloc  Row of the position in the local matrix  (only meaningful,
+  !!     if local is .true.)
+  !! \param jloc  Columnt of the position in the local matrix  (only
+  !!     meaningful, if local is .true.)
+  !!
+  subroutine scalafx_islocal(grid, desc, ii, jj, local, iloc, jloc)
+    type(blacsgrid), intent(in) :: grid
+    integer, intent(in) :: desc(DLEN_)
+    integer, intent(in) :: ii, jj
+    logical, intent(out) :: local
+    integer, intent(out) :: iloc, jloc
+
+    integer :: prow, pcol
+
+    call scalafx_infog2l(grid, desc, ii, jj, iloc, jloc, prow, pcol)
+    local = (prow == grid%myrow .and. pcol == grid%mycol)
+
+  end subroutine scalafx_islocal
+
+  
 end module scalapackfx_tools_module
