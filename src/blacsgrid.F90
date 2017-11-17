@@ -1,5 +1,5 @@
 include(blacsgrid.m4)
-
+ 
 !> BLACS grid related routines.
 module blacsgrid_module
   use scalapackfx_common_module
@@ -25,8 +25,11 @@ module blacsgrid_module
     !> Creates process grid.
     procedure :: initgrid
 
-    !> Creates separated equivalent process grids.
-    procedure :: initgrids
+    !> Creates separated equivalent process grids by equally splitting the current grid
+    procedure :: initsplitgrids
+
+    !> Created separated grid using explicit grid mapping
+    procedure :: initmappedgrids
 
     !> Destructs grid.
     procedure :: destruct
@@ -128,10 +131,10 @@ contains
   end subroutine initgrid
 
 
-  !> Creates equivalent independent subgrids.
+  !> Creates equivalent independent subgrids by splitting the current one into.
   !!
-  !! Sets up a independent rectangular processor grids. All processes must call
-  !! this routine at collectively. If size of all grids is smaller than the
+  !! Sets up independent rectangular processor grids. All processes must call
+  !! this routine collectively. If size of all grids is smaller than the
   !! number of available processes, those processes not fitting into any grid
   !! will obtain an uninitialized grid descriptor (with iproc = -1) at
   !! return. All other processes will obtain a grid descriptor for the subgrid
@@ -149,7 +152,7 @@ contains
   !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
   !!     created which contains only the master nodes from all grids.
   !!
-  subroutine initgrids(self, ngrid, nrow, ncol, colmajor, &
+  subroutine initsplitgrids(self, ngrid, nrow, ncol, colmajor, &
       & masterrow, mastercol, context, mastergrid)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: nrow, ncol
@@ -246,7 +249,58 @@ contains
       mastergrid%master = (mastergrid%iproc == 0)
     end if
     
-  end subroutine initgrids
+  end subroutine initsplitgrids
+
+
+
+  !> Creates subgrids by explicitly mapping specified processes into a subgrid.
+  !!
+  !! Sets up a independent rectangular processor grids. All processes must call
+  !! this routine at collectively. If size of all grids is smaller than the
+  !! number of available processes, those processes not fitting into any grid
+  !! will obtain an uninitialized grid descriptor (with iproc = -1) at
+  !! return. All other processes will obtain a grid descriptor for the subgrid
+  !! they belong to.
+  !!
+  !! \param self  BLACS grid descriptor
+  !! \param ngrid  Nr. of grids
+  !! \param nrow  Number of rows in every grid
+  !! \param ncol  Number of columns in every grid
+  !! \param colmajor  If .true., processes will be aligned in column major order
+  !!     otherwise in row major order. (Default: .false.)
+  !! \param masterrow  Master row in each subgrid.
+  !! \param mastercol  Master column in each grid.
+  !! \param context  BLACS system context (default: default system context)
+  !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
+  !!     created which contains only the master nodes from all grids.
+  !!
+  subroutine initmappedgrids(self, gridmap, context)
+    class(blacsgrid), intent(inout) :: self
+    integer, intent(in) :: gridmap(:,:)
+    integer, intent(in), optional :: context
+
+    integer :: ncol, nrow, gridsize, nproc, iproc
+
+    call blacs_pinfo(iproc, nproc)
+    nrow = size(gridmap, dim=1)
+    ncol = size(gridmap, dim=2)
+    gridsize = size(gridmap)
+
+    call self%initcontext(context)
+
+    call blacs_gridmap(self%ctxt, gridmap, size(gridmap, dim=1), nrow, ncol)
+    if (.not. any(gridmap == iproc)) then
+      call self%reset()
+    else
+      call blacs_gridinfo(self%ctxt, self%nrow, self%ncol, self%myrow, self%mycol)
+      self%nproc = gridsize
+      self%iproc = self%myrow * self%ncol + self%mycol
+      self%masterrow = 0
+      self%mastercol = 0
+      self%master = (self%myrow == self%masterrow .and. self%mycol == self%mastercol)
+    end if
+    
+  end subroutine initmappedgrids
 
 
   !> Destructs processor grid.
