@@ -7,7 +7,7 @@ program test_subgrid
 
   call blacsfx_pinfo(iproc, nproc)
   call allproc%initgrid(2, 4)
-  call grpproc%initgrids(2, 2, 2, mastergrid=grpmasters)
+  call grpproc%initsplitgrids(2, 2, 2, mastergrid=grpmasters)
   print "(A,4(A,1X,I4,5X))", "ROW-MAJOR| ", "GLOBALID:", iproc, &
       & "GROUPID:", grpproc%iproc, "ROW:", grpproc%myrow,&
       &  "COL:", grpproc%mycol
@@ -26,7 +26,7 @@ program test_subgrid
       call grpmasters%destruct()
     end if
   end if
-  call grpproc%initgrids(2, 2, 2, colmajor=.true.)
+  call grpproc%initsplitgrids(2, 2, 2, colmajor=.true.)
   print "(A,4(A,1X,I4,5X))", "COL-MAJOR| ", "GLOBALID:", iproc, &
       & "GROUPID:", grpproc%iproc, "ROW:", grpproc%myrow,&
       &  "COL:", grpproc%mycol
