@@ -1,5 +1,5 @@
 include(blacsgrid.m4)
- 
+
 !> BLACS grid related routines.
 module blacsgrid_module
   use scalapackfx_common_module
@@ -131,7 +131,7 @@ contains
   end subroutine initgrid
 
 
-  !> Creates equivalent independent subgrids by splitting the current one into.
+  !> Creates equivalent independent subgrids by splitting the current one up.
   !!
   !! Sets up independent rectangular processor grids. All processes must call
   !! this routine collectively. If size of all grids is smaller than the
