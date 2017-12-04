@@ -2,7 +2,7 @@ include(common.m4)
 
 dnl ************************************************************************
 dnl *** psyr / pher
-dnl ************************************************************************ 
+dnl ************************************************************************
 
 define(`_subroutine_interface_psyr_pher',`
 dnl $1: comment
@@ -27,7 +27,7 @@ end subroutine $2
 
 dnl ************************************************************************
 dnl *** psyrk / pherk
-dnl ************************************************************************ 
+dnl ************************************************************************
 
 define(`_subroutine_interface_psyrk_pherk',`
 dnl $1: comment
@@ -53,7 +53,7 @@ end subroutine $2
 
 dnl ************************************************************************
 dnl *** psymv / phemv
-dnl ************************************************************************ 
+dnl ************************************************************************
 
 define(`_subroutine_interface_psymv_phemv',`
 dnl $1: comment
@@ -164,54 +164,22 @@ subroutine $2(transa, transb, mm, nn, kk, alpha, aa, ia, ja, desca, &
 end subroutine $2
 ')
 
-
 dnl ************************************************************************
-dnl *** ptran
-dnl ************************************************************************ 
-
-define(`_subroutine_interface_ptran',`
-dnl $1: comment
-dnl $2: subroutine name
-dnl $3: dummy arguments type
-dnl $4: dummy arguments kind
-!> Matrix transpose ($1).
-subroutine $2(mm, nn, alpha, aa, ia, ja, desca, &
-    & beta, cc, ic, jc, descc)
-  import
-  integer, intent(in) :: mm, nn
-  $3($4), intent(in) :: alpha
-  integer, intent(in) :: desca(DLEN_)
-  $3($4), intent(in) :: aa(desca(LLD_), *)
-  integer, intent(in) :: ia, ja
-  $3($4), intent(in) :: beta
-  integer, intent(in) :: descc(DLEN_)
-  $3($4), intent(inout) :: cc(descc(LLD_), *)
-  integer, intent(in) :: ic, jc
-end subroutine $2
-')
-
-
+dnl *** ptran / ptranu / ptranc
 dnl ************************************************************************
-dnl *** ptranc
-dnl ************************************************************************ 
 
-define(`_subroutine_interface_ptranc',`
-dnl $1: comment
-dnl $2: subroutine name
-dnl $3: dummy arguments type
-dnl $4: dummy arguments kind
-!> Conjugated matrix transpose ($1).
-subroutine $2(mm, nn, alpha, aa, ia, ja, desca, &
-    & beta, cc, ic, jc, descc)
+define(`_subroutine_interface_ptranx',`
+!> Transpose of a distributed matrix ($1).
+subroutine $2(mm, nn, alpha, aa, ia, ja, desca, beta, cc, ic, jc, descc)
   import
-  integer, intent(in) :: mm, nn
-  $3($4), intent(in) :: alpha
-  integer, intent(in) :: desca(DLEN_)
-  $3($4), intent(in) :: aa(desca(LLD_), *)
-  integer, intent(in) :: ia, ja
-  $3($4), intent(in) :: beta
-  integer, intent(in) :: descc(DLEN_)
+  integer, intent(in)   :: mm, nn
+  $3($4), intent(in)    :: alpha
+  integer, intent(in)   :: ia, ja
+  integer, intent(in)   :: desca(DLEN_)
+  $3($4), intent(in)    :: aa(desca(LLD_), *)
+  $3($4), intent(in)    :: beta
+  integer, intent(in)   :: ic, jc
+  integer, intent(in)   :: descc(DLEN_)
   $3($4), intent(inout) :: cc(descc(LLD_), *)
-  integer, intent(in) :: ic, jc
 end subroutine $2
 ')

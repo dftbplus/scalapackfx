@@ -12,7 +12,8 @@ module pblas_module
   public :: psymm, phemm
   public :: pgemm
   public :: ptrmm
-  public :: ptran, ptranc
+  public :: ptran, ptranu
+  public :: ptranc
 
   !> Symmetric rank one update.
   interface psyr
@@ -43,7 +44,7 @@ module pblas_module
     _subroutine_interface_psymv_phemv(real, pssymv, real, sp)
     _subroutine_interface_psymv_phemv(dreal, pdsymv, real, dp)
   end interface psymv
-  
+
   !> Hermitian matrix vector product
   interface phemv
     _subroutine_interface_psymv_phemv(complex, pchemv, complex, sp)
@@ -78,18 +79,23 @@ module pblas_module
     _subroutine_interface_pgemm(dcomplex, pzgemm, complex, dp)
   end interface pgemm
 
-  !> Matrix transpose
+  !> Real matrix transpose.
   interface ptran
-    _subroutine_interface_ptran(real, pstran, real, sp)
-    _subroutine_interface_ptran(dreal, pdtran, real, dp)
-    _subroutine_interface_ptran(complex, pctranu, complex, sp)
-    _subroutine_interface_ptran(dcomplex, pztranu, complex, dp)    
+    _subroutine_interface_ptranx(real, pstran, real, sp)
+    _subroutine_interface_ptranx(dreal, pdtran, real, dp)
   end interface ptran
 
-  !> Conjugated matrix transpose
+  !> Complex matrix transpose.
+  interface ptranu
+    _subroutine_interface_ptranx(complex, pctranu, complex, sp)
+    _subroutine_interface_ptranx(dcomplex, pztranu, complex, dp)
+  end interface ptranu
+
+  !> Complex hermitian matrix transpose.
   interface ptranc
-    _subroutine_interface_ptranc(complex, pctranc, complex, sp)
-    _subroutine_interface_ptranc(dcomplex, pztranc, complex, dp)    
+    _subroutine_interface_ptranx(complex, pctranc, complex, sp)
+    _subroutine_interface_ptranx(dcomplex, pztranc, complex, dp)
+
   end interface ptranc
 
 end module pblas_module

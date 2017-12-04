@@ -9,7 +9,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 subroutine pblasfx_$1(aa, desca, xx, descx, yy, descy, uplo, alpha, beta, &
     & nn, ia, ja, ix, jx, incx, iy, jy, incy)
   $2($3), intent(in) :: aa(:,:)
@@ -54,7 +54,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 subroutine pblasfx_$1(xx, descx, aa, desca, uplo, nn, alpha, ix, jx, incx,&
     & ia, ja)
   $2($3), intent(in) :: xx(:,:)
@@ -93,7 +93,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 !> Symmetric/Hermitian rank-k update.
 !! \param aa  Matrix to update with.
 !! \param desca  Descriptor of aa.
@@ -147,7 +147,7 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-dnl $5 blacs subroutine name
+dnl $5 pblas subroutine name
 !> Symmetric/Hermitian matrix with general matrix product 
 !! \param aa  Symmetric/Hermitian matrix.
 !! \param desca  Descriptor of aa.
@@ -195,6 +195,7 @@ subroutine pblasfx_$1(aa, desca, bb, descb, cc, descc, side, uplo, &
 
 end subroutine pblasfx_$1
 ')
+
 
 dnl ************************************************************************
 dnl *** pgemm
@@ -306,9 +307,10 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
+dnl $5 pblas subroutine name
 !> Computes matrix-matrix product with one triangle matrix
 !!
-!! \see BLACS documentation (routines p?trmm)
+!! \see PBLAS documentation (routines p?trmm)
 !!
 subroutine pblasfx_ptrmm_$1(aa, desca, bb, descb, alpha, side, uplo, transa, &
     & diag, ia, ja, ib, jb, mm, nn)
@@ -393,68 +395,87 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-!> Computes transpose and adds to the matrix.
-!!
-!! \see BLACS documentation (routines p?tran)
-!!
-subroutine pblasfx_ptran_$1(aa, desca, bb, descb, alpha, beta, ia, ja, ib, jb, mm, nn)
-
-  !> Matrix to transpose
+dnl $5 pblas subroutine name
+!> Real matrix transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
   $2($3), intent(in) :: aa(:,:)
-
-  !> Descriptor of A.
   integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  real($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
 
-  !> Matrix to which transpose(A) should be added to.
-  $2($3), intent(inout) :: bb(:,:)
+  real($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
 
-  !> Descriptor of B
-  integer, intent(in) :: descb(DLEN_)
+  _handle_inoptflag(alpha0, alpha, real(1, kind=$3))
+  _handle_inoptflag(beta0, beta, real(0, kind=$3))
 
-  !> Prefactor of the transposed matrix. Default: 1.0
-  $2($3), intent(in), optional :: alpha
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
 
-  !> Prefactor of the output matrix. Default: 0.0
-  $2($3), intent(in), optional :: beta
-
-  !> First row of matrix A to consider. Default: 1
-  integer, intent(in), optional :: ia
-
-  !> First column of matrix A to consider. Default: 1
-  integer, intent(in), optional :: ja
-  
-  !> First row of matrix B to consider. Default: 1
-  integer, intent(in), optional :: ib
-
-  !> First column of matrix B to consider. Default: 1
-  integer, intent(in), optional :: jb
-
-  !> Number of rows for matrix B. Default: descb(M_)
-  integer, intent(in), optional :: mm
-  
-  !> Number of columns for matrix B. Default: descb(N_)
-  integer, intent(in), optional :: nn
-
-  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-  integer :: ia0, ja0, ib0, jb0, mm0, nn0
-  $2($3) :: alpha0, beta0
-
-  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
-  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
   _handle_inoptflag(ia0, ia, 1)
   _handle_inoptflag(ja0, ja, 1)
-  _handle_inoptflag(ib0, ib, 1)
-  _handle_inoptflag(jb0, jb, 1)
-  _handle_inoptflag(mm0, mm, descb(M_))
-  _handle_inoptflag(nn0, nn, descb(N_))
-
-  call ptran(mm0, nn0, alpha0, aa, ia0, ja0, &
-      & desca, beta0, bb, ib0, jb0, descb)
-
-end subroutine pblasfx_ptran_$1
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
+end subroutine pblasfx_$1
 ')
 
+dnl ************************************************************************
+dnl *** ptranu
+dnl ************************************************************************
+
+define(`_subroutine_pblasfx_ptranu',`
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl $3 dummy arguments kind
+dnl $4 conversion function
+dnl $5 pblas subroutine name
+!> Complex matrix transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
+  $2($3), intent(in) :: aa(:,:)
+  integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  complex($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
+
+  complex($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
+
+  _handle_inoptflag(alpha0, alpha, cmplx(1, 0, kind=$3))
+  _handle_inoptflag(beta0, beta, cmplx(0, 0, kind=$3))
+
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
+
+end subroutine pblasfx_$1
+')
 
 dnl ************************************************************************
 dnl *** ptranc
@@ -465,64 +486,38 @@ dnl $1 subroutine suffix
 dnl $2 dummy argument type
 dnl $3 dummy arguments kind
 dnl $4 conversion function
-!> Computes conjugated transpose and adds to the matrix.
-!!
-!! \see BLACS documentation (routines p?tran)
-!!
-subroutine pblasfx_ptranc_$1(aa, desca, bb, descb, alpha, beta, ia, ja, ib, jb, mm, nn)
-
-  !> Matrix to transpose
+!> Complex matrix hermitian transpose.
+!! \param aa  Matrix to update with.
+!! \param desca  Descriptor of aa.
+!! \param cc  Matrix to be updated.
+!! \param desccc Descriptor of cc.
+!! \param alpha  Prefactor.
+!! \param beta  Prefactor.
+subroutine pblasfx_$1(aa, desca, cc, descc, alpha, beta,&
+    & mm, nn, ia, ja, ic, jc)
   $2($3), intent(in) :: aa(:,:)
-
-  !> Descriptor of A.
   integer, intent(in) :: desca(DLEN_)
+  $2($3), intent(inout) :: cc(:,:)
+  integer, intent(in) :: descc(DLEN_)
+  complex($3), intent(in), optional :: alpha, beta
+  integer, intent(in), optional :: mm, nn
+  integer, intent(in), optional :: ia, ja, ic, jc
 
-  !> Matrix to which transpose(A) should be added to.
-  $2($3), intent(inout) :: bb(:,:)
+  complex($3) :: alpha0, beta0
+  integer :: mm0, nn0, ia0, ja0, ic0, jc0
 
-  !> Descriptor of B
-  integer, intent(in) :: descb(DLEN_)
+  _handle_inoptflag(alpha0, alpha, cmplx(1, 0, kind=$3))
+  _handle_inoptflag(beta0, beta, cmplx(0, 0, kind=$3))
 
-  !> Prefactor of the transposed matrix. Default: 1.0
-  $2($3), intent(in), optional :: alpha
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
 
-  !> Prefactor of the output matrix. Default: 0.0
-  $2($3), intent(in), optional :: beta
-
-  !> First row of matrix A to consider. Default: 1
-  integer, intent(in), optional :: ia
-
-  !> First column of matrix A to consider. Default: 1
-  integer, intent(in), optional :: ja
-  
-  !> First row of matrix B to consider. Default: 1
-  integer, intent(in), optional :: ib
-
-  !> First column of matrix B to consider. Default: 1
-  integer, intent(in), optional :: jb
-
-  !> Number of rows for matrix B. Default: descb(M_)
-  integer, intent(in), optional :: mm
-  
-  !> Number of columns for matrix B. Default: descb(N_)
-  integer, intent(in), optional :: nn
-
-  !::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-  integer :: ia0, ja0, ib0, jb0, mm0, nn0
-  $2($3) :: alpha0, beta0
-
-  _handle_inoptflag(alpha0, alpha, $4(1, kind=$3))
-  _handle_inoptflag(beta0, beta, $4(0, kind=$3))
   _handle_inoptflag(ia0, ia, 1)
   _handle_inoptflag(ja0, ja, 1)
-  _handle_inoptflag(ib0, ib, 1)
-  _handle_inoptflag(jb0, jb, 1)
-  _handle_inoptflag(mm0, mm, descb(M_))
-  _handle_inoptflag(nn0, nn, descb(N_))
+  _handle_inoptflag(ic0, ic, 1)
+  _handle_inoptflag(jc0, jc, 1)
+  call $5(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+      & cc, ic0, jc0, descc)
 
-  call ptranc(mm0, nn0, alpha0, aa, ia0, ja0, &
-      & desca, beta0, bb, ib0, jb0, descb)
-
-end subroutine pblasfx_ptranc_$1
+end subroutine pblasfx_$1
 ')

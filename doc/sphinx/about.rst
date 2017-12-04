@@ -1,10 +1,10 @@
 About SCALAPACKFX
 =================
 
-`SCALAPACKFX <http://www.bitbucket.org/aradi/scalapackfx/>`_ is a library
-containing modern Fortran (Fortran 2003) wrappers around SCALAPACK, PBLAS and
-BLACS routines. The goal is to make the use of those libraries as simple as
-possible in Fortran.
+`SCALAPACKFX <https://github.com/dftbplus/scalapackfx>`_ is a library containing
+modern Fortran (Fortran 2003) wrappers around SCALAPACK, PBLAS and BLACS
+routines. The goal is to make the use of those libraries as simple as possible
+in Fortran.
 
 Consider for example a simple broadcast in BLACS. In order to broadcast an
 integer array (aa) with 5x5 elements using the appropriate BLACS routine, you
@@ -43,4 +43,4 @@ A few routines are already covered (see :ref:`sec_routines`). If your desired
 routine is not among them yet, you are cordially invited to extend SCALAPACKFX
 and to share it in order to let others profit from your work (SCALAPACKFX is
 licensed under the simplified BSD license). For more details see the `project
-home page <http://www.bitbucket.org/aradi/scalapackfx/>`_.
+home page <https://github.com/dftbplus/scalapackfx>`_.

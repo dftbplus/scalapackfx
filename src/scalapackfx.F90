@@ -205,6 +205,7 @@ contains
 
 
   !> Returns descriptor and size for the local part of a distributed matrix.
+  !!
   !! \param mygrid  BLACS descriptor.
   !! \param mm  Number of rows of global matrix.
   !! \param nn  Number of columns of global matrix.
@@ -218,6 +219,7 @@ contains
   !! \param csrc  Process column, over which first column is distributed
   !!     (default: master column).
   !! \param info  Info flag.
+  !!
   subroutine scalafx_getdescriptor(mygrid, mm, nn, mb, nb, desc, rsrc, csrc, &
       & info)
     type(blacsgrid), intent(in) :: mygrid
@@ -260,6 +262,7 @@ contains
   end subroutine scalafx_getlocalshape
   
   !> Maps global position in a distributed matrix to local one.
+  !!
   !! \param mygrid  BLACS descriptor.
   !! \param desc  Descriptor of the distributed matrix.
   !! \param grow  Global row index.
@@ -268,6 +271,7 @@ contains
   !! \param lcol  Local column index on output.
   !! \param rsrc  Row of the process owning the local matrix.
   !! \param csrc  Column of the process owning the local matrix.
+  !!
   subroutine scalafx_infog2l(mygrid, desc, grow, gcol, lrow, lcol, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: desc(DLEN_)
@@ -280,16 +284,18 @@ contains
 
   end subroutine scalafx_infog2l
 
+  
   !> Maps local row or column index onto global matrix position.
-  !! \param indxloc Local index on input.
-  !! \param mygrid BLACS descriptor.
-  !! \param blocksize Block size for direction (row or column)
+  !!
+  !! \param indxloc  Local index on input.
+  !! \param mygrid  BLACS descriptor.
+  !! \param blocksize  Block size for direction (row or column)
+  !!
   function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
     integer :: scalafx_indxl2g
     integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
     
-    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, &
-        & ncr)
+    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, ncr)
     
   end function scalafx_indxl2g
   

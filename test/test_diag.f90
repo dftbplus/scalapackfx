@@ -72,7 +72,14 @@ contains
         write(stdout, "(A)") "# diagonalization: QR"
       case(2)
         write(stdout, "(A)") "# diagonalization: DAC"
+      case(3)
+        write(stdout, "(A)") "# diagonalization: RRR"
+      case(4)
+        write(stdout, "(A)") "# diagonalization: RRR subset by index (1:3)"
+      case(5)
+        write(stdout, "(A)") "# diagonalization: RRR subset by value (-1.0:0.0)"
       end select
+      
     end if
 
     call system_clock(tsys1, tcount)
@@ -91,6 +98,16 @@ contains
         call scalafx_psygvd(hammtx, hamdesc, overmtx, overdesc,&
             & eigvals, eigvecs, eigvdesc, jobz="V", uplo="L", &
             & allocfix=.true.)
+      case(3)
+        call scalafx_psygvr(hammtx, hamdesc, overmtx, overdesc, &
+            & eigvals, eigvecs, eigvdesc, jobz="V", uplo="L")
+      case(4)
+        call scalafx_psygvr(hammtx, hamdesc, overmtx, overdesc, &
+            & eigvals, eigvecs, eigvdesc, iu=3, jobz="V", uplo="L")
+      case(5)
+        call scalafx_psygvr(hammtx, hamdesc, overmtx, overdesc, &
+            & eigvals, eigvecs, eigvdesc, vl=-1.0_dp, vu=0.0_dp, jobz="V", &
+            & uplo="L")
       end select
     else
       select case (idiag)
@@ -100,6 +117,15 @@ contains
       case(2)
         call scalafx_psyevd(hammtx, hamdesc, eigvals, eigvecs,&
             & eigvdesc, jobz="V", uplo="L", allocfix=.true.)
+      case(3)
+        call scalafx_psyevr(hammtx, hamdesc, eigvals, eigvecs, &
+            & eigvdesc, jobz="V", uplo="L")
+      case(4)
+        call scalafx_psyevr(hammtx, hamdesc, eigvals, eigvecs, &
+            & eigvdesc, iu=3, jobz="V", uplo="L")
+      case(5)
+        call scalafx_psyevr(hammtx, hamdesc, eigvals, eigvecs, &
+            & eigvdesc, vl=-1.0_dp, vu=0.0_dp, jobz="V", uplo="L")
       end select
     end if
 
@@ -152,8 +178,8 @@ contains
     read(buffer, *) bsize
     call get_command_argument(4, buffer)
     read(buffer, *) idiag
-    if (idiag /= 1 .and. idiag /= 2) then
-      stop "idiag must be one or two"
+    if (.not. any([ 1, 2, 3, 4, 5 ] == idiag)) then
+      stop "idiag must between 1 and 5."
     end if
     call get_command_argument(5, hamfile)
     if (narg == 6) then
