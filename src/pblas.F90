@@ -95,7 +95,6 @@ module pblas_module
   interface ptranc
     _subroutine_interface_ptranx(complex, pctranc, complex, sp)
     _subroutine_interface_ptranx(dcomplex, pztranc, complex, dp)
-
   end interface ptranc
 
 end module pblas_module
