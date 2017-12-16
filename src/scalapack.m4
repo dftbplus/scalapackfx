@@ -279,31 +279,58 @@ end subroutine p$2heevr
 ')
 
 dnl ************************************************************************
-dnl *** pgesvd
+dnl *** prgesvd
 dnl ************************************************************************
 
-define(`_subroutine_interface_pgesvd',`
+define(`_subroutine_interface_prgesvd',`
 dnl $1: comment
 dnl $2: type letter
 dnl $3: dummy arguments kind
-dnl $4: dummy arguments type
 !> Singular values and vectors ($1)
-subroutine p$2gesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
+subroutine p$2rgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
     & vt, ivt, jvt, descvt, work, lwork, info)
   import
   character, intent(in) :: jobu, jobvt
   integer, intent(in) :: mm, nn
   integer, intent(in) :: ia, ja, desca(DLEN_)
-  $4($3), intent(inout) :: aa(desca(LLD_), *)
+  real($3), intent(inout) :: aa(desca(LLD_), *)
   real($3), intent(out) :: sigma(*)
   integer, intent(in) :: iu, ju, descu(DLEN_)
-  $4($3), intent(out) :: uu(descu(LLD_), *)
+  real($3), intent(out) :: uu(descu(LLD_), *)
   integer, intent(in) :: ivt, jvt, descvt(DLEN_)
-  $4($3), intent(out) :: vt(descvt(LLD_), *)
-  $4($3), intent(inout) :: work(*)
+  real($3), intent(out) :: vt(descvt(LLD_), *)
+  real($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
   integer, intent(out) :: info
-end subroutine p$2gesvd
+end subroutine p$2rgesvd
+')
+
+dnl ************************************************************************
+dnl *** prgesvd
+dnl ************************************************************************
+
+define(`_subroutine_interface_pcgesvd',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments kind
+!> Singular values and vectors ($1)
+subroutine p$2cgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
+    & vt, ivt, jvt, descvt, work, lwork, rwork, info)
+  import
+  character, intent(in) :: jobu, jobvt
+  integer, intent(in) :: mm, nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  complex($3), intent(inout) :: aa(desca(LLD_), *)
+  real($3), intent(out) :: sigma(*)
+  integer, intent(in) :: iu, ju, descu(DLEN_)
+  complex($3), intent(out) :: uu(descu(LLD_), *)
+  integer, intent(in) :: ivt, jvt, descvt(DLEN_)
+  complex($3), intent(out) :: vt(descvt(LLD_), *)
+  complex($3), intent(inout) :: work(*)
+  integer, intent(in) :: lwork
+  real($3), intent(inout) :: rwork(*)
+  integer, intent(out) :: info
+end subroutine p$2cgesvd
 ')
 
 dnl ************************************************************************
