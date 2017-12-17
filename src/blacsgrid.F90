@@ -79,17 +79,21 @@ contains
   !! \param masterrow  Master row in each subgrid.
   !! \param mastercol  Master column in each grid.
   !! \param context  BLACS system context (default: default system context)
+  !! \param repeatable if present and T, forces topologies to be repeatable.
+  !!     May degrade performance in this case.
   !!
   subroutine initgrid(self, nrow, ncol, colmajor, masterrow, &
-      & mastercol, context)
+      & mastercol, context, repeatable)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: nrow, ncol
     logical, intent(in), optional :: colmajor
     integer, intent(in), optional :: masterrow, mastercol, context
+    logical, intent(in), optional :: repeatable
 
     logical :: colmajor0
     integer :: masterrow0, mastercol0
     integer :: nproc, iproc, gridsize
+    integer :: val(1)
 
     ! Stop, if we do not have enough processess
     call blacs_pinfo(iproc, nproc)
@@ -110,6 +114,15 @@ contains
     else
       call blacs_gridinit(self%ctxt, "R", nrow, ncol)
     end if
+
+    if (present(repeatable)) then
+      val = 0
+      if (repeatable) then
+        val = 1
+      end if
+      call blacs_set(self%ctxt,15,val)
+    end if
+
     !! Processes not participating should obtain a cleared structure.
     if (iproc >= gridsize) then
       call self%reset()
@@ -151,20 +164,24 @@ contains
   !! \param context  BLACS system context (default: default system context)
   !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
   !!     created which contains only the master nodes from all grids.
+  !! \param repeatable if present and T, forces topologies to be repeatable.
+  !!     May degrade performance in this case.
   !!
   subroutine initsplitgrids(self, ngrid, nrow, ncol, colmajor, &
-      & masterrow, mastercol, context, mastergrid)
+      & masterrow, mastercol, context, mastergrid, repeatable)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: nrow, ncol
     logical, intent(in), optional :: colmajor
     integer, intent(in), optional :: masterrow, mastercol, context
     class(blacsgrid), intent(out), optional :: mastergrid
+    logical, intent(in), optional :: repeatable
 
     integer :: ngrid, ctxt0, gridsize, nproc, iproc
     integer :: ind, irow, icol, shift
     integer, allocatable :: imap(:,:), imap2(:,:)
     logical :: colmajor0
     integer :: masterrow0, mastercol0
+    integer :: val(1)
 
     call blacs_pinfo(iproc, nproc)
     gridsize = nrow * ncol
@@ -205,6 +222,15 @@ contains
     ! Create grid
     self%ctxt = ctxt0
     call blacs_gridmap(self%ctxt, imap, size(imap, dim=1), nrow, ncol)
+
+    if (present(repeatable)) then
+      val = 0
+      if (repeatable) then
+        val = 1
+      end if
+      call blacs_set(self%ctxt,15,val)
+    end if
+
     if (iproc >= ngrid * gridsize) then
       call self%reset()
     else
@@ -273,13 +299,16 @@ contains
   !! \param context  BLACS system context (default: default system context)
   !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
   !!     created which contains only the master nodes from all grids.
+  !! \param repeatable if present and T, forces topologies to be repeatable.
+  !!     May degrade performance in this case.
   !!
-  subroutine initmappedgrids(self, gridmap, context)
+  subroutine initmappedgrids(self, gridmap, context, repeatable)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: gridmap(:,:)
     integer, intent(in), optional :: context
+    logical, intent(in), optional :: repeatable
 
-    integer :: ncol, nrow, gridsize, nproc, iproc
+    integer :: ncol, nrow, gridsize, nproc, iproc, val(1)
 
     call blacs_pinfo(iproc, nproc)
     nrow = size(gridmap, dim=1)
@@ -289,6 +318,15 @@ contains
     call self%initcontext(context)
 
     call blacs_gridmap(self%ctxt, gridmap, size(gridmap, dim=1), nrow, ncol)
+
+    if (present(repeatable)) then
+      val = 0
+      if (repeatable) then
+        val = 1
+      end if
+      call blacs_set(self%ctxt,15,val)
+    end if
+
     if (.not. any(gridmap == iproc)) then
       call self%reset()
     else
