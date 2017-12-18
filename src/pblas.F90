@@ -71,7 +71,7 @@ module pblas_module
     _subroutine_interface_ptrmm(dcomplex, pztrmm, complex, dp)
   end interface ptrmm
 
-  !> Genereal matrix matrix product
+  !> General matrix matrix product
   interface pgemm
     _subroutine_interface_pgemm(real, psgemm, real, sp)
     _subroutine_interface_pgemm(dreal, pdgemm, real, dp)
