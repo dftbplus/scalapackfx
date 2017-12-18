@@ -144,7 +144,7 @@ dnl $1: comment
 dnl $2: subroutine name
 dnl $3: dummy arguments type
 dnl $4: dummy arguments kind
-!> Symmetric/hermitian matrix matrix product ($1).
+!> General matrix matrix product ($1).
 subroutine $2(transa, transb, mm, nn, kk, alpha, aa, ia, ja, desca, &
     & bb, ib, jb, descb, beta, cc, ic, jc, descc)
   import
