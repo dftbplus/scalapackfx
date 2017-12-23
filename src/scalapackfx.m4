@@ -1116,7 +1116,8 @@ dnl
 dnl $1 subroutine suffix
 dnl $2 dummy argument kind
 dnl
-!> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
+!> Solves Hermitian generalized eigenvalue problem by the divide and conquer
+!! algorithm.
 !!
 !! \details Invokes SCALAPACK routines p?potrf, p?hegst, p?heevd, p?trsm in
 !! order to transform the general eigenvalue problem to the standard form
@@ -1309,7 +1310,7 @@ dnl
 dnl $1 subroutine suffix
 dnl $2 dummy argument kind
 dnl
-!> Solves Hermitian eigenvalue problem by the MRRR algorithm.
+!> Solves Hermitian generalized eigenvalue problem by the MRRR algorithm.
 !!
 !! \details Invokes SCALAPACK routines p?potrf, p?hegst, p?heevr, p?trsm in
 !! order to transform the general eigenvalue problem to the standard form
