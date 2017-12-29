@@ -33,7 +33,7 @@ module scalapackfx_module
   public :: scalafx_indxl2g
   public :: scalafx_localindices
   public :: scalafx_creatematrix
-
+  public :: scalafx_pgesvd
 
   !> Cholesky factorization of a symmetric/Hermitian positive definite matrix.
   interface scalafx_ppotrf
@@ -126,6 +126,12 @@ module scalapackfx_module
   interface scalafx_phegvr
     module procedure scalafx_phegvr_complex, scalafx_phegvr_dcomplex
   end interface scalafx_phegvr
+
+  !> Singular value decomposition
+  interface scalafx_pgesvd
+    module procedure scalafx_r_pgesvd_real, scalafx_r_pgesvd_dreal
+    module procedure scalafx_c_pgesvd_complex, scalafx_c_pgesvd_dcomplex
+  end interface scalafx_pgesvd
   
   !> Solves triangular matrix equation.
   interface scalafx_ptrsm
@@ -191,6 +197,11 @@ contains
   _subroutine_scalafx_psygvr(dreal, dp)
   _subroutine_scalafx_phegvr(complex, sp)
   _subroutine_scalafx_phegvr(dcomplex, dp)
+
+  _subroutine_scalafx_r_pgesvd(real, s, sp)
+  _subroutine_scalafx_r_pgesvd(dreal, r, dp)
+  _subroutine_scalafx_c_pgesvd(complex, c, sp)
+  _subroutine_scalafx_c_pgesvd(dcomplex, z, dp)
   
   _subroutine_scalafx_ptrsm(real, real(sp), real(1.0, sp))
   _subroutine_scalafx_ptrsm(dreal, real(dp), real(1.0, dp))

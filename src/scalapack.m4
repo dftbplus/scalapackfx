@@ -287,7 +287,7 @@ dnl $1: comment
 dnl $2: type letter
 dnl $3: dummy arguments kind
 !> Singular values and vectors ($1)
-subroutine p$2rgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
+subroutine p$2gesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
     & vt, ivt, jvt, descvt, work, lwork, info)
   import
   character, intent(in) :: jobu, jobvt
@@ -302,11 +302,11 @@ subroutine p$2rgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, 
   real($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
   integer, intent(out) :: info
-end subroutine p$2rgesvd
+end subroutine p$2gesvd
 ')
 
 dnl ************************************************************************
-dnl *** prgesvd
+dnl *** pcgesvd
 dnl ************************************************************************
 
 define(`_subroutine_interface_pcgesvd',`
@@ -314,7 +314,7 @@ dnl $1: comment
 dnl $2: type letter
 dnl $3: dummy arguments kind
 !> Singular values and vectors ($1)
-subroutine p$2cgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
+subroutine p$2gesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
     & vt, ivt, jvt, descvt, work, lwork, rwork, info)
   import
   character, intent(in) :: jobu, jobvt
@@ -330,7 +330,7 @@ subroutine p$2cgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, 
   integer, intent(in) :: lwork
   real($3), intent(inout) :: rwork(*)
   integer, intent(out) :: info
-end subroutine p$2cgesvd
+end subroutine p$2gesvd
 ')
 
 dnl ************************************************************************
