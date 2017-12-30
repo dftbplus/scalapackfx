@@ -16,13 +16,14 @@ program test_diag
   implicit none
 
   call main()
-  
+
 
 contains
 
   subroutine main()
     type(blacsgrid) :: mygrid
     real(dp), allocatable :: matrix(:,:), U(:,:), sigma(:), vt(:,:)
+    complex(dp), allocatable :: matrixcplx(:,:), Ucplx(:,:), vtcplx(:,:)
     integer :: matrixdesc(DLEN_), Udesc(DLEN_), vtdesc(DLEN_)
     integer :: mm, nn
     integer :: tsys1, tsys2, tcount
@@ -50,21 +51,30 @@ contains
 
     mm = matrixdesc(M_)
     nn = matrixdesc(N_)
-    
+
     if (mygrid%master) then
       write(stdout, "(A,2(1X,I0))") "# matrix size:", mm, nn
       write(stdout, "(A,1X,A)") "# singular value decomposition:", "standard"
       write(stdout, "(A,2(1X,I0))") "# matrix size on master:",&
-          & size(matrix, dim=1), size(matrix, dim=2)      
+          & size(matrix, dim=1), size(matrix, dim=2)
     end if
 
     call system_clock(tsys1, tcount)
     call cpu_time(tcpu1)
 
-    ! Allocate matrices    
+    ! Allocate matrices
     call scalafx_creatematrix(mygrid, mm, mm, bsize, bsize, U, Udesc)
     call scalafx_creatematrix(mygrid, nn, nn, bsize, bsize, Vt, Vtdesc)
     allocate(sigma(min(mm,nn)))
+
+    allocate(matrixcplx(size(matrix,dim=1),size(matrix,dim=2)))
+    allocate(Ucplx(size(u,dim=1),size(u,dim=2)))
+    allocate(vtcplx(size(vt,dim=1),size(vt,dim=2)))
+    matrixcplx = 0.0_dp
+    Ucplx = 0.0_dp
+    vtcplx = 0.0_dp
+
+    matrixcplx = ((1,1)/sqrt(2.0_dp)) * matrix
 
     call scalafx_pgesvd(matrix, matrixdesc, U, Udesc, sigma, vt, vtdesc)
 
@@ -80,6 +90,7 @@ contains
     ! Write singular values and vectors
     if (mygrid%master) then
       open(12, file="singularvals.dat", form="formatted", status="replace")
+      write(12,*)"Real"
       write(12, "(ES23.15)") sigma
       close(12)
       write(stdout, "(A,A,A)") "# Singular values written to '", "singularvals.dat", "'"
@@ -88,6 +99,15 @@ contains
     call writetofile(mygrid, "singularVt.dat", vT, Vtdesc)
     if (mygrid%master) then
       write(stdout, "(A,A,A)") "# Singular vectors written to '", "singularU/singularVt.dat", "'"
+    end if
+
+    call scalafx_pgesvd(matrixcplx, matrixdesc, Ucplx, Udesc, sigma, vtcplx, vtdesc)
+    if (mygrid%master) then
+      open(12, file="singularvals.dat", form="formatted", status='old', position='append')
+      write(12,*)"Complex"
+      write(12, "(ES23.15)") sigma
+      close(12)
+      write(stdout, "(A,A,A)") "# Singular values written to '", "singularvals.dat", "'"
     end if
 
     ! Destroy blacs communication layer.

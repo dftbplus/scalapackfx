@@ -1412,22 +1412,33 @@ dnl
 !!
 !! \param aa  Matrix to decompose (A).
 !! \param desca  Descriptor of matrix A.
-!! \param ww  Singular values on exit.
 !! \param uu  Left singular vectors (U).
-!! \param descz  Descriptor of the left singular vectors
-!! \param jobz  Job type (default: "V")
+!! \param descu  Descriptor of the left singular vectors.
+!! \param sigma  Singular values on exit.
+!! \param vt  Right singular vectors, transposed (Vt).
+!! \param descvt  Descriptor of the right singular vectors.
+!! \param jobu  Job type for U matrix (default: "V")
+!! \param jobu  Job type for vt matrix (default: "V")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param iu  First row of the submatrix U (default: 1)
+!! \param ju  First column of the submatrix U (default: 1)
+!! \param ivt  First row of the submatrix vt (default: 1)
+!! \param jvt  First column of the submatrix vt (default: 1)
+!! \param mm  Number of columns of the matrix A (default: desca(M_))
+!! \param nn  Number of rows of the matrix A (default: desca(N_))
 !! \param work  Working array (if not specified, allocated automatically)
 !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
 !!     subroutine stops.
 !!
-!! \see SCALAPACK documentation (routine p?gesvd).
+!! \see SCALAPACK documentation (real routines p[sd]gesvd).
 !!
 subroutine scalafx_r_pgesvd_$1(aa, desca, uu, descu, sigma, vt, descvt, jobu, jobvt, &
     & ia, ja, iu, ju, ivt, jvt, mm, nn, work, info)
   real($3), intent(inout) :: aa(:,:)
   integer, intent(in) :: desca(DLEN_)
   real($3), intent(inout) :: uu(:,:)
-  integer, intent(in) :: descu(DLEN_)  
+  integer, intent(in) :: descu(DLEN_)
   real($3), intent(out) :: sigma(:)
   real($3), intent(out) :: vt(:,:)
   integer, intent(in) :: descvt(DLEN_)
@@ -1483,24 +1494,34 @@ dnl
 !!
 !! \param aa  Matrix to decompose (A).
 !! \param desca  Descriptor of matrix A.
-!! \param ww  Singular values on exit.
 !! \param uu  Left singular vectors (U).
-!! \param descz  Descriptor of the left singular vectors
-!! \param jobz  Job type (default: "V")
-!! \param work  Complex working array (if not specified, allocated
-!!     automatically)
+!! \param descu  Descriptor of the left singular vectors.
+!! \param sigma  Singular values on exit.
+!! \param vt  Right singular vectors, transposed (Vt).
+!! \param descvt  Descriptor of the right singular vectors.
+!! \param jobu  Job type for U matrix (default: "V")
+!! \param jobu  Job type for vt matrix (default: "V")
+!! \param ia  First row of the submatrix A (default: 1)
+!! \param ja  First column of the submatrix A (default: 1)
+!! \param iu  First row of the submatrix U (default: 1)
+!! \param ju  First column of the submatrix U (default: 1)
+!! \param ivt  First row of the submatrix vt (default: 1)
+!! \param jvt  First column of the submatrix vt (default: 1)
+!! \param mm  Number of columns of the matrix A (default: desca(M_))
+!! \param nn  Number of rows of the matrix A (default: desca(N_))
+!! \param work  Working array (if not specified, allocated automatically)
 !! \param rwork Real working array (if not specified, allocated automatically)
 !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
 !!     subroutine stops.
 !!
-!! \see SCALAPACK documentation (routine p?gesvd).
+!! \see SCALAPACK documentation (complex routines p[cz]gesvd).
 !!
-subroutine scalafx_c_pgesvd_$1(aa, desca, uu, descu, jobu, sigma, vt, descvt, jobvt, &
+subroutine scalafx_c_pgesvd_$1(aa, desca, uu, descu, sigma, vt, descvt, jobu, jobvt, &
     & ia, ja, iu, ju, ivt, jvt, mm, nn, work, rwork, info)
   complex($3), intent(inout) :: aa(:,:)
   integer, intent(in) :: desca(DLEN_)
   complex($3), intent(inout) :: uu(:,:)
-  integer, intent(in) :: descu(DLEN_)  
+  integer, intent(in) :: descu(DLEN_)
   real($3), intent(out) :: sigma(:)
   complex($3), intent(out) :: vt(:,:)
   integer, intent(in) :: descvt(DLEN_)
@@ -1510,11 +1531,11 @@ subroutine scalafx_c_pgesvd_$1(aa, desca, uu, descu, jobu, sigma, vt, descvt, jo
   real($3), intent(inout), allocatable, optional :: rwork(:)
   integer, intent(out), optional :: info
 
-  integer :: mm0, nn0, lwork, lrwork, lrwork_tmp, lrwmin, lwmin, info0, ia0, ja0, iu0, ju0, ivt0, jvt0
+  integer :: mm0, nn0, lwork, lrwmin, lrwork, lwmin, info0, ia0, ja0, iu0, ju0, ivt0, jvt0
   character :: jobu0, jobvt0
-  real($3) :: rtmp(1)
   complex($3) :: ctmp(1)
   complex($3), allocatable :: work0(:)
+  real($3) :: rtmp(1)
   real($3), allocatable :: rwork0(:)
 
   ! Handle optional flags
@@ -1528,18 +1549,21 @@ subroutine scalafx_c_pgesvd_$1(aa, desca, uu, descu, jobu, sigma, vt, descvt, jo
   _handle_inoptflag(jvt0, jvt, 1)
   _handle_inoptflag(mm0, mm, desca(M_))
   _handle_inoptflag(nn0, nn, desca(N_))
-  
+
   ! Allocate  workspace
-  call pgesvd(jobu, jobvt, mm, nn, aa, ia, ja, desca, sigma, uu, iu, ju, descu, &
-    & vt, ivt, jvt, descvt, ctmp, -1, rtmp, info)
-  call handle_infoflag(info0, "pgesvd in scalafx_c_pgesvd_$1", info)
-  lwmin = int(ctmp(1))
+  call pgesvd(jobu0, jobvt0, mm0, nn0, aa, ia0, ja0, desca, sigma, uu, iu0, ju0, descu, &
+    & vt, ivt0, jvt0, descvt, ctmp, -1, rtmp, info0)
+  call handle_infoflag(info0, "pgesvd in scalafx_r_pgesvd_$1", info)
+  lwmin = int(real(ctmp(1)))
   lrwmin = int(rtmp(1))
   _move_minoptalloc(work0, lwmin, lwork, work)
   _move_minoptalloc(rwork0, lrwmin, lrwork, rwork)
 
   ! SVD
-  
+  call pgesvd(jobu0, jobvt0, mm0, nn0, aa, ia0, ja0, desca, sigma, uu, iu0, ju0, descu, &
+    & vt, ivt0, jvt0, descvt, work0, lwmin, rwork0, info0)
+  call handle_infoflag(info0, "pgesvd in scalafx_c_pgesvd_$1", info)
+
   ! Save work space allocations, if dummy arguments present
   _optmovealloc(work0, work)
   _optmovealloc(rwork0, rwork)
