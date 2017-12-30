@@ -7,7 +7,7 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-  public :: ptrsm, ppotrf, ppotri, ptrtri
+  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf
   public :: sl_init, numroc, infog2l, indxl2g, descinit
 
 
@@ -38,6 +38,14 @@ module scalapack_module
     _subroutine_interface_ptrtri(complex, c, complex(sp))
     _subroutine_interface_ptrtri(dcomplex, z, complex(dp))
   end interface ptrtri
+
+  !> LU decomposition of a general matrix with pivoting
+  interface pgetrf
+    _subroutine_interface_pgetrf(real, s, real(sp))
+    _subroutine_interface_pgetrf(dreal, d, real(dp))
+    _subroutine_interface_pgetrf(complex, c, complex(sp))
+    _subroutine_interface_pgetrf(dcomplex, z, complex(dp))
+  end interface pgetrf
 
   !> Reduces generalized symmetric eigenvalue problem to standard form.
   interface psygst

@@ -58,6 +58,26 @@ end subroutine p$2trtri
 ')
 
 dnl ************************************************************************
+dnl *** pgetrf
+dnl ************************************************************************
+
+define(`_subroutine_interface_pgetrf',`
+dnl $1: comment
+dnl $2: type letter
+dnl $3: dummy arguments type
+!> LU factorization of a general matrix with pivoting ($1).
+subroutine p$2getrf(mm, nn, aa, ia, ja, desca, ipiv, info)
+  import
+  integer, intent(in) :: mm
+  integer, intent(in) :: nn
+  integer, intent(in) :: ia, ja, desca(DLEN_)
+  $3, intent(inout) :: aa(desca(LLD_), *)
+  integer, intent(out) :: ipiv(*)
+  integer, intent(out) :: info
+end subroutine p$2getrf
+')
+
+dnl ************************************************************************
 dnl *** psygst
 dnl ************************************************************************ 
 

@@ -12,3 +12,6 @@ test_subgrids: $(test_subgrids.o)
 
 test_tran: $(test_tran.o)
 	$(link-target)
+
+test_det: $(test_det.o)
+	$(link-target)
