@@ -94,7 +94,7 @@ module scalapack_module
     _subroutine_interface_pcgesvd(complex, c, sp)
     _subroutine_interface_pcgesvd(dcomplex, z, dp)
   end interface pgesvd
-  
+
   !> Linear system of equation for triangular matrix.
   interface ptrsm
     _subroutine_interface_ptrsm(real, s, real(sp))
@@ -134,7 +134,7 @@ module scalapack_module
     !> Converts local matrix index into global.
     function indxl2g(indxglob, nb, iproc, isrcproc, nprocs)
       integer :: indxl2g
-      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs
+      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs      
     end function indxl2g
     
     !> Initializes a descriptor for a distributed array.

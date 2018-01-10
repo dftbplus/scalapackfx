@@ -2,7 +2,7 @@ include(common.m4)
 
 dnl ************************************************************************
 dnl *** ppotrf
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_ppotrf',`
 dnl $1: comment
@@ -21,7 +21,7 @@ end subroutine p$2potrf
 
 dnl ************************************************************************
 dnl *** ppotri
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_ppotri',`
 dnl $1: comment
@@ -40,7 +40,7 @@ end subroutine p$2potri
 
 dnl ************************************************************************
 dnl *** ptrtri
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_ptrtri',`
 dnl $1: comment
@@ -59,7 +59,7 @@ end subroutine p$2trtri
 
 dnl ************************************************************************
 dnl *** psygst
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_psygst',`
 dnl $1: comment
@@ -83,7 +83,7 @@ end subroutine p$2sygst
 
 dnl ************************************************************************
 dnl *** phegst
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_phegst',`
 dnl $1: comment
@@ -107,7 +107,7 @@ end subroutine p$2hegst
 
 dnl ************************************************************************
 dnl *** psyev
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_psyev',`
 dnl $1: comment
@@ -131,7 +131,7 @@ end subroutine p$2syev
 
 dnl ************************************************************************
 dnl *** pheev
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_pheev',`
 dnl $1: comment
@@ -147,7 +147,7 @@ subroutine p$2heev(jobz, uplo, nn, aa, ia, ja, desca, ww, zz, iz, jz,&
   complex($3), intent(inout) :: aa(desca(LLD_), *)
   integer, intent(in) :: iz, jz, descz(DLEN_)
   real($3), intent(out) :: ww(nn)
-  complex($3), intent(out) :: zz(descz(LLD_),*)
+  complex($3), intent(out) ::  zz(descz(LLD_),*)
   complex($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
   real($3), intent(inout) :: rwork(*)
@@ -158,7 +158,7 @@ end subroutine p$2heev
 
 dnl ************************************************************************
 dnl *** psyevd
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_psyevd',`
 dnl $1: comment
@@ -184,7 +184,7 @@ end subroutine p$2syevd
 
 dnl ************************************************************************
 dnl *** pheevd
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_pheevd',`
 dnl $1: comment
@@ -200,7 +200,7 @@ subroutine p$2heevd(jobz, uplo, nn, aa, ia, ja, desca, ww, zz, iz, jz,&
   complex($3), intent(inout) :: aa(desca(LLD_), *)
   integer, intent(in) :: iz, jz, descz(DLEN_)
   real($3), intent(out) :: ww(nn)
-  complex($3), intent(out) :: zz(descz(LLD_),*)
+  complex($3), intent(out) ::  zz(descz(LLD_),*)
   complex($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
   real($3), intent(inout) :: rwork(*)
@@ -213,7 +213,7 @@ end subroutine p$2heevd
 
 dnl ************************************************************************
 dnl *** psyevr
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_psyevr',`
 dnl $1: comment
@@ -245,7 +245,7 @@ end subroutine p$2syevr
 
 dnl ************************************************************************
 dnl *** pheevr
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_pheevr',`
 dnl $1: comment
@@ -266,7 +266,7 @@ subroutine p$2heevr(jobz, range, uplo, nn, aa, ia, ja, desca, vl, vu, il, iu, &
   integer, intent(out) :: mm, nz
   real($3), intent(out) :: ww(nn)
   integer, intent(in) :: descz(DLEN_)
-  complex($3), intent(out) :: zz(descz(LLD_),*)
+  complex($3), intent(out) ::  zz(descz(LLD_),*)
   integer, intent(in) :: iz, jz
   complex($3), intent(inout) :: work(*)
   integer, intent(in) :: lwork
@@ -335,7 +335,7 @@ end subroutine p$2gesvd
 
 dnl ************************************************************************
 dnl *** ptrsm
-dnl ************************************************************************
+dnl ************************************************************************ 
 
 define(`_subroutine_interface_ptrsm',`
 dnl $1: comment
