@@ -23,7 +23,7 @@ SRCDIR = ../src
 .SUFFIXES: .f90 .o
 
 
-TARGETS = test_desc test_diag test_psyr_pher test_subgrids test_tran
+TARGETS = test_desc test_diag test_psyr_pher test_subgrids test_tran test_svd
 
 all: $(TARGETS)
 

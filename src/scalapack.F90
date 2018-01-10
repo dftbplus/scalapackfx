@@ -7,7 +7,7 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-  public :: ptrsm, ppotrf, ppotri, ptrtri
+  public :: ptrsm, ppotrf, ppotri, ptrtri, pgesvd
   public :: sl_init, numroc, infog2l, indxl2g, descinit
 
 
@@ -87,6 +87,14 @@ module scalapack_module
     _subroutine_interface_pheevr(dcomplex, z, dp)
   end interface pheevr
   
+  !> Singular value decomposition of a matrix
+  interface pgesvd
+    _subroutine_interface_prgesvd(real, s, sp)
+    _subroutine_interface_prgesvd(dreal, d, dp)
+    _subroutine_interface_pcgesvd(complex, c, sp)
+    _subroutine_interface_pcgesvd(dcomplex, z, dp)
+  end interface pgesvd
+
   !> Linear system of equation for triangular matrix.
   interface ptrsm
     _subroutine_interface_ptrsm(real, s, real(sp))
