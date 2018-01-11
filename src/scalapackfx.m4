@@ -146,6 +146,57 @@ end subroutine scalafx_ptrtri_$1
 ')
 
 dnl ************************************************************************
+dnl *** pgetrf
+dnl ************************************************************************
+
+define(`_subroutine_scalafx_pgetrf',`
+dnl
+dnl $1 subroutine suffix
+dnl $2 dummy argument type
+dnl
+!> LU factorization of a general matrix with pivoting
+!!
+subroutine scalafx_pgetrf_$1(aa, desca, ipiv, ia, ja, mm, nn, info)
+
+  !> LU decomposition on exit, pivoted by ipiv
+  $2, intent(inout) :: aa(:,:)
+
+  !> Descriptor of A.
+  integer, intent(in) :: desca(DLEN_)
+
+  !> Pivot matrix
+  integer, intent(out) :: ipiv(:)
+
+  !> First row of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ia
+
+  !> First column of the submatrix of A. Default: 1
+  integer, intent(in), optional :: ja
+
+  !> Number of columns in the submatrix of A. Default: desca(M_)
+  integer, intent(in), optional :: mm
+
+  !> Number of rows in the submatrix of A. Default: desca(N_)
+  integer, intent(in), optional :: nn
+
+  !> Info flag. If not specified and error occurs, the subroutine stops.
+  integer, intent(out), optional :: info
+
+  !------------------------------------------------------------------------
+
+  integer :: ia0, ja0, mm0, nn0, info0
+
+  _handle_inoptflag(ia0, ia, 1)
+  _handle_inoptflag(ja0, ja, 1)
+  _handle_inoptflag(mm0, mm, desca(M_))
+  _handle_inoptflag(nn0, nn, desca(N_))
+  call pgetrf(mm0, nn0, aa, ia0, ja0, desca, ipiv, info0)
+  call handle_infoflag(info0, "pgetrf in scalafx_pgetrf_$1", info)
+
+end subroutine scalafx_pgetrf_$1
+')
+
+dnl ************************************************************************
 dnl *** psygst / phegst
 dnl ************************************************************************
 

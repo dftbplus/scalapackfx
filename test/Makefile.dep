@@ -21,3 +21,6 @@ test_tran.o = test_tran.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_c
 
 test_svd.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
 test_svd.o = test_svd.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
+
+test_det.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_det.o = test_det.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))

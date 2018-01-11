@@ -12,6 +12,7 @@ module scalapackfx_module
   public :: scalafx_ppotrf
   public :: scalafx_ppotri
   public :: scalafx_ptrtri
+  public :: scalafx_pgetrf
   public :: scalafx_psygst
   public :: scalafx_phegst
   public :: scalafx_psyev
@@ -52,7 +53,13 @@ module scalapackfx_module
     module procedure scalafx_ptrtri_real, scalafx_ptrtri_dreal
     module procedure scalafx_ptrtri_complex, scalafx_ptrtri_dcomplex
   end interface scalafx_ptrtri
-  
+
+  !> LU decomposition of a general matrix with pivoting.
+  interface scalafx_pgetrf
+    module procedure scalafx_pgetrf_real, scalafx_pgetrf_dreal
+    module procedure scalafx_pgetrf_complex, scalafx_pgetrf_dcomplex
+  end interface scalafx_pgetrf
+
   !> Reduces symmetric definite generalized eigenvalue problem to standard form.
   interface scalafx_psygst
     module procedure scalafx_psygst_real, scalafx_psygst_dreal
@@ -163,6 +170,11 @@ contains
   _subroutine_scalafx_ptrtri(complex, complex(sp))
   _subroutine_scalafx_ptrtri(dcomplex, complex(dp))
 
+  _subroutine_scalafx_pgetrf(real, real(sp))
+  _subroutine_scalafx_pgetrf(dreal, real(dp))
+  _subroutine_scalafx_pgetrf(complex, complex(sp))
+  _subroutine_scalafx_pgetrf(dcomplex, complex(dp))
+  
   _subroutine_scalafx_psygst_phegst(real, real(sp), real(sp), psygst)
   _subroutine_scalafx_psygst_phegst(dreal, real(dp), real(dp), psygst)
   _subroutine_scalafx_psygst_phegst(complex, complex(sp), real(sp), phegst)

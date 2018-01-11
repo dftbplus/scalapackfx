@@ -15,3 +15,6 @@ test_tran: $(test_tran.o)
 
 test_svd: $(test_svd.o)
 	$(link-target)
+
+test_det: $(test_det.o)
+	$(link-target)
