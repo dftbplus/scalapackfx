@@ -7,11 +7,7 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-<<<<<<< HEAD
-  public :: ptrsm, ppotrf, ppotri, ptrtri, pgesvd
-=======
-  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf
->>>>>>> bhourahine/pgetrf
+  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgesvd
   public :: sl_init, numroc, infog2l, indxl2g, descinit
 
 
