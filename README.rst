@@ -6,7 +6,7 @@ The open source library `SCALAPACKFX
 Fortran (Fortran 2003) wrappers around routines of the SCALAPACK, PBLAS and
 BLACS libraries to make their use as simple as possible. The
 documentation is included inside the repository, but is also available at
-`scalapackfx.readthedocs.io <https://scalapackfx.readthedocs.io/>`_.
+`dftbplus.github.io <https://dftbplus.github.io/>`_.
 
 A few essential routines (especially those related to diagonalization) are
 already covered. If not, you are cordially invited to extend SCALAPACKFX and to
