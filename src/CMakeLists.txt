@@ -1,0 +1,41 @@
+set(SOURCES-FPP
+  blacs.F90
+  blacsfx.F90
+  blacsgrid.F90
+  libscalapackfx.F90
+  linecomm.F90
+  pblas.F90
+  pblasfx.F90
+  scalapack.F90
+  scalapackfx.F90
+  scalapackfx_common.F90
+  scalapackfx_tools.F90)
+
+foreach(fppsrc ${SOURCES-FPP})
+  string(REGEX REPLACE "\\.F90" ".f90" f90src ${fppsrc})  
+  string(REGEX REPLACE "\\.F90" ".m4" m4src ${fppsrc})
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${m4src})
+    set(OTHERDEPS ${CMAKE_CURRENT_SOURCE_DIR}/${m4src})
+  else()
+    set(OTHERDEPS)
+  endif()
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${f90src}
+    COMMAND m4 -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${fppsrc} > ${CMAKE_CURRENT_BINARY_DIR}/${f90src}
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${fppsrc} ${OTHERDEPS})
+  list(APPEND SOURCES-F90-PREPROC ${CMAKE_CURRENT_BINARY_DIR}/${f90src})
+endforeach()
+
+add_library(scalapackfx ${SOURCES-F90-PREPROC})
+
+set(INCLUDEDIR ${CMAKE_CURRENT_BINARY_DIR}/include)
+
+set_target_properties(scalapackfx PROPERTIES Fortran_MODULE_DIRECTORY ${INCLUDEDIR})
+
+target_include_directories(scalapackfx INTERFACE ${INCLUDEDIR})
+
+install(TARGETS scalapackfx
+  ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
+  LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+
+install(DIRECTORY ${INCLUDEDIR}/ DESTINATION ${INSTALL_MOD_DIR})
