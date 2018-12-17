@@ -11,7 +11,7 @@ set(sources-fpp
   scalapackfx_common.F90
   scalapackfx_tools.F90)
 
-foreach(fppsrc ${sources-fpp})
+foreach(fppsrc IN LISTS sources-fpp)
   string(REGEX REPLACE "\\.F90" ".f90" f90src ${fppsrc})  
   string(REGEX REPLACE "\\.F90" ".m4" m4src ${fppsrc})
   if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${m4src})

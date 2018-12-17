@@ -9,12 +9,12 @@ set(common-dep-targets
   test_svd
   test_tran)
 
-foreach(target ${targets})
+foreach(target IN LISTS targets)
   add_executable(${target} ${target}.f90)
   target_link_libraries(${target} scalapackfx ${SCALAPACK_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 endforeach()
 
-foreach(target ${common-dep-targets})
+foreach(target IN LISTS common-dep-targets)
   add_executable(${target} ${target}.f90 test_common.f90)
   target_link_libraries(${target} scalapackfx ${SCALAPACK_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 endforeach()
