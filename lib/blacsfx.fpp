@@ -104,7 +104,7 @@ contains
 
     ${TYPE}$, pointer :: buffer(:,:)
 
-    buffer(1:size(aa),1:1) => aa(1:size(aa))
+    buffer(1:size(aa), 1:1) => aa(1:size(aa))
     call blacsfx_gebs(mygrid, buffer, scope, top)
 
   end subroutine blacsfx_gebs_${SUFFIX}$
@@ -218,7 +218,7 @@ contains
 
     ${TYPE}$ :: buffer(1,1)
 
-    aa=buffer(1,1)
+    aa = buffer(1,1)
     call blacsfx_gebr(mygrid, buffer, scope, top, rsrc, csrc)
 
   end subroutine blacsfx_gebr_${SUFFIX}$
@@ -270,7 +270,7 @@ contains
 
     ${TYPE}$, pointer :: buffer(:,:)
 
-    buffer(1:size(aa),1:1) => aa(1:size(aa))
+    buffer(1:size(aa), 1:1) => aa(1:size(aa))
     call blacsfx_gsed(mygrid, buffer, rdest, cdest)
 
   end subroutine blacsfx_gesd_${SUFFIX}$
