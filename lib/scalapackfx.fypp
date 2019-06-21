@@ -1,10 +1,12 @@
 #:mute
-  
+
 #! Set DEBUG to 0 unless DEBUG level is specified explicitely
 #:set DEBUG = getvar('DEBUG', 0)
 
 #! Build normal library unless stub library is explicitly requested
 #!#:set STUB_LIBRARY = defined('STUB_LIBRARY')
+
+#:set CONTROL_TYPES = ['master', 'slave']
 
 #:set INT_TYPES = ['int']
 
@@ -17,7 +19,7 @@
 #:set NUMERIC_TYPES = INT_TYPES + FLOAT_TYPES
 
 #:set ALL_TYPES = NUMERIC_TYPES + LOGICAL_TYPES + CHAR_TYPES
-  
+
 #:set TYPE_ABBREVS = {'int': 'i', 'real': 's', 'dreal': 'd', 'complex': 'c', 'dcomplex': 'z',&
     & 'logical': 'l', 'char': 'h'}
 
@@ -26,9 +28,9 @@
     & 'complex': 'complex(sp)', 'dcomplex': 'complex(dp)',  'logical': 'logical',&
     & 'char': 'character(len=*)'}
 
-    
+
 #! Returns colons within paranthesis according to the RANK or empty string
-#! if RANK is zero.  
+#! if RANK is zero.
 #:def RANKSUFFIX(RANK)
 ${'' if RANK == 0 else '(' + ':' + ',:' * (RANK - 1) +')'}$
 #:enddef RANKSUFFIX
@@ -37,7 +39,7 @@ ${'' if RANK == 0 else '(' + ':' + ',:' * (RANK - 1) +')'}$
 #! Indicates debug code.
 #!
 #! code: Code to insert, if DEBUG > 0
-#! 
+#!
 #:def DEBUG_CODE(code)
 #:if DEBUG > 0
 $:code
