@@ -10,7 +10,11 @@
 
 #:set INT_TYPES = ['int']
 
-#:set FLOAT_TYPES = ['real', 'dreal', 'complex', 'dcomplex']
+#:set REAL_TYPES = ['real', 'dreal']
+
+#:set COMPLEX_TYPES = ['complex', 'dcomplex']
+
+#:set FLOAT_TYPES = REAL_TYPES + COMPLEX_TYPES
 
 #:set LOGICAL_TYPES = ['logical']
 
@@ -28,6 +32,11 @@
     & 'complex': 'complex(sp)', 'dcomplex': 'complex(dp)',  'logical': 'logical',&
     & 'char': 'character(len=*)'}
 
+#:set FORTRAN_KINDS = {'real': 'sp', 'dreal': 'dp', 'complex': 'sp',&
+    & 'dcomplex': 'dp'}
+
+#:set PSYGST_PHEGST_HANDLE = {'real': 'psygst', 'dreal': 'psygst',&
+    & 'complex': 'phegst', 'dcomplex': 'phegst'}
 
 #! Returns colons within paranthesis according to the RANK or empty string
 #! if RANK is zero.
@@ -51,13 +60,59 @@ $:code
 #! if present or to a default value (cc) otherwise.
 #!
 #:def inoptflags(aa,bb,cc)
-if (present(${bb}$)) then
-  ${aa}$ = ${bb}$
-else
-  ${aa}$ = ${cc}$
-end if
+  if (present(${bb}$)) then
+    ${aa}$ = ${bb}$
+  else
+    ${aa}$ = ${cc}$
+  end if
 #:enddef
 
+
+#! Sets an optional output argument (aa) if present to a certain value (bb).
+#!
+#:def handle_outoptflag(aa, bb)
+  if (present(${aa}$)) then
+    ${aa}$ = ${bb}$
+  end if
+#:enddef
+
+
+#! Allocates an array (aa) to a minimal size (bb) with an actual size
+#! stored in (cc). If the optional allocatable argument (dd) is present
+#! and big enough, its allocation transfer will be transfered instead of
+#! a new allocation.
+#!
+#:def move_minoptalloc(aa, bb, cc, dd)
+  if (present(${dd}$)) then
+    if (size(${dd}$) >= ${bb}$) then
+      call move_alloc(${dd}$, ${aa}$)
+    else
+      deallocate(${dd}$)
+    end if
+  end if
+  if (.not. allocated(${aa}$)) then
+    allocate(${aa}$(${bb}$))
+  end if
+  ${cc}$ = size(${aa}$)
+#:enddef move_minoptalloc
+
+
+#! Sets an optional output argument (aa) if present to a certain value (bb).
+#!
+#:def handle_outoptflag(aa, bb)
+  if (present(${aa}$)) then
+    ${aa}$ = ${bb}$
+  end if
+#:enddef
+
+
+#! Moves allocation from an array (aa) to an optional target (bb).
+#!
+#:def optmovealloc(aa, bb)
+  if (present(${bb}$)) then
+    call move_alloc(${aa}$, ${bb}$)
+  end if
+#:enddef
 
 #! Asserts the validity of a condition.
 #!
