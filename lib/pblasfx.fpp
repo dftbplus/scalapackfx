@@ -3,9 +3,9 @@
 #:set RANKS = [2, 1, 0]
 
 
-! ************************************************************************
-! *** psymv/phemv
-! ************************************************************************
+#! ************************************************************************
+#! *** psymv/phemv
+#! ************************************************************************
 
 #:def pblasfx_psymv_phemv_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
@@ -46,18 +46,13 @@
 
 
 
-dnl ************************************************************************
-dnl *** psyr/pher
-dnl ************************************************************************
+#!************************************************************************
+#!*** psyr/pher
+#!************************************************************************
 
 #:def pblasfx_psyr_pher_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
-  dnl $5 pblas subroutine name
-  subroutine pblasfx_$1(xx, descx, aa, desca, uplo, nn, alpha, ix, jx, incx,&
+  subroutine pblasfx_${SUFFIX}$(xx, descx, aa, desca, uplo, nn, alpha, ix, jx, incx,&
       & ia, ja)
     ${TYPE}$(${KIND}$), intent(in) :: xx(:,:)
     integer, intent(in) :: descx(DLEN_)
@@ -73,13 +68,13 @@ dnl ************************************************************************
     integer :: nn0, ix0, jx0, incx0, ia0, ja0
 
     @:inoptflags(uplo0, uplo, "L")
-    @:inoptflag(nn0, nn, desca(M_))
-    @:inoptflag(alpha0, alpha, real(1, kind=$3))
-    @:inoptflag(ix0, ix, 1)
-    @:inoptflag(jx0, jx, 1)
-    @:inoptflag(incx0, incx, 1)
-    @:inoptflag(ia0, ia, 1)
-    @:inoptflag(ja0, ja, 1)
+    @:inoptflags(nn0, nn, desca(M_))
+    @:inoptflags(alpha0, alpha, real(1, kind=${KIND}$))
+    @:inoptflags(ix0, ix, 1)
+    @:inoptflags(jx0, jx, 1)
+    @:inoptflags(incx0, incx, 1)
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
     call ${NAME}$(uplo0, nn0, alpha0, xx, ix0, jx0, descx, incx0, aa, ia0, ja0, desca)
 
   end subroutine pblasfx_${SUFFIX}$
@@ -88,17 +83,12 @@ dnl ************************************************************************
 
 
 
-dnl ************************************************************************
-dnl *** psyrk/pherk
-dnl ************************************************************************
+#!************************************************************************
+#!*** psyrk/pherk
+#!************************************************************************
 
 #:def pblasfx_psyrk_pherk_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
-  dnl $5 pblas subroutine name
   !> Symmetric/Hermitian rank-k update.
   !! \param aa  Matrix to update with.
   !! \param desca  Descriptor of aa.
@@ -145,16 +135,71 @@ dnl ************************************************************************
 #:enddef pblasfx_psyrk_pherk_template
 
 
-dnl ************************************************************************
-dnl *** pgemm
-dnl ************************************************************************
+
+
+#! ************************************************************************
+#! *** psymm/phemm
+#! ************************************************************************
+
+#:def pblasfx_psymm_phemm_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
+
+  !> Symmetric/Hermitian matrix with general matrix product
+  !! \param aa  Symmetric/Hermitian matrix.
+  !! \param desca  Descriptor of aa.
+  !! \param bb  general matrix.
+  !! \param descb  Descriptor of bb.
+  !! \param cc  Matrix to store result
+  !! \param descc  Descriptor of cc.
+  !! \param side "L" for for left, "R" for right (default: "L"),
+  !!        if "L" C := alpha * A * B + beta*C
+  !!        if "R" C := alpha * B * A + beta*C
+  !! \param uplo "U" for for upper, "L" for lower triangle matrix (default: "L").
+  !! \param alpha  Prefactor.
+  !! \param beta  Prefactor.
+  subroutine pblasfx_${SUFFIX}$(aa, desca, bb, descb, cc, descc, side, uplo, &
+      & alpha, beta, mm, nn, ia, ja, ib, jb, ic, jc)
+    ${TYPE}$(${KIND}$), intent(in) :: aa(:,:)
+    integer, intent(in) :: desca(DLEN_)
+    ${TYPE}$(${KIND}$), intent(in) :: bb(:,:)
+    integer, intent(in) :: descb(DLEN_)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(:,:)
+    integer, intent(in) :: descc(DLEN_)
+    character, intent(in), optional :: side
+    character, intent(in), optional :: uplo
+    ${TYPE}$(${KIND}$), intent(in), optional :: alpha, beta
+    integer, intent(in), optional :: mm, nn, ia, ja, ib, jb, ic, jc
+
+    ${TYPE}$(${KIND}$) :: alpha0, beta0
+    character :: side0, uplo0
+    integer :: mm0, nn0, ia0, ja0, ib0, jb0, ic0, jc0
+
+    @:inoptflags(side0, side, "L")
+    @:inoptflags(uplo0, uplo, "L")
+    @:inoptflags(alpha0, alpha, ${FUNCTION}$(1, kind=${KIND}$))
+    @:inoptflags(beta0, beta, ${FUNCTION}$(0, kind=${KIND}$))
+    @:inoptflags(mm0, mm, desca(M_))
+    @:inoptflags(nn0, nn, desca(N_))
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(ib0, ib, 1)
+    @:inoptflags(jb0, jb, 1)
+    @:inoptflags(ic0, ic, 1)
+    @:inoptflags(jc0, jc, 1)
+    call ${NAME}$(side0, uplo0, mm0, nn0, alpha0, aa, ia0, ja0, desca, &
+        & bb, ib0, jb0, descb, beta0, cc, ic0, jc0, descc)
+  end subroutine pblasfx_${SUFFIX}$
+
+#:enddef pblasfx_psymm_phemm_template
+
+
+
+
+#!************************************************************************
+#!*** pgemm
+#!************************************************************************
 
 #:def pblasfx_pgemm_template(SUFFIX, TYPE, KIND, FUNCTION)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
   !> Matrix matrix product: alpha * A * B + beta * C.
   !!
   !! \see PBLAS documentation (p?gemm routines)
@@ -249,22 +294,17 @@ dnl ************************************************************************
 #:enddef pblasfx_pgemm_template
 
 
-dnl ************************************************************************
-dnl *** ptrmm
-dnl ************************************************************************
+#!************************************************************************
+#!*** ptrmm
+#!************************************************************************
 
-#:def pblasfx_ptrmm_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
+#:def pblasfx_ptrmm_template(SUFFIX, TYPE, KIND, FUNCTION)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
-  dnl $5 pblas subroutine name
   !> Computes matrix-matrix product with one triangle matrix
   !!
   !! \see PBLAS documentation (routines p?trmm)
   !!
-  subroutine pblasfx_ptrmm_$1(aa, desca, bb, descb, alpha, side, uplo, transa, &
+  subroutine pblasfx_ptrmm_${SUFFIX}$(aa, desca, bb, descb, alpha, side, uplo, transa, &
       & diag, ia, ja, ib, jb, mm, nn)
 
     !> Unit or non-unit lower or upper triangular matrix A
@@ -339,17 +379,12 @@ dnl ************************************************************************
 #:enddef pblasfx_ptrmm_template
 
 
-dnl ************************************************************************
-dnl *** ptran
-dnl ************************************************************************
+#!************************************************************************
+#!*** ptran
+#!************************************************************************
 
 #:def pblasfx_ptran_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
-  dnl $5 pblas subroutine name
   !> Real matrix transpose.
   !! \param aa  Matrix to update with.
   !! \param desca  Descriptor of aa.
@@ -388,17 +423,12 @@ dnl ************************************************************************
 
 
 
-dnl ************************************************************************
-dnl *** ptranu
-dnl ************************************************************************
+#!************************************************************************
+#!*** ptranu
+#!************************************************************************
 
 #:def pblasfx_ptranu_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
-  dnl $1 subroutine suffix
-  dnl $2 dummy argument type
-  dnl $3 dummy arguments kind
-  dnl $4 conversion function
-  dnl $5 pblas subroutine name
   !> Complex matrix transpose.
   !! \param aa  Matrix to update with.
   !! \param desca  Descriptor of aa.
@@ -438,52 +468,48 @@ dnl ************************************************************************
 
 
 
-dnl ************************************************************************
-dnl *** ptranc
-dnl ************************************************************************
+#!************************************************************************
+#!*** ptranc
+#!************************************************************************
 
 #:def pblasfx_ptranc_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
-dnl $1 subroutine suffix
-dnl $2 dummy argument type
-dnl $3 dummy arguments kind
-dnl $4 conversion function
-!> Complex matrix hermitian transpose.
-!! \param aa  Matrix to update with.
-!! \param desca  Descriptor of aa.
-!! \param cc  Matrix to be updated.
-!! \param desccc Descriptor of cc.
-!! \param alpha  Prefactor.
-!! \param beta  Prefactor.
-subroutine pblasfx_${SUFFIX}$(aa, desca, cc, descc, alpha, beta,&
-    & mm, nn, ia, ja, ic, jc)
-  ${TYPE}$(${KIND}$), intent(in) :: aa(:,:)
-  integer, intent(in) :: desca(DLEN_)
-  ${TYPE}$(${KIND}$), intent(inout) :: cc(:,:)
-  integer, intent(in) :: descc(DLEN_)
-  complex(${KIND}$), intent(in), optional :: alpha, beta
-  integer, intent(in), optional :: mm, nn
-  integer, intent(in), optional :: ia, ja, ic, jc
 
-  complex(${KIND}$) :: alpha0, beta0
-  integer :: mm0, nn0, ia0, ja0, ic0, jc0
+  !> Complex matrix hermitian transpose.
+  !! \param aa  Matrix to update with.
+  !! \param desca  Descriptor of aa.
+  !! \param cc  Matrix to be updated.
+  !! \param desccc Descriptor of cc.
+  !! \param alpha  Prefactor.
+  !! \param beta  Prefactor.
+  subroutine pblasfx_${SUFFIX}$(aa, desca, cc, descc, alpha, beta,&
+      & mm, nn, ia, ja, ic, jc)
+    ${TYPE}$(${KIND}$), intent(in) :: aa(:,:)
+    integer, intent(in) :: desca(DLEN_)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(:,:)
+    integer, intent(in) :: descc(DLEN_)
+    complex(${KIND}$), intent(in), optional :: alpha, beta
+    integer, intent(in), optional :: mm, nn
+    integer, intent(in), optional :: ia, ja, ic, jc
 
-  @:inoptflags(alpha0, alpha, cmplx(1, 0, kind=${KIND}$))
-  @:inoptflags(beta0, beta, cmplx(0, 0, kind=${KIND}$))
+    complex(${KIND}$) :: alpha0, beta0
+    integer :: mm0, nn0, ia0, ja0, ic0, jc0
 
-  @:inoptflags(mm0, mm, desca(M_))
-  @:inoptflags(nn0, nn, desca(N_))
+    @:inoptflags(alpha0, alpha, cmplx(1, 0, kind=${KIND}$))
+    @:inoptflags(beta0, beta, cmplx(0, 0, kind=${KIND}$))
 
-  @:inoptflags(ia0, ia, 1)
-  @:inoptflags(ja0, ja, 1)
-  @:inoptflags(ic0, ic, 1)
-  @:inoptflags(jc0, jc, 1)
-  call ${NAME}$(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
-      & cc, ic0, jc0, descc)
+    @:inoptflags(mm0, mm, desca(M_))
+    @:inoptflags(nn0, nn, desca(N_))
 
-end subroutine pblasfx_$1
-')
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(ic0, ic, 1)
+    @:inoptflags(jc0, jc, 1)
+    call ${NAME}$(mm0, nn0, alpha0, aa, ia0, ja0, desca, beta0,&
+        & cc, ic0, jc0, descc)
 
+  end subroutine pblasfx_${SUFFIX}$
 
+#:enddef pblasfx_ptranc_template
 
 !> High level Fortran wrappers for the PBLAS library.
 module pblasfx_module
@@ -587,7 +613,7 @@ contains
   @:pblasfx_ptrmm_template(complex, complex, sp, cmplx)
   @:pblasfx_ptrmm_template(dcomplex, complex, dp, cmplx)
 
-  @:pblasfx_ptran_te(ptran_real, real, sp, real, ptran)
+  @:pblasfx_ptran_template(ptran_real, real, sp, real, ptran)
   @:pblasfx_ptran_template(ptran_dreal, real, dp, real, ptran)
   @:pblasfx_ptranu_template(ptranu_complex, complex, sp, complex, ptranu)
   @:pblasfx_ptranu_template(ptranu_dcomplex, complex, dp, complex, ptranu)
