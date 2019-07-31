@@ -1,6 +1,6 @@
 #:include 'scalapackfx.fypp'
 #:set TYPES = NUMERIC_TYPES
-#:set RANKS = [2, 1, 0]
+#:set RANKS = [0, 1, 2]
 
 !> Contains wrapper for the BLACS library
 module blacsfx_module
@@ -12,7 +12,12 @@ module blacsfx_module
 
   ! Public names.
   public :: DLEN_, DT_, CTXT_, M_, N_, MB_, NB_, RSRC_, CSRC_, LLD_
-  public :: blacsfx_gebs
+  public :: blacsgrid
+  public :: blacsfx_gebs, blacsfx_gebr
+  public :: blacsfx_gesd, blacsfx_gerv
+  public :: blacsfx_gsum
+  public :: blacsfx_barrier
+  public :: blacsfx_pinfo, blacsfx_pcoord, blacsfx_pnum, blacsfx_exit
 
 
   interface blacsfx_gebs
