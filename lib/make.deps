@@ -1,0 +1,56 @@
+.SECONDEXPANSION:
+
+pblasfx.o: $$(_modobj_pblas_module) $$(_modobj_scalapackfx_common_module)
+pblasfx.o = pblasfx.o $($(_modobj_pblas_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_pblasfx_module = pblasfx.o
+
+
+scalapackfx_tools.o: $$(_modobj_scalapackfx_module) $$(_modobj_blacsfx_module) $$(_modobj_linecomm_module) $$(_modobj_scalapackfx_common_module)
+scalapackfx_tools.o = scalapackfx_tools.o $($(_modobj_scalapackfx_module)) $($(_modobj_blacsfx_module)) $($(_modobj_linecomm_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_scalapackfx_tools_module = scalapackfx_tools.o
+
+
+pblas.o: $$(_modobj_scalapackfx_common_module)
+pblas.o = pblas.o $($(_modobj_scalapackfx_common_module))
+_modobj_pblas_module = pblas.o
+
+
+blacs.o: $$(_modobj_scalapackfx_common_module)
+blacs.o = blacs.o $($(_modobj_scalapackfx_common_module))
+_modobj_blacs_module = blacs.o
+
+
+scalapack.o: $$(_modobj_scalapackfx_common_module)
+scalapack.o = scalapack.o $($(_modobj_scalapackfx_common_module))
+_modobj_scalapack_module = scalapack.o
+
+
+blacsfx.o: $$(_modobj_blacs_module) $$(_modobj_blacsgrid_module) $$(_modobj_scalapackfx_common_module)
+blacsfx.o = blacsfx.o $($(_modobj_blacs_module)) $($(_modobj_blacsgrid_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_blacsfx_module = blacsfx.o
+
+
+blacsgrid.o: $$(_modobj_blacs_module) $$(_modobj_scalapackfx_common_module)
+blacsgrid.o = blacsgrid.o $($(_modobj_blacs_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_blacsgrid_module = blacsgrid.o
+
+
+linecomm.o: $$(_modobj_scalapackfx_module) $$(_modobj_blacsfx_module) $$(_modobj_scalapackfx_common_module)
+linecomm.o = linecomm.o $($(_modobj_scalapackfx_module)) $($(_modobj_blacsfx_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_linecomm_module = linecomm.o
+
+
+libscalapackfx.o: $$(_modobj_scalapackfx_module) $$(_modobj_blacsfx_module) $$(_modobj_scalapackfx_tools_module) $$(_modobj_pblasfx_module)
+libscalapackfx.o = libscalapackfx.o $($(_modobj_scalapackfx_module)) $($(_modobj_blacsfx_module)) $($(_modobj_scalapackfx_tools_module)) $($(_modobj_pblasfx_module))
+_modobj_libscalapackfx_module = libscalapackfx.o
+
+
+scalapackfx_common.o: scalapackfx_common.o
+scalapackfx_common.o = scalapackfx_common.o
+_modobj_scalapackfx_common_module = scalapackfx_common.o
+
+
+scalapackfx.o: $$(_modobj_blacsfx_module) $$(_modobj_scalapack_module) $$(_modobj_scalapackfx_common_module)
+scalapackfx.o = scalapackfx.o $($(_modobj_blacsfx_module)) $($(_modobj_scalapack_module)) $($(_modobj_scalapackfx_common_module))
+_modobj_scalapackfx_module = scalapackfx.o
+
