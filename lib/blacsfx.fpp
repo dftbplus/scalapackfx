@@ -276,7 +276,7 @@ contains
     ${TYPE}$, pointer :: buffer(:,:)
 
     buffer(1:size(aa), 1:1) => aa(1:size(aa))
-    call blacsfx_gsed(mygrid, buffer, rdest, cdest)
+    call blacsfx_gesd(mygrid, buffer, rdest, cdest)
 
   end subroutine blacsfx_gesd_${SUFFIX}$
 
@@ -300,7 +300,7 @@ contains
     ${TYPE}$ :: buffer(1,1)
 
     buffer(1,1) = aa
-    call blacsfx_gsed(mygrid, buffer, rdest, cdest)
+    call blacsfx_gesd(mygrid, buffer, rdest, cdest)
 
   end subroutine blacsfx_gesd_${SUFFIX}$
 
