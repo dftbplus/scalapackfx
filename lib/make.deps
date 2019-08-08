@@ -45,7 +45,7 @@ libscalapackfx.o = libscalapackfx.o $($(_modobj_scalapackfx_module)) $($(_modobj
 _modobj_libscalapackfx_module = libscalapackfx.o
 
 
-scalapackfx_common.o: scalapackfx_common.o
+scalapackfx_common.o:
 scalapackfx_common.o = scalapackfx_common.o
 _modobj_scalapackfx_common_module = scalapackfx_common.o
 

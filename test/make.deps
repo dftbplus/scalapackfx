@@ -1,0 +1,26 @@
+.SECONDEXPANSION:
+
+test_desc.o: $$(_modobj_libscalapackfx_module)
+test_desc.o = test_desc.o $($(_modobj_libscalapackfx_module))
+
+test_common.o: $$(_modobj_scalapackfx_module) $$(_modobj_blacsfx_module) $$(_modobj_scalapackfx_tools_module)
+test_common.o = test_common.o $($(_modobj_scalapackfx_module)) $($(_modobj_blacsfx_module)) $($(_modobj_scalapackfx_tools_module))
+_modobj_test_common_module = test_common.o
+
+test_psyr_pher.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_psyr_pher.o = test_psyr_pher.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
+
+test_subgrids.o: $$(_modobj_libscalapackfx_module)
+test_subgrids.o = test_subgrids.o $($(_modobj_libscalapackfx_module))
+
+test_diag.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_diag.o = test_diag.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
+
+test_tran.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_tran.o = test_tran.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
+
+test_svd.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_svd.o = test_svd.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))
+
+test_det.o: $$(_modobj_libscalapackfx_module) $$(_modobj_test_common_module)
+test_det.o = test_det.o $($(_modobj_libscalapackfx_module)) $($(_modobj_test_common_module))

@@ -1,0 +1,70 @@
+############################################################################
+#
+# Makefile for building some example programs
+#
+# Needs as variable:
+#     ROOT  Source root directory
+#     BUILDROOT  Build root directory
+#
+# The mpifx library must be already built in $(BUILDROOT)/lib
+#
+############################################################################
+
+
+############################################################################
+# Building some test/example programs.
+############################################################################
+
+
+.SUFFIXES:
+.SUFFIXES: .f90 .fpp .o
+
+TARGETS = test_desc test_diag test_psyr_pher test_subgrids test_tran test_svd test_det
+
+all: $(TARGETS)
+
+SCALAPACKFX_LIBDIR = $(BUILDROOT)/lib
+SCALAPACKFX_INCDIR = $(BUILDROOT)/lib
+
+include $(ROOT)/make.arch
+
+# Directory where library source can be found
+SRCDIR = $(ROOT)/test
+
+vpath % $(SRCDIR)
+
+%.o: %.f90
+	$(FXX) $(FXXOPT) -I$(SCALAPACKFX_INCDIR) -c $<
+
+# Linking rules for targets
+
+define link-target
+$(LN) $(LNOPT) -o $@ $^ -L$(SCALAPACKFX_LIBDIR) -lscalapackfx $(LIB_SCALAPACK)
+endef
+
+-PHONY: clean
+clean:
+	rm -f *.mod *.o _*
+
+include $(SRCDIR)/make.deps
+
+test_desc: $(test_desc.o)
+	$(link-target)
+
+test_diag: $(test_diag.o)
+	$(link-target)
+
+test_psyr_pher: $(test_psyr_pher.o)
+	$(link-target)
+
+test_subgrids: $(test_subgrids.o)
+	$(link-target)
+
+test_tran: $(test_tran.o)
+	$(link-target)
+
+test_svd: $(test_svd.o)
+	$(link-target)
+
+test_det: $(test_det.o)
+	$(link-target)
