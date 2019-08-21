@@ -11,10 +11,10 @@ set(common-dep-targets
 
 foreach(target IN LISTS targets)
   add_executable(${target} ${target}.f90)
-  target_link_libraries(${target} scalapackfx ${SCALAPACK_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+  target_link_libraries(${target} scalapackfx ${EXTERNAL_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 endforeach()
 
 foreach(target IN LISTS common-dep-targets)
   add_executable(${target} ${target}.f90 test_common.f90)
-  target_link_libraries(${target} scalapackfx ${SCALAPACK_LIBRARIES} ${MPI_Fortran_LIBRARIES})
+  target_link_libraries(${target} scalapackfx ${EXTERNAL_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 endforeach()
