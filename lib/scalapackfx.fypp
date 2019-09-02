@@ -35,9 +35,6 @@
 #:set FORTRAN_KINDS = {'real': 'sp', 'dreal': 'dp', 'complex': 'sp',&
     & 'dcomplex': 'dp'}
 
-#:set PSYGST_PHEGST_HANDLE = {'real': 'psygst', 'dreal': 'psygst',&
-    & 'complex': 'phegst', 'dcomplex': 'phegst'}
-
 #! Returns colons within paranthesis according to the RANK or empty string
 #! if RANK is zero.
 #:def RANKSUFFIX(RANK)

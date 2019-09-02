@@ -1,5 +1,3 @@
-#:include 'scalapackfx.fypp'
-
 !> Helper routines for SCALAPACKFX.
 !! \cond HIDDEN
 module scalapackfx_common_module

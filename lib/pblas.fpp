@@ -203,7 +203,7 @@ module pblas_module
 
   !> Symmetric rank one update.
   interface psyr
-    $:interface_psyr_pher_template('real', 'pssyr', 'real', 'sp')
+    @:interface_psyr_pher_template(real, pssyr, real, sp)
     @:interface_psyr_pher_template(dreal, pdsyr, real, dp)
   end interface psyr
 

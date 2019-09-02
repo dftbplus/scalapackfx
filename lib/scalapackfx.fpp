@@ -1,5 +1,4 @@
 #:include 'scalapackfx.fypp'
-#:set TYPES = FLOAT_TYPES
 
 !> High level Fortran wrappers for the SCALAPACK library.
 module scalapackfx_module
@@ -158,7 +157,7 @@ module scalapackfx_module
 !*** ppotrf
 !************************************************************************
 
-#:def scalafx_ppotrf_template()
+#:def scalafx_ppotrf_template(TYPE, FTYPE)
 
   !> Computes the Cholesky factorization of a Hermitian positive definite matrix.
   !!
@@ -198,7 +197,7 @@ module scalapackfx_module
 !*** ppotri
 !************************************************************************
 
-#:def scalafx_ppotri_template()
+#:def scalafx_ppotri_template(TYPE, FTYPE)
 
   !> Computes the inverse of a symmetric/Hermitian positive definite matrix.
   !!
@@ -247,7 +246,7 @@ module scalapackfx_module
 !*** ptrtri
 !************************************************************************
 
-#:def scalafx_ptrtri_template()
+#:def scalafx_ptrtri_template(TYPE, FTYPE)
 
   !> Computes the inverse of a symmetric/Hermitian positive definite matrix.
   !!
@@ -300,7 +299,7 @@ module scalapackfx_module
 !*** pgetrf
 !************************************************************************
 
-#:def scalafx_pgetrf_template()
+#:def scalafx_pgetrf_template(TYPE, FTYPE)
 
   !> LU factorization of a general matrix with pivoting
   !!
@@ -350,8 +349,12 @@ module scalapackfx_module
 !*** psygst / phegst
 !************************************************************************
 
-#:def scalafx_psygst_phegst_template()
+#:def scalafx_psygst_phegst_template(TYPE, FTYPE)
 
+  #:set PSYGST_PHEGST_HANDLE = {'real': 'psygst', 'dreal': 'psygst',&
+      & 'complex': 'phegst', 'dcomplex': 'phegst'}
+  #:set NAME = PSYGST_PHEGST_HANDLE[TYPE]
+      
   !> Reduces Hermitian-definite generalized eigenvalue problem to standard form.
   !!
   !! \param ibtype  Type of the problem (1, 2, 3).
@@ -405,7 +408,7 @@ module scalapackfx_module
 !*** psyev
 !************************************************************************
 
-#:def scalafx_psyev_template()
+#:def scalafx_psyev_template(TYPE, FTYPE)
 
   !> Solves real eigenvalue problem.
   !!
@@ -478,7 +481,7 @@ module scalapackfx_module
 !*** pheev
 !************************************************************************
 
-#:def scalafx_pheev_template()
+#:def scalafx_pheev_template(TYPE, KIND)
 
   !> Solves complex eigenvalue problem.
   !!
@@ -568,7 +571,7 @@ module scalapackfx_module
 #!*** psyevd
 #!************************************************************************
 
-#:def scalafx_psyevd_template()
+#:def scalafx_psyevd_template(TYPE, KIND)
 
   !> Solves symmetric eigenvalue problem by the divide and conquer algorithm.
   !!
@@ -689,7 +692,7 @@ module scalapackfx_module
 #! *** pheevd
 #! ************************************************************************
 
-#:def scalafx_pheevd_template()
+#:def scalafx_pheevd_template(TYPE, KIND)
 
   !> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
   !!
@@ -825,7 +828,7 @@ module scalapackfx_module
 #! *** psyevr
 #! ************************************************************************
 
-#:def scalafx_psyevr_template()
+#:def scalafx_psyevr_template(TYPE, KIND)
 
   !> Solves symmetric eigenvalue problem by the MRRR algorithm.
   !!
@@ -951,7 +954,7 @@ module scalapackfx_module
 #! *** pheevr
 #! ************************************************************************
 
-#:def scalafx_pheevr_template()
+#:def scalafx_pheevr_template(TYPE, KIND)
 
   !> Solves Hermitian eigenvalue problem by the divide and conquer algorithm.
   !!
@@ -1052,7 +1055,7 @@ module scalapackfx_module
 #! *** psygv
 #! ************************************************************************
 
-#:def scalafx_psygv_template()
+#:def scalafx_psygv_template(TYPE, KIND)
   !> Solves symmetric generalized eigenvalue problem by the QR algorithm.
   !!
   !! \details Invokes SCALAPACK routines p?potrf, p?sygst, p?syev, p?trsm in
@@ -1129,7 +1132,7 @@ module scalapackfx_module
 #! *** phegv
 #! ************************************************************************
 
-#:def scalafx_phegv_template()
+#:def scalafx_phegv_template(TYPE, KIND)
 
   !> Solves Hermitian generalized eigenvalue problem by the QR algorithm.
   !!
@@ -1211,7 +1214,7 @@ module scalapackfx_module
 #! *** psygvd
 #! ************************************************************************
 
-#:def scalafx_psygvd_template()
+#:def scalafx_psygvd_template(TYPE, KIND)
 
   !> Solves real generalized eigenvalue problem by the divide and conquer
   !! algorithm.
@@ -1301,7 +1304,7 @@ module scalapackfx_module
 #! *** phegvd
 #! ************************************************************************
 
-#:def scalafx_phegvd_template()
+#:def scalafx_phegvd_template(TYPE, KIND)
 
   !> Solves Hermitian generalized eigenvalue problem by the divide and conquer
   !! algorithm.
@@ -1394,7 +1397,7 @@ module scalapackfx_module
 #! *** psygvr
 #! ************************************************************************
 
-#:def scalafx_psygvr_template()
+#:def scalafx_psygvr_template(TYPE, KIND)
 
   !> Solves real generalized eigenvalue problem by the MRRR algorithm.
   !!
@@ -1494,7 +1497,7 @@ module scalapackfx_module
 #! *** phegvr
 #! ************************************************************************
 
-#:def scalafx_phegvr_template()
+#:def scalafx_phegvr_template(TYPE, KIND)
 
   !> Solves Hermitian generalized eigenvalue problem by the MRRR algorithm.
   !!
@@ -1592,7 +1595,7 @@ module scalapackfx_module
 #! *** pgesvd
 #! ************************************************************************
 
-#:def scalafx_r_pgesvd_template()
+#:def scalafx_r_pgesvd_template(TYPE, KIND)
 
   !> Singular value decomposition
   !!
@@ -1672,7 +1675,7 @@ module scalapackfx_module
 #:enddef scalafx_r_pgesvd_template
 
 
-#:def scalafx_c_pgesvd_template()
+#:def scalafx_c_pgesvd_template(TYPE, KIND)
 
   !> Singular value decomposition
   !!
@@ -1762,7 +1765,7 @@ module scalapackfx_module
 #! *** ptrsm
 #! ************************************************************************
 
-#:def scalafx_ptrsm_template(HANDLE)
+#:def scalafx_ptrsm_template(TYPE, FTYPE, HANDLE)
 
   !> Solves triangular matrix equation.
   !!
@@ -1821,7 +1824,7 @@ module scalapackfx_module
 #! *** creatematrix
 #! ************************************************************************
 
-#:def scalafx_creatematrix_template(TYPE,FTYPE)
+#:def scalafx_creatematrix_template(TYPE, FTYPE)
 
   !> Creates a distributed matrix and allocates local storage.
   !!
@@ -1859,36 +1862,34 @@ module scalapackfx_module
 
 contains
 
-  #:for TYPE in TYPES
-    #:set SUFFIX = TYPE_ABBREVS[TYPE]
+  #:for TYPE in FLOAT_TYPES
     #:set FTYPE = FORTRAN_TYPES[TYPE]
     #:set KIND = FORTRAN_KINDS[TYPE]
-    #:set NAME = PSYGST_PHEGST_HANDLE[TYPE]
 
-    $:scalafx_ppotrf_template()
-    $:scalafx_ppotri_template()
-    $:scalafx_ptrtri_template()
-    $:scalafx_pgetrf_template()
-    $:scalafx_psygst_phegst_template()
+    $:scalafx_ppotrf_template(TYPE, FTYPE)
+    $:scalafx_ppotri_template(TYPE, FTYPE)
+    $:scalafx_ptrtri_template(TYPE, FTYPE)
+    $:scalafx_pgetrf_template(TYPE, FTYPE)
+    $:scalafx_psygst_phegst_template(TYPE, FTYPE)
 
     #:if TYPE in REAL_TYPES
-      $:scalafx_psyevr_template()
-      $:scalafx_psygvd_template()
-      $:scalafx_psyevd_template()
-      $:scalafx_psygv_template()
-      $:scalafx_psygvr_template()
-      $:scalafx_psyev_template()
-      $:scalafx_r_pgesvd_template()
-      @:scalafx_ptrsm_template(real(1.0, ${KIND}$))
+      $:scalafx_psyevr_template(TYPE, KIND)
+      $:scalafx_psygvd_template(TYPE, KIND)
+      $:scalafx_psyevd_template(TYPE, KIND)
+      $:scalafx_psygv_template(TYPE, KIND)
+      $:scalafx_psygvr_template(TYPE, KIND)
+      $:scalafx_psyev_template(TYPE, KIND)
+      $:scalafx_r_pgesvd_template(TYPE, KIND)
+      $:scalafx_ptrsm_template(TYPE, FTYPE, "real(1.0, " + str(KIND) + ")")
     #:else
-      $:scalafx_pheevr_template()
-      $:scalafx_phegvd_template()
-      $:scalafx_pheevd_template()
-      $:scalafx_phegv_template()
-      $:scalafx_phegvr_template()
-      $:scalafx_pheev_template()
-      $:scalafx_c_pgesvd_template()
-      @:scalafx_ptrsm_template(cmplx(1, 0, ${KIND}$))
+      $:scalafx_pheevr_template(TYPE, KIND)
+      $:scalafx_phegvd_template(TYPE, KIND)
+      $:scalafx_pheevd_template(TYPE, KIND)
+      $:scalafx_phegv_template(TYPE, KIND)
+      $:scalafx_phegvr_template(TYPE, KIND)
+      $:scalafx_pheev_template(TYPE, KIND)
+      $:scalafx_c_pgesvd_template(TYPE, KIND)
+      $:scalafx_ptrsm_template(TYPE, FTYPE, "cmplx(1, 0, " + str(KIND) + ")")
     #:endif
 
     $:scalafx_creatematrix_template(TYPE, FTYPE)
