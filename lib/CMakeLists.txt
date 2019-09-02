@@ -1,27 +1,27 @@
 set(sources-fpp
-  blacs.F90
-  blacsfx.F90
-  blacsgrid.F90
-  libscalapackfx.F90
-  linecomm.F90
-  pblas.F90
-  pblasfx.F90
-  scalapack.F90
-  scalapackfx.F90
-  scalapackfx_common.F90
-  scalapackfx_tools.F90)
+  blacs.fpp
+  blacsfx.fpp
+  blacsgrid.fpp
+  libscalapackfx.fpp
+  linecomm.fpp
+  pblas.fpp
+  pblasfx.fpp
+  scalapack.fpp
+  scalapackfx.fpp
+  scalapackfx_common.fpp
+  scalapackfx_tools.fpp)
 
 foreach(fppsrc IN LISTS sources-fpp)
-  string(REGEX REPLACE "\\.F90" ".f90" f90src ${fppsrc})  
-  string(REGEX REPLACE "\\.F90" ".m4" m4src ${fppsrc})
-  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${m4src})
-    set(otherdeps ${CMAKE_CURRENT_SOURCE_DIR}/${m4src})
+  string(REGEX REPLACE "\\.fpp" ".f90" f90src ${fppsrc})  
+  string(REGEX REPLACE "\\.fpp" ".fypp" fyppsrc ${fppsrc})
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${fyppsrc})
+    set(otherdeps ${CMAKE_CURRENT_SOURCE_DIR}/${fyppsrc})
   else()
     set(otherdeps)
   endif()
   add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${f90src}
-    COMMAND m4 -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${fppsrc} > ${CMAKE_CURRENT_BINARY_DIR}/${f90src}
+    COMMAND ${FYPP} -I${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/${fppsrc} ${CMAKE_CURRENT_BINARY_DIR}/${f90src}
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${fppsrc} ${otherdeps})
   list(APPEND SOURCES-F90-PREPROC ${CMAKE_CURRENT_BINARY_DIR}/${f90src})
 endforeach()

@@ -22,8 +22,14 @@ set(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_PREFIX}/lib/cmake" CACHE PATH
   "Installation directory for CMake package export files")
 
 find_package(MPI REQUIRED)
+find_program(FYPP fypp)
+if(FYPP)
+  message(STATUS "Preprocessor fypp: ${FYPP}")
+else()
+  message(FATAL_ERROR "Prepropcessor fypp not found")
+endif()
 
-add_subdirectory(src)
+add_subdirectory(lib)
 if(NOT LIBRARY_ONLY)
   add_subdirectory(test)
 endif()
