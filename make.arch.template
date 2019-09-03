@@ -5,8 +5,8 @@
 # Fortran 2003 compiler
 FXX = mpif90
 
-# Fortran compiler options
-FXXOPT = -std=f2003
+# Fortran compiler otions
+FXXOPT = 
 
 # Linker
 LN = $(FXX)
@@ -14,14 +14,23 @@ LN = $(FXX)
 # Linker options
 LNOPT = 
 
-# FYPP interpreter (see https://github.com/aradi/fypp)
-FYPP = $(ROOT)/external/fypp/fypp
+# M4 interpreter
+FYPP = fypp
 
-# FYPP interpreter options (e.g. -DDEBUG for debug mode)
+# M4 interpreter options
 FYPPOPT = ""
 
-# Directory where the build should happen
-BUILDDIR = $(ROOT)/_build
+# How to link the Scalapack library
+# Only needed for the test programs, you can leave it empty, if you only
+# compile the library.
+LIB_SCALAPACK =  -L$(MKLROOT)/lib/intel64 \
+#  -lmkl_scalapack_lp64 \
+#  -lmkl_blacs_openmpi_lp64 \
+#  -lmkl_intel_lp64 -lmkl_sequential -lmkl_core
 
-# Where to copy files when installation is required
-INSTALLDIR = $(ROOT)/_install
+LIB_SCALAPACK = -L$(HOME)/opt/scalapack/2.0.2-gnu8-omp3.1/lib -lscalapack \
+  -L$(HOME)/opt/lapack/3.8.0-gnu8/lib -llapack -lblas
+
+
+# Where to build the library (ROOT = root of the source distribution)
+BUILDDIR = $(ROOT)/_build
