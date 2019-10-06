@@ -5,7 +5,7 @@ project(scalapackfx VERSION 0.1 LANGUAGES Fortran)
 set(LIBRARY_ONLY FALSE CACHE BOOL "Whether only library should be compiled")
 
 # Only needed, if tests are also compiled
-set(EXTERNAL_LIBRARIES "scalapack" CACHE STRING
+set(EXTERNAL_LIBRARIES "scalapack;lapack;blas" CACHE STRING
   "External (ScaLAPACK, LAPACK, BLAS) libraries needed to build the tests/examples.")
 
 # Installation paths
