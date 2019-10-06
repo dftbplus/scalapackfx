@@ -5,6 +5,7 @@ set(targets
 set(common-dep-targets
   test_det
   test_diag
+  test_linecomm
   test_psyr_pher
   test_svd
   test_tran)
