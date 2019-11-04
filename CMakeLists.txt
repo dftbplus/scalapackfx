@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 3.5)
 
 project(scalapackfx VERSION 0.1 LANGUAGES Fortran)
 
-set(LIBRARY_ONLY FALSE CACHE BOOL "Whether only library should be compiled")
-
 # Only needed, if tests are also compiled
 set(EXTERNAL_LIBRARIES "scalapack;lapack;blas" CACHE STRING
   "External (ScaLAPACK, LAPACK, BLAS) libraries needed to build the tests/examples.")
+
+set(LIBRARY_ONLY FALSE CACHE BOOL "Whether only library should be compiled")
+
+option(BUILD_SHARED_LIBS "Whether the library should be a shared one" FALSE)
+
+option(INSTALL_INCLUDE_FILES "Whether include / module files should be installed" TRUE)
 
 # Installation paths
 set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH
