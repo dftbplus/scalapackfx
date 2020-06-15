@@ -43,7 +43,7 @@ contains
       stop
     end if
     call mygrid%initgrid(nprow, npcol)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0)") "# block size:", bsize
     end if
@@ -51,9 +51,9 @@ contains
     call readfromfile(mygrid, matrixfile, bsize, bsize, matrix, matrixdesc)
 
     nn = matrixdesc(M_)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# matrix size:", nn, nn
-      write(stdout, "(A,2(1X,I0))") "# matrix size on master:",&
+      write(stdout, "(A,2(1X,I0))") "# matrix size on leader:",&
           & size(matrix, dim=1), size(matrix, dim=2)
     end if
 
@@ -62,11 +62,11 @@ contains
     call collector%init(mygrid, matrixdesc, "c")
 
     do icol = 1, matrixdesc(N_)
-      if (mygrid%master) then
-        call collector%getline_master(mygrid, icol, matrix, iobuffer)
+      if (mygrid%lead) then
+        call collector%getline_lead(mygrid, icol, matrix, iobuffer)
         write(*, *) iobuffer(:)
       else
-        call collector%getline_slave(mygrid, icol, matrix)
+        call collector%getline_follow(mygrid, icol, matrix)
       end if
     end do
 

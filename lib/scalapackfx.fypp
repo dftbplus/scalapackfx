@@ -6,7 +6,7 @@
 #! Build normal library unless stub library is explicitly requested
 #!#:set STUB_LIBRARY = defined('STUB_LIBRARY')
 
-#:set CONTROL_TYPES = ['master', 'slave']
+#:set CONTROL_TYPES = ['lead', 'follow']
 
 #:set INT_TYPES = ['int']
 

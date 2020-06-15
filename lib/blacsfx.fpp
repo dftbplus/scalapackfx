@@ -154,8 +154,8 @@ contains
   !! \param aa  Matrix to receive.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rsrc  Row of the source (default: row of master process).
-  !! \param csrc  Column of the source (default: column of master process).
+  !! \param rsrc  Row of the source (default: row of lead process).
+  !! \param csrc  Column of the source (default: column of lead process).
   !! \see BLACS documentation (routine ?gebr2d).
   subroutine blacsfx_gebr_${SUFFIX}$(mygrid, aa, scope, top, rsrc, csrc)
     class(blacsgrid), intent(in) :: mygrid
@@ -168,8 +168,8 @@ contains
 
     @:inoptflags(scope0,scope,"A")
     @:inoptflags(top0,top," ")
-    @:inoptflags(rsrc0,rsrc, mygrid%masterrow)
-    @:inoptflags(csrc0,csrc, mygrid%mastercol)
+    @:inoptflags(rsrc0,rsrc, mygrid%leadrow)
+    @:inoptflags(csrc0,csrc, mygrid%leadcol)
 
     call gebr2d(mygrid%ctxt, scope0, top0, size(aa, dim=1), size(aa, dim=2),&
       & aa, size(aa, dim=1), rsrc0, csrc0)
@@ -186,8 +186,8 @@ contains
   !! \param aa  Matrix to receive.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rsrc  Row of the source (default: row of master process).
-  !! \param csrc  Column of the source (default: column of master process).
+  !! \param rsrc  Row of the source (default: row of lead process).
+  !! \param csrc  Column of the source (default: column of lead process).
   !! \see BLACS documentation (routine ?gebr2d).
   subroutine blacsfx_gebr_${SUFFIX}$(mygrid, aa, scope, top, rsrc, csrc)
     class(blacsgrid), intent(in) :: mygrid
@@ -212,8 +212,8 @@ contains
   !! \param aa  Matrix to receive.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rsrc  Row of the source (default: row of master process).
-  !! \param csrc  Column of the source (default: column of master process).
+  !! \param rsrc  Row of the source (default: row of lead process).
+  !! \param csrc  Column of the source (default: column of lead process).
   !! \see BLACS documentation (routine ?gebr2d).
   subroutine blacsfx_gebr_${SUFFIX}$(mygrid, aa, scope, top, rsrc, csrc)
     class(blacsgrid), intent(in) :: mygrid
@@ -318,8 +318,8 @@ contains
   !> Receives general rectangular matrix from source process (${TYPE}$, rank 2).
   !! \param mygrid  BLACS descriptor
   !! \param aa  Object to receive.
-  !! \param rdest  Row of the destination process (default: master row).
-  !! \param cdest  Column of the destination proces (default: master col).
+  !! \param rdest  Row of the destination process (default: lead row).
+  !! \param cdest  Column of the destination proces (default: lead col).
   !! \see BLACS documentation (routine ?gerv2d).
   subroutine blacsfx_gerv_${SUFFIX}$(mygrid, aa, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
@@ -328,8 +328,8 @@ contains
 
     integer :: rsrc0, csrc0
 
-    @:inoptflags(rsrc0,rsrc,mygrid%masterrow)
-    @:inoptflags(csrc0,csrc,mygrid%mastercol)
+    @:inoptflags(rsrc0,rsrc,mygrid%leadrow)
+    @:inoptflags(csrc0,csrc,mygrid%leadcol)
     call gerv2d(mygrid%ctxt, size(aa, dim=1), size(aa, dim=2), aa, &
       & size(aa, dim=1), rsrc0, csrc0)
 
@@ -343,8 +343,8 @@ contains
   !> Receives general rectangular matrix from source process (${TYPE}$, rank 2).
   !! \param mygrid  BLACS descriptor
   !! \param aa  Object to receive.
-  !! \param rdest  Row of the destination process (default: master row).
-  !! \param cdest  Column of the destination proces (default: master col).
+  !! \param rdest  Row of the destination process (default: lead row).
+  !! \param cdest  Column of the destination proces (default: lead col).
   !! \see BLACS documentation (routine ?gerv2d).
   subroutine blacsfx_gerv_${SUFFIX}$(mygrid, aa, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
@@ -366,8 +366,8 @@ contains
   !> Receives general rectangular matrix from source process (${TYPE}$, rank 2).
   !! \param mygrid  BLACS descriptor
   !! \param aa  Object to receive.
-  !! \param rdest  Row of the destination process (default: master row).
-  !! \param cdest  Column of the destination proces (default: master col).
+  !! \param rdest  Row of the destination process (default: lead row).
+  !! \param cdest  Column of the destination proces (default: lead col).
   !! \see BLACS documentation (routine ?gerv2d).
   subroutine blacsfx_gerv_${SUFFIX}$(mygrid, aa, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
@@ -397,8 +397,8 @@ contains
   !! \param aa  Matrix to sum up.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rdest  Row of the destination (default: row of master process).
-  !! \param rcol  Column of the destination (default: column of master process).
+  !! \param rdest  Row of the destination (default: row of lead process).
+  !! \param rcol  Column of the destination (default: column of lead process).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid
@@ -411,8 +411,8 @@ contains
 
     @:inoptflags(scope0, scope, "A")
     @:inoptflags(top0, top, " ")
-    @:inoptflags(rdest0, rdest, mygrid%masterrow)
-    @:inoptflags(cdest0, cdest, mygrid%mastercol)
+    @:inoptflags(rdest0, rdest, mygrid%leadrow)
+    @:inoptflags(cdest0, cdest, mygrid%leadcol)
     call gsum2d(mygrid%ctxt, scope0, top0, size(aa, dim=1), size(aa, dim=2),&
       & aa, size(aa, dim=1), rdest0, cdest0)
 
@@ -428,8 +428,8 @@ contains
   !! \param aa  Vector to sum up.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rdest  Row of the destination (default: row of master process).
-  !! \param rcol  Column of the destination (default: column of master process).
+  !! \param rdest  Row of the destination (default: row of lead process).
+  !! \param rcol  Column of the destination (default: column of lead process).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid
@@ -454,8 +454,8 @@ contains
   !! \param aa  Scalar to sum up.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rdest  Row of the destination (default: row of master process).
-  !! \param rcol  Column of the destination (default: column of master process).
+  !! \param rdest  Row of the destination (default: row of lead process).
+  !! \param rcol  Column of the destination (default: column of lead process).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid

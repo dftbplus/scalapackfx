@@ -35,7 +35,7 @@ contains
 
     integer :: mm, nn
 
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file=fname, action="read", status="old")
       read(12, *) mm, nn
       call blacsfx_gebs(mygrid, mm)
@@ -45,11 +45,11 @@ contains
       call blacsfx_gebr(mygrid, nn)
     end if
     call scalafx_creatematrix(mygrid, mm, nn, mb, nb, mtxloc, desc)
-    if (mygrid%master) then
-      call readarray_master(mygrid, 12, desc, mtxloc, formatted=.true.)
+    if (mygrid%lead) then
+      call readarray_lead(mygrid, 12, desc, mtxloc, formatted=.true.)
       close(12)
     else
-      call readarray_slave(mygrid, desc, mtxloc)
+      call readarray_follow(mygrid, desc, mtxloc)
     end if
 
   end subroutine readfromfile
@@ -66,13 +66,13 @@ contains
     real(dp), intent(in) :: mtxloc(:,:)
     integer, intent(in) :: desc(DLEN_)
 
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file=fname, form="formatted", status="replace")
       write(12, "(I0,1X,I0)") desc(M_), desc(N_)
-      call writearray_master(mygrid, 12, desc, mtxloc, elemformat="(ES23.15)")
+      call writearray_lead(mygrid, 12, desc, mtxloc, elemformat="(ES23.15)")
       close(12)
     else
-      call writearray_slave(mygrid, desc, mtxloc)
+      call writearray_follow(mygrid, desc, mtxloc)
     end if
 
   end subroutine writetofile_real
@@ -88,13 +88,13 @@ contains
     complex(dp), intent(in) :: mtxloc(:,:)
     integer, intent(in) :: desc(DLEN_)
 
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file=fname, form="formatted", status="replace")
       write(12, "(I0,1X,I0)") desc(M_), desc(N_)
-      call writearray_master(mygrid, 12, desc, mtxloc, elemformat="(ES23.15)")
+      call writearray_lead(mygrid, 12, desc, mtxloc, elemformat="(ES23.15)")
       close(12)
     else
-      call writearray_slave(mygrid, desc, mtxloc)
+      call writearray_follow(mygrid, desc, mtxloc)
     end if
 
   end subroutine writetofile_cmplx
