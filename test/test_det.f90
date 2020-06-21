@@ -33,13 +33,13 @@ contains
     end do
     npcol = nproc / nprow
     call mygrid%initgrid(nprow, npcol)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0)") "# block size:", bsize
     end if
 
     ! Set up matrix
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A)") "Matrix read from file 'hamsqr1.dat'."
     end if
     call readfromfile(mygrid, "hamsqr1.dat", bsize, bsize, xx, descx)
@@ -49,9 +49,9 @@ contains
     allocate(ipiv(min(mm,nn)))
     ipiv = 0
 
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# global matrix size:", mm, nn
-      write(stdout, "(A,2(1X,I0))") "# local matrix size on master:",&
+      write(stdout, "(A,2(1X,I0))") "# local matrix size on leader:",&
           & size(xx, dim=1), size(xx, dim=2)
     end if
 

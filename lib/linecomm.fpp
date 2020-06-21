@@ -16,7 +16,7 @@ module linecomm_module
   !> Type for communicating a row or a column of a distributed matrix.
   !!
   !! \details The type linecomm collects/distributes a line (row or column)
-  !! of a distributed matrix into/from a buffer on the master node.
+  !! of a distributed matrix into/from a buffer on the lead node.
   !! It communicate the entire line at once or blockwise, with the blocks
   !! having the size of the BLACS block size.
   !!
@@ -29,11 +29,11 @@ module linecomm_module
   !!     allocate(iobuffer(desc(M_))
   !!     call collector%init(mygrid, desc, "c")
   !!     do icol = 1, desc(N_)
-  !!       if (mygrid%master) then
-  !!         call collector%getline_master(mygrid, icol, mtxloc, iobuffer)
+  !!       if (mygrid%lead) then
+  !!         call collector%getline_lead(mygrid, icol, mtxloc, iobuffer)
   !!         write(fd, formatstr) iobuffer(:)
   !!       else
-  !!         call collector%getline_slave(mygrid, icol, mtxloc)
+  !!         call collector%getline_follow(mygrid, icol, mtxloc)
   !!       end if
   !!     end do
   !!
@@ -45,11 +45,11 @@ module linecomm_module
   !!     allocate(iobuffer(desc(M_))
   !!     call distributor%init(desc, "c")
   !!     do icol = 1, ncol
-  !!       if (mygrid%master) then
+  !!       if (mygrid%lead) then
   !!         read(fd, *) iobuffer(:)
-  !!         call distributor%setline_master(mygrid, icol, iobuffer, mtxloc)
+  !!         call distributor%setline_lead(mygrid, icol, iobuffer, mtxloc)
   !!       else
-  !!         call distributor%setline_slave(mygrid, icol, mtxloc)
+  !!         call distributor%setline_follow(mygrid, icol, mtxloc)
   !!       end if
   !!     end do
   !!
@@ -69,11 +69,11 @@ module linecomm_module
       #:endfor
     #:endfor
 
-    generic :: getblock_master => getblock_master_int, getblock_master_real, &
-        & getblock_master_dreal, getblock_master_complex, &
-        & getblock_master_dcomplex
-    generic :: getblock_slave => getblock_slave_int, getblock_slave_real, &
-        & getblock_slave_dreal, getblock_slave_complex, getblock_slave_dcomplex
+    generic :: getblock_lead => getblock_lead_int, getblock_lead_real, &
+        & getblock_lead_dreal, getblock_lead_complex, &
+        & getblock_lead_dcomplex
+    generic :: getblock_follow => getblock_follow_int, getblock_follow_real, &
+        & getblock_follow_dreal, getblock_follow_complex, getblock_follow_dcomplex
 
     #:for CONTROL in CONTROLS
       #:for TYPE in TYPES
@@ -81,10 +81,10 @@ module linecomm_module
       #:endfor
     #:endfor
 
-    generic :: getline_master => getline_master_int, getline_master_real, &
-        & getline_master_dreal, getline_master_complex, getline_master_dcomplex
-    generic :: getline_slave => getline_slave_int, getline_slave_real, &
-        & getline_slave_dreal, getline_slave_complex, getline_slave_dcomplex
+    generic :: getline_lead => getline_lead_int, getline_lead_real, &
+        & getline_lead_dreal, getline_lead_complex, getline_lead_dcomplex
+    generic :: getline_follow => getline_follow_int, getline_follow_real, &
+        & getline_follow_dreal, getline_follow_complex, getline_follow_dcomplex
 
     #:for CONTROL in CONTROLS
       #:for TYPE in TYPES
@@ -92,11 +92,11 @@ module linecomm_module
       #:endfor
     #:endfor
 
-    generic :: setblock_master => setblock_master_int, setblock_master_real, &
-        & setblock_master_dreal, setblock_master_complex, &
-        & setblock_master_dcomplex
-    generic :: setblock_slave => setblock_slave_int, setblock_slave_real, &
-        & setblock_slave_dreal, setblock_slave_complex, setblock_slave_dcomplex
+    generic :: setblock_lead => setblock_lead_int, setblock_lead_real, &
+        & setblock_lead_dreal, setblock_lead_complex, &
+        & setblock_lead_dcomplex
+    generic :: setblock_follow => setblock_follow_int, setblock_follow_real, &
+        & setblock_follow_dreal, setblock_follow_complex, setblock_follow_dcomplex
 
     #:for CONTROL in CONTROLS
       #:for TYPE in TYPES
@@ -104,10 +104,10 @@ module linecomm_module
       #:endfor
     #:endfor
 
-    generic :: setline_master => setline_master_int, setline_master_real, &
-        & setline_master_dreal, setline_master_complex, setline_master_dcomplex
-    generic :: setline_slave => setline_slave_int, setline_slave_real, &
-        & setline_slave_dreal, setline_slave_complex, setline_slave_dcomplex
+    generic :: setline_lead => setline_lead_int, setline_lead_real, &
+        & setline_lead_dreal, setline_lead_complex, setline_lead_dcomplex
+    generic :: setline_follow => setline_follow_int, setline_follow_real, &
+        & setline_follow_dreal, setline_follow_complex, setline_follow_dcomplex
 
     procedure, private :: getpositions
   end type linecomm
@@ -121,8 +121,8 @@ contains
   !! \param desc  Descriptor of distributed matrix.
   !! \param rowcol  If "r" or "R", a given row of the matrix is collected,
   !!     otherwise a given column.
-  !! \param iorow  Row of process doing the io (default: row of master).
-  !! \param iocol  Column of process doing the io (default: column of master).
+  !! \param iorow  Row of process doing the io (default: row of lead).
+  !! \param iocol  Column of process doing the io (default: column of lead).
   !!
   subroutine init(self, mygrid, desc, rowcol, iorow, iocol)
     class(linecomm), intent(out) :: self
@@ -131,8 +131,8 @@ contains
     character, intent(in) :: rowcol
     integer, intent(in), optional :: iorow, iocol
 
-    @:inoptflags(self%iorow, iorow, mygrid%masterrow)
-    @:inoptflags(self%iocol, iocol, mygrid%mastercol)
+    @:inoptflags(self%iorow, iorow, mygrid%leadrow)
+    @:inoptflags(self%iocol, iocol, mygrid%leadcol)
     self%rowcollect = (rowcol == "R" .or. rowcol == "r")
     self%desc(:) = desc
     if (self%rowcollect) then
@@ -190,9 +190,9 @@ contains
 #!!! GETBLOCK
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#:def getblock_master_template(SUFFIX,TYPE)
+#:def getblock_lead_template(SUFFIX,TYPE)
 
-  !> Returns the given block of the distributed matrix (master, $1).
+  !> Returns the given block of the distributed matrix (lead, $1).
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor.
@@ -204,7 +204,7 @@ contains
   !!    along that dimension. The actual number of elements for a given block
   !!    can be queried via the getblocksize() call.
   !!
-  subroutine getblock_master_${SUFFIX}$(self, mygrid, ii, ib, locmtx, &
+  subroutine getblock_lead_${SUFFIX}$(self, mygrid, ii, ib, locmtx, &
       & buffer)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
@@ -224,14 +224,14 @@ contains
       call blacsfx_gerv(mygrid, work, prow, pcol)
     end if
 
-  end subroutine getblock_master_${SUFFIX}$
+  end subroutine getblock_lead_${SUFFIX}$
 
-#:enddef getblock_master_template
+#:enddef getblock_lead_template
 
 
-#:def getblock_slave_template(SUFFIX,TYPE)
+#:def getblock_follow_template(SUFFIX,TYPE)
 
-  !> Returns the given block of the distributed matrix (slave, $1).
+  !> Returns the given block of the distributed matrix (follow, $1).
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor.
@@ -239,7 +239,7 @@ contains
   !! \param ib  Block index within given row/column.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine getblock_slave_${SUFFIX}$(self, mygrid, ii, ib, locmtx)
+  subroutine getblock_follow_${SUFFIX}$(self, mygrid, ii, ib, locmtx)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii, ib
@@ -255,18 +255,18 @@ contains
       call blacsfx_gesd(mygrid, work, self%iorow, self%iocol)
     end if
 
-  end subroutine getblock_slave_${SUFFIX}$
+  end subroutine getblock_follow_${SUFFIX}$
 
-#:enddef getblock_slave_template
+#:enddef getblock_follow_template
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!! GETLINE
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#:def getline_master_template(SUFFIX,TYPE)
+#:def getline_lead_template(SUFFIX,TYPE)
 
-  !> Returns an entire row/column of a distributed matrix (master, $1)
+  !> Returns an entire row/column of a distributed matrix (lead, $1)
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor
@@ -276,7 +276,7 @@ contains
   !!     big enough to contain the result (greater or equal to the size of
   !!     the distributed matrix along that direction).
   !!
-  subroutine getline_master_${SUFFIX}$(self, mygrid, ii, locmtx, buffer)
+  subroutine getline_lead_${SUFFIX}$(self, mygrid, ii, locmtx, buffer)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii
@@ -289,22 +289,22 @@ contains
     do ib = 1, self%nblock
       istart = iend + 1
       iend = istart + self%getblocksize(ib) - 1
-      call self%getblock_master(mygrid, ii, ib, locmtx, buffer(istart:iend))
+      call self%getblock_lead(mygrid, ii, ib, locmtx, buffer(istart:iend))
     end do
 
-  end subroutine getline_master_${SUFFIX}$
+  end subroutine getline_lead_${SUFFIX}$
 
-#:enddef getline_master_template
+#:enddef getline_lead_template
 
-#:def getline_slave_template(SUFFIX,TYPE)
+#:def getline_follow_template(SUFFIX,TYPE)
 
-  !> Returns the entire row/column of a distributed matrix (slave)
+  !> Returns the entire row/column of a distributed matrix (follow)
   !!
   !! \param mygrid  BLACS descriptor
   !! \param ii  Number of the line (row or column) to collect.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine getline_slave_${SUFFIX}$(self, mygrid, ii, locmtx)
+  subroutine getline_follow_${SUFFIX}$(self, mygrid, ii, locmtx)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii
@@ -313,21 +313,21 @@ contains
     integer :: ib
 
     do ib = 1, self%nblock
-      call self%getblock_slave(mygrid, ii, ib, locmtx)
+      call self%getblock_follow(mygrid, ii, ib, locmtx)
     end do
 
-  end subroutine getline_slave_${SUFFIX}$
+  end subroutine getline_follow_${SUFFIX}$
 
-#:enddef getline_slave_template
+#:enddef getline_follow_template
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!! SETBLOCK
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#:def setblock_master_template(SUFFIX,TYPE)
+#:def setblock_lead_template(SUFFIX,TYPE)
 
-  !> Sets the given block of the distributed matrix (master, $1).
+  !> Sets the given block of the distributed matrix (lead, $1).
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor.
@@ -338,7 +338,7 @@ contains
   !!    the getblocksize() call. Its size can be bigger than that.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine setblock_master_${SUFFIX}$(self, mygrid, ii, ib, buffer, locmtx)
+  subroutine setblock_lead_${SUFFIX}$(self, mygrid, ii, ib, buffer, locmtx)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii, ib
@@ -357,13 +357,13 @@ contains
       call blacsfx_gesd(mygrid, work, prow, pcol)
     end if
 
-  end subroutine setblock_master_${SUFFIX}$
+  end subroutine setblock_lead_${SUFFIX}$
 
-#:enddef setblock_master_template
+#:enddef setblock_lead_template
 
-#:def setblock_slave_template(SUFFIX,TYPE)
+#:def setblock_follow_template(SUFFIX,TYPE)
 
-  !> Sets the given block of the distributed matrix (slave, $1).
+  !> Sets the given block of the distributed matrix (follow, $1).
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor.
@@ -371,7 +371,7 @@ contains
   !! \param ib  Block index within given row/column.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine setblock_slave_${SUFFIX}$(self, mygrid, ii, ib, locmtx)
+  subroutine setblock_follow_${SUFFIX}$(self, mygrid, ii, ib, locmtx)
     use iso_fortran_env
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
@@ -388,18 +388,18 @@ contains
       call blacsfx_gerv(mygrid, work, self%iorow, self%iocol)
     end if
 
-  end subroutine setblock_slave_${SUFFIX}$
+  end subroutine setblock_follow_${SUFFIX}$
 
-#:enddef setblock_slave_template
+#:enddef setblock_follow_template
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 #!!! SETLINE
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-#:def setline_master_template(SUFFIX,TYPE)
+#:def setline_lead_template(SUFFIX,TYPE)
 
-  !> Sets an entire row/column of a distributed matrix (master, $1)
+  !> Sets an entire row/column of a distributed matrix (lead, $1)
   !!
   !! \param self  Instance.
   !! \param mygrid  BLACS descriptor
@@ -408,7 +408,7 @@ contains
   !!     elements along the line. Its size can be bigger.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine setline_master_${SUFFIX}$(self, mygrid, ii, buffer, locmtx)
+  subroutine setline_lead_${SUFFIX}$(self, mygrid, ii, buffer, locmtx)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii
@@ -421,23 +421,23 @@ contains
     do ib = 1, self%nblock
       istart = iend + 1
       iend = istart + self%getblocksize(ib) - 1
-      call self%setblock_master(mygrid, ii, ib, buffer(istart:iend), locmtx)
+      call self%setblock_lead(mygrid, ii, ib, buffer(istart:iend), locmtx)
     end do
 
-  end subroutine setline_master_${SUFFIX}$
+  end subroutine setline_lead_${SUFFIX}$
 
-#:enddef setline_master_template
+#:enddef setline_lead_template
 
 
-#:def setline_slave_template(SUFFIX,TYPE)
+#:def setline_follow_template(SUFFIX,TYPE)
 
-  !> Sets the entire row/column of a distributed matrix (slave)
+  !> Sets the entire row/column of a distributed matrix (follow)
   !!
   !! \param mygrid  BLACS descriptor
   !! \param ii  Number of the line (row or column) to set.
   !! \param locmtx  Local part of the global matrix.
   !!
-  subroutine setline_slave_${SUFFIX}$(self, mygrid, ii, locmtx)
+  subroutine setline_follow_${SUFFIX}$(self, mygrid, ii, locmtx)
     class(linecomm), intent(in) :: self
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: ii
@@ -446,12 +446,12 @@ contains
     integer :: ib
 
     do ib = 1, self%nblock
-      call self%setblock_slave(mygrid, ii, ib, locmtx)
+      call self%setblock_follow(mygrid, ii, ib, locmtx)
     end do
 
-  end subroutine setline_slave_${SUFFIX}$
+  end subroutine setline_follow_${SUFFIX}$
 
-#:enddef setline_slave_template
+#:enddef setline_follow_template
 
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -461,14 +461,14 @@ contains
   #:for TYPE in TYPES
     #:set SUFFIX=TYPE
     #:set FTYPE=FORTRAN_TYPES[TYPE]
-    $:getblock_master_template(SUFFIX, FTYPE)
-    $:getblock_slave_template(SUFFIX, FTYPE)
-    $:getline_master_template(SUFFIX,FTYPE)
-    $:getline_slave_template(SUFFIX,FTYPE)
-    $:setblock_master_template(SUFFIX,FTYPE)
-    $:setblock_slave_template(SUFFIX,FTYPE)
-    $:setline_master_template(SUFFIX,FTYPE)
-    $:setline_slave_template(SUFFIX,FTYPE)
+    $:getblock_lead_template(SUFFIX, FTYPE)
+    $:getblock_follow_template(SUFFIX, FTYPE)
+    $:getline_lead_template(SUFFIX,FTYPE)
+    $:getline_follow_template(SUFFIX,FTYPE)
+    $:setblock_lead_template(SUFFIX,FTYPE)
+    $:setblock_follow_template(SUFFIX,FTYPE)
+    $:setline_lead_template(SUFFIX,FTYPE)
+    $:setline_follow_template(SUFFIX,FTYPE)
   #:endfor
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

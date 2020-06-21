@@ -169,17 +169,17 @@
 #:enddef
 
 #! ************************************************************************
-#! *** writearray_master
+#! *** writearray_lead
 #! ************************************************************************
 
   
-#:def writearray_master_template(SUFFIX, FTYPE)
+#:def writearray_lead_template(SUFFIX, FTYPE)
 
   #!
   #! ${SUFFIX}$ subroutine suffix
   #! ${FTYPE}$ dummy argument type
   #!
-  !> Writes a distributed array to a file (master, ${SUFFIX}$).
+  !> Writes a distributed array to a file (lead, ${SUFFIX}$).
   !!
   !! \param mygrid  BLACS descriptor
   !! \param fd  File descriptor of an opened file.
@@ -192,7 +192,7 @@
   !!     or an unformatted file! The formatting string must contain the
   !!     delimiting parantheses.
   !!
-  subroutine writearray_master_${SUFFIX}$(mygrid, fd, desc, mtxloc, rowwise, elemformat)
+  subroutine writearray_lead_${SUFFIX}$(mygrid, fd, desc, mtxloc, rowwise, elemformat)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: fd, desc(DLEN_)
     ${FTYPE}$, intent(in) :: mtxloc(:,:)
@@ -225,7 +225,7 @@
   
     allocate(buffer(linelen))
     do ii = 1, nline
-      call distributor%getline_master(mygrid, ii, mtxloc, buffer)
+      call distributor%getline_lead(mygrid, ii, mtxloc, buffer)
       if (formatted) then
         write(fd, lineformat) buffer
       else
@@ -233,30 +233,30 @@
       end if
     end do
     
-  end subroutine writearray_master_${SUFFIX}$
+  end subroutine writearray_lead_${SUFFIX}$
 
 #:enddef
 
 
 #! ************************************************************************
-#! *** writearray_slave
+#! *** writearray_follow
 #! ************************************************************************
 
   
-#:def writearray_slave_template(SUFFIX, FTYPE)
+#:def writearray_follow_template(SUFFIX, FTYPE)
 
   #!
   #! ${SUFFIX}$ subroutine suffix
   #! ${FTYPE}$ dummy argument type
   #!
-  !> Writes a distributed array to a file (slave, ${SUFFIX}$).
+  !> Writes a distributed array to a file (follow, ${SUFFIX}$).
   !!
   !! \param mygrid  BLACS descriptor
   !! \param desc  Descriptor of the distributed matrix
   !! \param mtxloc  Local portion of the distributed matrix
   !! \param rowwise  If .true. matrix is dumped rowwise otherwise columnwise
   !!
-  subroutine writearray_slave_${SUFFIX}$(mygrid, desc, mtxloc, rowwise)
+  subroutine writearray_follow_${SUFFIX}$(mygrid, desc, mtxloc, rowwise)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: desc(DLEN_)
     ${FTYPE}$, intent(in) :: mtxloc(:,:)
@@ -275,25 +275,25 @@
       nline = desc(M_)
     end if
     do ii = 1, nline
-      call distributor%getline_slave(mygrid, ii, mtxloc)
+      call distributor%getline_follow(mygrid, ii, mtxloc)
     end do
     
-  end subroutine writearray_slave_${SUFFIX}$
+  end subroutine writearray_follow_${SUFFIX}$
 
 #:enddef
 
 #! ************************************************************************
-#! *** readarray_master
+#! *** readarray_lead
 #! ************************************************************************
 
   
-#:def readarray_master_template(SUFFIX, FTYPE)
+#:def readarray_lead_template(SUFFIX, FTYPE)
 
   #!
   #! ${SUFFIX}$ subroutine suffix
   #! ${FTYPE}$ dummy argument type
   #!
-  !> Reads a distributed array from a file (master, ${SUFFIX}$).
+  !> Reads a distributed array from a file (lead, ${SUFFIX}$).
   !!
   !! \param mygrid  BLACS descriptor
   !! \param fd  File descriptor of an opened file.
@@ -305,7 +305,7 @@
   !!     unformatted. The file descriptor must accordingly belong to a formatted
   !!     or an unformatted file! (default: .false.)
   !!
-  subroutine readarray_master_${SUFFIX}$(mygrid, fd, desc, mtxloc, rowwise, formatted)
+  subroutine readarray_lead_${SUFFIX}$(mygrid, fd, desc, mtxloc, rowwise, formatted)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: fd, desc(DLEN_)
     ${FTYPE}$, intent(inout) :: mtxloc(:,:)
@@ -334,25 +334,25 @@
       else
         read(fd) buffer
       end if
-      call collector%setline_master(mygrid, ii, buffer, mtxloc)
+      call collector%setline_lead(mygrid, ii, buffer, mtxloc)
     end do
     
-  end subroutine readarray_master_${SUFFIX}$
+  end subroutine readarray_lead_${SUFFIX}$
 
 #:enddef
 
 #! ************************************************************************
-#! *** readarray_slave
+#! *** readarray_follow
 #! ************************************************************************
 
   
-#:def readarray_slave_template(SUFFIX, FTYPE)
+#:def readarray_follow_template(SUFFIX, FTYPE)
 
   #!
   #! ${SUFFIX}$ subroutine suffix
   #! ${FTYPE}$ dummy argument type
   #!
-  !> Reads a distributed array from a file (slave, ${SUFFIX}$).
+  !> Reads a distributed array from a file (follow, ${SUFFIX}$).
   !!
   !! \param mygrid  BLACS descriptor
   !! \param desc  Descriptor of the distributed matrix
@@ -360,7 +360,7 @@
   !! \param rowwise  If .true. matrix is assumed to be stored rowwise otherwise
   !!     columnwise (default: .false.)
   !!
-  subroutine readarray_slave_${SUFFIX}$(mygrid, desc, mtxloc, rowwise)
+  subroutine readarray_follow_${SUFFIX}$(mygrid, desc, mtxloc, rowwise)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: desc(DLEN_)
     ${FTYPE}$, intent(inout) :: mtxloc(:,:)
@@ -379,10 +379,10 @@
       nline = desc(M_)
     end if
     do ii = 1, nline
-      call collector%setline_slave(mygrid, ii, mtxloc)
+      call collector%setline_follow(mygrid, ii, mtxloc)
     end do
     
-  end subroutine readarray_slave_${SUFFIX}$
+  end subroutine readarray_follow_${SUFFIX}$
 
 #:enddef
   
@@ -403,8 +403,8 @@ module scalapackfx_tools_module
 
   public :: scalafx_cpl2g, scalafx_cpg2l, scalafx_addl2g, scalafx_addg2l
   public :: scalafx_islocal
-  public :: writearray_master, writearray_slave
-  public :: readarray_master, readarray_slave
+  public :: writearray_lead, writearray_follow
+  public :: readarray_lead, readarray_follow
   public :: blocklist, size
   public :: linecomm
 
@@ -428,29 +428,29 @@ module scalapackfx_tools_module
     module procedure addg2l_int
   end interface scalafx_addg2l
 
-  interface writearray_master
-    module procedure writearray_master_int
-    module procedure writearray_master_real, writearray_master_dreal
-    module procedure writearray_master_complex, writearray_master_dcomplex
-  end interface writearray_master
+  interface writearray_lead
+    module procedure writearray_lead_int
+    module procedure writearray_lead_real, writearray_lead_dreal
+    module procedure writearray_lead_complex, writearray_lead_dcomplex
+  end interface writearray_lead
 
-  interface writearray_slave
-    module procedure writearray_slave_int
-    module procedure writearray_slave_real, writearray_slave_dreal
-    module procedure writearray_slave_complex, writearray_slave_dcomplex
-  end interface writearray_slave
+  interface writearray_follow
+    module procedure writearray_follow_int
+    module procedure writearray_follow_real, writearray_follow_dreal
+    module procedure writearray_follow_complex, writearray_follow_dcomplex
+  end interface writearray_follow
 
-  interface readarray_master
-    module procedure readarray_master_int
-    module procedure readarray_master_real, readarray_master_dreal
-    module procedure readarray_master_complex, readarray_master_dcomplex
-  end interface readarray_master
+  interface readarray_lead
+    module procedure readarray_lead_int
+    module procedure readarray_lead_real, readarray_lead_dreal
+    module procedure readarray_lead_complex, readarray_lead_dcomplex
+  end interface readarray_lead
 
-  interface readarray_slave
-    module procedure readarray_slave_int
-    module procedure readarray_slave_real, readarray_slave_dreal
-    module procedure readarray_slave_complex, readarray_slave_dcomplex
-  end interface readarray_slave
+  interface readarray_follow
+    module procedure readarray_follow_int
+    module procedure readarray_follow_real, readarray_follow_dreal
+    module procedure readarray_follow_complex, readarray_follow_dcomplex
+  end interface readarray_follow
   
 
   !> List of the local blocks of a distributed matrix.
@@ -607,29 +607,29 @@ contains
 !!! writearray/readarray
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  @:writearray_master_template(int, integer)
-  @:writearray_master_template(real, real(sp))
-  @:writearray_master_template(dreal, real(dp))
-  @:writearray_master_template(complex, complex(sp))
-  @:writearray_master_template(dcomplex, complex(dp))
+  @:writearray_lead_template(int, integer)
+  @:writearray_lead_template(real, real(sp))
+  @:writearray_lead_template(dreal, real(dp))
+  @:writearray_lead_template(complex, complex(sp))
+  @:writearray_lead_template(dcomplex, complex(dp))
 
-  @:writearray_slave_template(int, integer)
-  @:writearray_slave_template(real, real(sp))
-  @:writearray_slave_template(dreal, real(dp))
-  @:writearray_slave_template(complex, complex(sp))
-  @:writearray_slave_template(dcomplex, complex(dp))
+  @:writearray_follow_template(int, integer)
+  @:writearray_follow_template(real, real(sp))
+  @:writearray_follow_template(dreal, real(dp))
+  @:writearray_follow_template(complex, complex(sp))
+  @:writearray_follow_template(dcomplex, complex(dp))
 
-  @:readarray_master_template(int, integer)
-  @:readarray_master_template(real, real(sp))
-  @:readarray_master_template(dreal, real(dp))
-  @:readarray_master_template(complex, complex(sp))
-  @:readarray_master_template(dcomplex, complex(dp))
+  @:readarray_lead_template(int, integer)
+  @:readarray_lead_template(real, real(sp))
+  @:readarray_lead_template(dreal, real(dp))
+  @:readarray_lead_template(complex, complex(sp))
+  @:readarray_lead_template(dcomplex, complex(dp))
 
-  @:readarray_slave_template(int, integer)
-  @:readarray_slave_template(real, real(sp))
-  @:readarray_slave_template(dreal, real(dp))
-  @:readarray_slave_template(complex, complex(sp))
-  @:readarray_slave_template(dcomplex, complex(dp))
+  @:readarray_follow_template(int, integer)
+  @:readarray_follow_template(real, real(sp))
+  @:readarray_follow_template(dreal, real(dp))
+  @:readarray_follow_template(complex, complex(sp))
+  @:readarray_follow_template(dcomplex, complex(dp))
 
   
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
