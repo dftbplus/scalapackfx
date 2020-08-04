@@ -27,6 +27,7 @@ foreach(fppsrc IN LISTS sources-fpp)
 endforeach()
 
 add_library(scalapackfx ${SOURCES-F90-PREPROC})
+target_link_libraries(scalapackfx ${EXTERNAL_LIBRARIES} ${MPI_Fortran_LIBRARIES})
 
 set(BUILD_MOD_DIR ${CMAKE_CURRENT_BINARY_DIR}/include)
 
