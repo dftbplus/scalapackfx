@@ -1,17 +1,22 @@
 os: linux
-dist: bionic
+dist: focal
+
+# NOTE: Focal offers broken CMake-export file for ScaLAPACK containing a
+# a non-existent path for the library. On those systems, the CMake export file
+# based auto-detection must be disabled by providing the -DSCALAPACK_LIBRARY
+# option.
 
 language: python
 python: 3.7
 
 
 env:
- - BUILD_SHARED_LIBS=false
- - BUILD_SHARED_LIBS=true
+  - BUILD_SHARED_LIBS=False
+  - BUILD_SHARED_LIBS=True
 
 addons:
-   apt:
-      packages:
+  apt:
+    packages:
       - cmake
       - gfortran
       - libblas-dev
@@ -20,7 +25,22 @@ addons:
       - libscalapack-openmpi-dev
 
 install:
- - pip install fypp
+  - pip install fypp
 
 script:
- - mkdir -p _build && pushd _build && cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} -DEXTERNAL_LIBRARIES="scalapack-openmpi;lapack;blas" .. && make -j && popd
+  - >
+    FC=gfortran
+    cmake -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
+    -DSCALAPACK_LIBRARY="scalapack-openmpi"
+    -DCMAKE_INSTALL_PREFIX=${PWD}/_install 
+    -B _build .
+    && cmake --build _build -- -j
+    && cmake --install _build
+  - >
+    CMAKE_PREFIX_PATH="${PWD}/_install:${CMAKE_PREFIX_PATH}"
+    ./test/integration/cmake/runtest.sh _build_cmake
+    -DSCALAPACK_LIBRARY="scalapack-openmpi"
+  - >
+    PKG_CONFIG_PATH="${PWD}/_install/lib/pkgconfig:${PKG_CONFIG_PATH}"
+    FC=mpifort
+    ./test/integration/pkgconfig/runtest.sh _build_pkgconfig

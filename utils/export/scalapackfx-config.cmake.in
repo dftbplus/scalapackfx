@@ -1,0 +1,15 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/Modules)
+
+if(NOT TARGET ScalapackFx::ScalapackFx)
+  if (NOT TARGET Scalapack::Scalapack)
+    find_dependency(CustomScalapack)
+  endif()
+  if (NOT TARGET LAPACK::LAPACK)
+    find_dependency(CustomLapack)
+  endif()
+  include(${CMAKE_CURRENT_LIST_DIR}/scalapackfx-targets.cmake)
+endif()
