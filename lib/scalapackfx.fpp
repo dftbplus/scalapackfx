@@ -1836,9 +1836,9 @@ module scalapackfx_module
   !! \param desc  Matrix descriptor on exit.
   !! \param mtxloc  Allocated local matrix on exit.
   !! \param rsrc  Process row, over which first row is distributed
-  !!     (default: master row).
+  !!     (default: lead row).
   !! \param csrc  Process column, over which first column is distributed
-  !!     (default: master column).
+  !!     (default: lead column).
   !! \param info  Info flag.
   !!
   subroutine scalafx_creatematrix_${TYPE}$(mygrid, mm, nn, mb, nb, mtxloc,&
@@ -1908,9 +1908,9 @@ contains
   !! \param nrowloc  Number of rows for local matrix.
   !! \param ncolloc  Number of columns for local matrix.
   !! \param rsrc  Process row, over which first row is distributed
-  !!     (default: master row).
+  !!     (default: lead row).
   !! \param csrc  Process column, over which first column is distributed
-  !!     (default: master column).
+  !!     (default: lead column).
   !! \param info  Info flag.
   !!
   subroutine scalafx_getdescriptor(mygrid, mm, nn, mb, nb, desc, rsrc, csrc, &
@@ -1924,8 +1924,8 @@ contains
     integer :: rsrc0, csrc0, info0
     integer :: nrowloc
 
-    @:inoptflags(rsrc0, rsrc, mygrid%masterrow)
-    @:inoptflags(csrc0, csrc, mygrid%mastercol)
+    @:inoptflags(rsrc0, rsrc, mygrid%leadrow)
+    @:inoptflags(csrc0, csrc, mygrid%leadcol)
     ! At least one local row, as per definition LLD >= 1 in the descriptor.
     nrowloc = max(1, numroc(mm, mb, mygrid%myrow, rsrc0, mygrid%nrow))
     call descinit(desc, mm, nn, mb, nb, rsrc0, csrc0, mygrid%ctxt, nrowloc, &

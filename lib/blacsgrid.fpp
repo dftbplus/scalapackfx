@@ -18,9 +18,9 @@ module blacsgrid_module
     integer :: nproc = -1  !< Nr. of processes in the grid.
     integer :: myrow = -1  !< Row of the current process.
     integer :: mycol = -1  !< Column of the current process.
-    integer :: masterrow = -1   !< Row of the master process.
-    integer :: mastercol = -1   !< Column of the master process.
-    logical :: master = .false. !< Whether the current process is the master.
+    integer :: leadrow = -1   !< Row of the lead process.
+    integer :: leadcol = -1   !< Column of the lead process.
+    logical :: lead = .false. !< Whether the current process is the lead.
   contains
     !> Creates process grid.
     procedure :: initgrid
@@ -76,22 +76,22 @@ contains
   !! \param ncol  Number of processor columns.
   !! \param colmajor  If .true., processes will be aligned in column major order
   !!     otherwise in row major order. (Default: .false.)
-  !! \param masterrow  Master row in each subgrid.
-  !! \param mastercol  Master column in each grid.
+  !! \param leadrow  Lead row in each subgrid.
+  !! \param leadcol  Lead column in each grid.
   !! \param context  BLACS system context (default: default system context)
   !! \param repeatable if present and T, forces topologies to be repeatable.
   !!     May degrade performance in this case.
   !!
-  subroutine initgrid(self, nrow, ncol, colmajor, masterrow, &
-      & mastercol, context, repeatable)
+  subroutine initgrid(self, nrow, ncol, colmajor, leadrow, &
+      & leadcol, context, repeatable)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: nrow, ncol
     logical, intent(in), optional :: colmajor
-    integer, intent(in), optional :: masterrow, mastercol, context
+    integer, intent(in), optional :: leadrow, leadcol, context
     logical, intent(in), optional :: repeatable
 
     logical :: colmajor0
-    integer :: masterrow0, mastercol0
+    integer :: leadrow0, leadcol0
     integer :: nproc, iproc, gridsize
     integer :: val(1)
 
@@ -107,8 +107,8 @@ contains
 
     call self%initcontext(context)
     @:inoptflags(colmajor0, colmajor, .false.)
-    @:inoptflags(masterrow0, masterrow, 0)
-    @:inoptflags(mastercol0, mastercol, 0)
+    @:inoptflags(leadrow0, leadrow, 0)
+    @:inoptflags(leadcol0, leadcol, 0)
     if (colmajor0) then
       call blacs_gridinit(self%ctxt, "C", nrow, ncol)
     else
@@ -135,10 +135,10 @@ contains
       else
         self%iproc = self%myrow * self%ncol + self%mycol
       end if
-      self%masterrow = masterrow0
-      self%mastercol = mastercol0
-      self%master = (self%myrow == self%masterrow &
-          & .and. self%mycol == self%mastercol)
+      self%leadrow = leadrow0
+      self%leadcol = leadcol0
+      self%lead = (self%myrow == self%leadrow &
+          & .and. self%mycol == self%leadcol)
     end if
 
   end subroutine initgrid
@@ -159,28 +159,28 @@ contains
   !! \param ncol  Number of columns in every grid
   !! \param colmajor  If .true., processes will be aligned in column major order
   !!     otherwise in row major order. (Default: .false.)
-  !! \param masterrow  Master row in each subgrid.
-  !! \param mastercol  Master column in each grid.
+  !! \param leadrow  Lead row in each subgrid.
+  !! \param leadcol  Lead column in each grid.
   !! \param context  BLACS system context (default: default system context)
-  !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
-  !!     created which contains only the master nodes from all grids.
+  !! \param leadgrid  If present, an additional (1, ngrid) shaped grid is
+  !!     created which contains only the lead nodes from all grids.
   !! \param repeatable if present and T, forces topologies to be repeatable.
   !!     May degrade performance in this case.
   !!
   subroutine initsplitgrids(self, ngrid, nrow, ncol, colmajor, &
-      & masterrow, mastercol, context, mastergrid, repeatable)
+      & leadrow, leadcol, context, leadgrid, repeatable)
     class(blacsgrid), intent(inout) :: self
     integer, intent(in) :: nrow, ncol
     logical, intent(in), optional :: colmajor
-    integer, intent(in), optional :: masterrow, mastercol, context
-    class(blacsgrid), intent(out), optional :: mastergrid
+    integer, intent(in), optional :: leadrow, leadcol, context
+    class(blacsgrid), intent(out), optional :: leadgrid
     logical, intent(in), optional :: repeatable
 
     integer :: ngrid, ctxt0, gridsize, nproc, iproc
     integer :: ind, irow, icol, shift
     integer, allocatable :: imap(:,:), imap2(:,:)
     logical :: colmajor0
-    integer :: masterrow0, mastercol0
+    integer :: leadrow0, leadcol0
     integer :: val(1)
 
     call blacs_pinfo(iproc, nproc)
@@ -196,8 +196,8 @@ contains
     call self%initcontext(context)
     ctxt0 = self%ctxt
     @:inoptflags(colmajor0, colmajor, .false.)
-    @:inoptflags(masterrow0, masterrow, 0)
-    @:inoptflags(mastercol0, mastercol, 0)
+    @:inoptflags(leadrow0, leadrow, 0)
+    @:inoptflags(leadcol0, leadcol, 0)
 
     ! Processes outside of the grid see the gridmap of the last process
     ! within the grid, so they realize they are not participating.
@@ -242,37 +242,37 @@ contains
       else
         self%iproc = self%myrow * self%ncol + self%mycol
       end if
-      self%masterrow = masterrow0
-      self%mastercol = mastercol0
-      self%master = (self%myrow == self%masterrow &
-          & .and. self%mycol == self%mastercol)
+      self%leadrow = leadrow0
+      self%leadcol = leadcol0
+      self%lead = (self%myrow == self%leadrow &
+          & .and. self%mycol == self%leadcol)
     end if
 
-    ! Return here if mastergrid is not asked for.
-    if (.not. present(mastergrid)) then
+    ! Return here if leadgrid is not asked for.
+    if (.not. present(leadgrid)) then
       return
     end if
     if (colmajor0) then
-      shift = nrow * mastercol0 + masterrow0
+      shift = nrow * leadcol0 + leadrow0
     else
-      shift = ncol * masterrow0 + mastercol0
+      shift = ncol * leadrow0 + leadcol0
     end if
     allocate(imap2(1, ngrid))
     do icol = 1, ngrid
       imap2(1, icol) = (icol - 1) * gridsize + shift
     end do
-    mastergrid%ctxt = ctxt0
-    call blacs_gridmap(mastergrid%ctxt, imap2, size(imap2, dim=1), 1, ngrid)
+    leadgrid%ctxt = ctxt0
+    call blacs_gridmap(leadgrid%ctxt, imap2, size(imap2, dim=1), 1, ngrid)
     if (mod(iproc, gridsize) /= shift) then
-      call mastergrid%reset()
+      call leadgrid%reset()
     else
-      call blacs_gridinfo(mastergrid%ctxt, mastergrid%nrow, &
-          & mastergrid%ncol, mastergrid%myrow, mastergrid%mycol)
-      mastergrid%nproc = ngrid
-      mastergrid%iproc = iproc / gridsize
-      mastergrid%masterrow = 0
-      mastergrid%mastercol = 0
-      mastergrid%master = (mastergrid%iproc == 0)
+      call blacs_gridinfo(leadgrid%ctxt, leadgrid%nrow, &
+          & leadgrid%ncol, leadgrid%myrow, leadgrid%mycol)
+      leadgrid%nproc = ngrid
+      leadgrid%iproc = iproc / gridsize
+      leadgrid%leadrow = 0
+      leadgrid%leadcol = 0
+      leadgrid%lead = (leadgrid%iproc == 0)
     end if
 
   end subroutine initsplitgrids
@@ -294,11 +294,11 @@ contains
   !! \param ncol  Number of columns in every grid
   !! \param colmajor  If .true., processes will be aligned in column major order
   !!     otherwise in row major order. (Default: .false.)
-  !! \param masterrow  Master row in each subgrid.
-  !! \param mastercol  Master column in each grid.
+  !! \param leadrow  Lead row in each subgrid.
+  !! \param leadcol  Lead column in each grid.
   !! \param context  BLACS system context (default: default system context)
-  !! \param mastergrid  If present, an additional (1, ngrid) shaped grid is
-  !!     created which contains only the master nodes from all grids.
+  !! \param leadgrid  If present, an additional (1, ngrid) shaped grid is
+  !!     created which contains only the lead nodes from all grids.
   !! \param repeatable if present and T, forces topologies to be repeatable.
   !!     May degrade performance in this case.
   !!
@@ -333,9 +333,9 @@ contains
       call blacs_gridinfo(self%ctxt, self%nrow, self%ncol, self%myrow, self%mycol)
       self%nproc = gridsize
       self%iproc = self%myrow * self%ncol + self%mycol
-      self%masterrow = 0
-      self%mastercol = 0
-      self%master = (self%myrow == self%masterrow .and. self%mycol == self%mastercol)
+      self%leadrow = 0
+      self%leadcol = 0
+      self%lead = (self%myrow == self%leadrow .and. self%mycol == self%leadcol)
     end if
 
   end subroutine initmappedgrids
@@ -370,9 +370,9 @@ contains
     self%nproc = -1
     self%myrow = -1
     self%mycol = -1
-    self%masterrow = -1
-    self%mastercol = -1
-    self%master = .false.
+    self%leadrow = -1
+    self%leadcol = -1
+    self%lead = .false.
 
   end subroutine reset
 

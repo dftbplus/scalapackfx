@@ -42,7 +42,7 @@ contains
       stop
     end if
     call mygrid%initgrid(nprow, npcol)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0)") "# block size:", bsize
     end if
@@ -52,10 +52,10 @@ contains
     mm = matrixdesc(M_)
     nn = matrixdesc(N_)
 
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# matrix size:", mm, nn
       write(stdout, "(A,1X,A)") "# singular value decomposition:", "standard"
-      write(stdout, "(A,2(1X,I0))") "# matrix size on master:",&
+      write(stdout, "(A,2(1X,I0))") "# matrix size on leader:",&
           & size(matrix, dim=1), size(matrix, dim=2)
     end if
 
@@ -81,14 +81,14 @@ contains
     call cpu_time(tcpu2)
     call system_clock(tsys2)
 
-    if (mygrid%master) then
-      write(stdout, "(A,F8.1)") "# cpu time on master:", tcpu2 - tcpu1
-      write(stdout, "(A,F8.1)") "# system time on master:",&
+    if (mygrid%lead) then
+      write(stdout, "(A,F8.1)") "# cpu time on leader:", tcpu2 - tcpu1
+      write(stdout, "(A,F8.1)") "# system time on leader:",&
           & real(tsys2 - tsys1, dp) / real(tcount, dp)
     end if
 
     ! Write singular values and vectors
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file="singularvals.dat", form="formatted", status="replace")
       write(12,*)"Real"
       write(12, "(ES23.15)") sigma
@@ -97,12 +97,12 @@ contains
     end if
     call writetofile(mygrid, "singularU.dat", U, Udesc)
     call writetofile(mygrid, "singularVt.dat", vT, Vtdesc)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,A,A)") "# Singular vectors written to '", "singularU/singularVt.dat", "'"
     end if
 
     call scalafx_pgesvd(matrixcplx, matrixdesc, Ucplx, Udesc, sigma, vtcplx, vtdesc)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file="singularvals.dat", form="formatted", status='old', position='append')
       write(12,*)"Complex"
       write(12, "(ES23.15)") sigma

@@ -47,7 +47,7 @@ contains
       stop
     end if
     call mygrid%initgrid(nprow, npcol)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0)") "# block size:", bsize
     end if
@@ -58,14 +58,14 @@ contains
     end if
 
     nn = hamdesc(M_)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,2(1X,I0))") "# matrix size:", nn, nn
       if (overlap) then
         write(stdout, "(A,1X,A)") "# eigenvalue problem:", "generalized"
       else
         write(stdout, "(A,1X,A)") "# eigenvalue problem:", "standard"
       end if
-      write(stdout, "(A,2(1X,I0))") "# matrix size on master:",&
+      write(stdout, "(A,2(1X,I0))") "# matrix size on leader:",&
           & size(hammtx, dim=1), size(hammtx, dim=2)
       select case (idiag)
       case(1)
@@ -132,21 +132,21 @@ contains
     call cpu_time(tcpu2)
     call system_clock(tsys2)
 
-    if (mygrid%master) then
-      write(stdout, "(A,F8.1)") "# cpu time on master:", tcpu2 - tcpu1
-      write(stdout, "(A,F8.1)") "# system time on master:",&
+    if (mygrid%lead) then
+      write(stdout, "(A,F8.1)") "# cpu time on leader:", tcpu2 - tcpu1
+      write(stdout, "(A,F8.1)") "# system time on leader:",&
           & real(tsys2 - tsys1, dp) / real(tcount, dp)
     end if
 
     ! Write eigenvalues and eigenvectors
-    if (mygrid%master) then
+    if (mygrid%lead) then
       open(12, file="eigvals.dat", form="formatted", status="replace")
       write(12, "(ES23.15)") eigvals
       close(12)
       write(stdout, "(A,A,A)") "# Eigenvalues written to '", "eigvals.dat", "'"
     end if
     call writetofile(mygrid, "eigvecs.dat", eigvecs, eigvdesc)
-    if (mygrid%master) then
+    if (mygrid%lead) then
       write(stdout, "(A,A,A)") "# Eigenvectors written to '", "eigvecs.dat", "'"
     end if
 
