@@ -38,16 +38,16 @@ distributing it across the processes and finally diagonalizing it::
       ...
       ! Here comes the code which distributes your matrix
       ! You can use the linecomm type to distribute it if you read it from file
-      if (master) then
+      if (mygrid%lead) then
           allocate(iobuffer(nn))
       end if
       call distr%init(desc, "c")
       do icol = 1, nn
-        if (myblacs%master) then
+        if (mygrid%lead) then
           read(12, *) iobuffer(:)
-          call distr%setline_master(myblacs, icol, iobuffer, aa)
+          call distr%setline_lead(mygrid, icol, iobuffer, aa)
         else
-          call distr%setline_slave(myblacs, icol, mtxloc)
+          call distr%setline_follow(mygrid, icol, mtxloc)
         end if
       end do
       ...

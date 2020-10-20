@@ -1,0 +1,9 @@
+Name: scalapackfx
+Description: Modern Fortran wrappers for ScaLAPACK
+Version: @PROJECT_VERSION@
+URL: https://github.com/dftbplus/scalapackfx
+
+Requires: @PKGCONFIG_REQUIRES@
+Libs: @PKGCONFIG_LIBS@
+Libs.private: @PKGCONFIG_LIBS_PRIVATE@
+Cflags: @PKGCONFIG_C_FLAGS@

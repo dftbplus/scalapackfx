@@ -1,5 +1,5 @@
-!> Testing rank one updates.
-program test_psyr_pher
+!> Testing transposition
+program test_ptran
   use, intrinsic :: iso_fortran_env, stdout => output_unit
   use test_common_module
   use libscalapackfx_module
@@ -16,10 +16,9 @@ contains
   subroutine main()
     type(blacsgrid) :: mygrid
     real(dp), allocatable :: xx(:,:), res(:,:)
+    complex(dp), allocatable :: xxc(:,:), resc(:,:)
     integer :: descx(DLEN_), descres(DLEN_)
-    real(dp) :: alpha
     integer :: nprow, npcol, mm, nn, iproc, nproc
-    integer :: ii
 
     ! Initialize blas and create a square processor grid
     call blacsfx_pinfo(iproc, nproc)
@@ -35,7 +34,10 @@ contains
       write(stdout, "(A,1X,I0)") "# block size:", bsize
     end if
 
-    ! Read in matrix from disc.
+    ! Set up matrix
+    if (mygrid%lead) then
+      write(stdout, "(A)") "Matrix read from file 'hamsqr1.dat'."
+    end if
     call readfromfile(mygrid, "hamsqr1.dat", bsize, bsize, xx, descx)
     mm = descx(M_)
     nn = descx(N_)
@@ -45,26 +47,44 @@ contains
           & size(xx, dim=1), size(xx, dim=2)
     end if
 
-    ! Do rank one update with all column vectors of the matrix.
-    call scalafx_creatematrix(mygrid, mm, mm, bsize, bsize, res, descres)
-    res(:,:) = 0.0_dp
-    do ii = 1, mm
-      alpha = real(ii, dp)
-      call pblasfx_psyr(xx, descx, res, descres, alpha=alpha, ix=1, jx=ii,&
-          & incx=1)
-    end do
+    call scalafx_creatematrix(mygrid, nn, mm, bsize, bsize, res, descres)
+    res = 0.0_dp
+
+    call pblasfx_ptran(xx,descx,res,descres)
 
     ! Write results to disc.
-    call writetofile(mygrid, "psyr_result.dat", res, descres)
+    call writetofile(mygrid, "ptran_realresult.dat", res, descres)
     if (mygrid%lead) then
-      write(stdout, "(A)") "Result written to file 'psyr_result.dat'."
+      write(stdout, "(A)") "Result written to file 'ptran_realresult.dat'."
     end if
+
+    allocate(xxc(size(xx,dim=1),size(xx,dim=2)))
+    allocate(resc(size(res,dim=1),size(res,dim=2)))
+
+    xxc = cmplx(0,1,dp) * xx + xx
+
+    call pblasfx_ptranu(xxc,descx,resc,descres)
+
+    ! Write results to disc.
+    call writetofile(mygrid, "ptran_cmplxresult.dat", resc, descres)
+    if (mygrid%lead) then
+      write(stdout, "(A)") "Result written to file 'ptran_cmplxresult.dat'."
+    end if
+
+    call pblasfx_ptranc(xxc,descx,resc,descres)
+
+    ! Write results to disc.
+    call writetofile(mygrid, "ptran_cmplxHresult.dat", resc, descres)
+    if (mygrid%lead) then
+      write(stdout, "(A)") "Result written to file 'ptran_cmplxHresult.dat'."
+    end if
+
+    deallocate(resc)
+    deallocate(xxc)
 
     ! Finish blacs.
     call blacsfx_exit()
 
   end subroutine main
 
-
-end program test_psyr_pher
-
+end program test_ptran
