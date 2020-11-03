@@ -4,6 +4,11 @@ Change Log
 
 Notable project changes in various releases.
 
+
+Unreleased
+==========
+
+
 1.0.1
 =====
 
@@ -12,10 +17,6 @@ Fixed
 
 * ScaLAPACK interfaces use only assumed-size arrays (no fixed size ones) to
   avoid linking problems with NAG compiled applications
-
-
-Unreleased
-==========
 
 
 1.0
