@@ -21,7 +21,7 @@ module scalapack_module
     import
     character, intent(in) :: uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     ${FTYPES}$, intent(inout) :: aa(desca(LLD_), *)
     integer, intent(out) :: info
   end subroutine p${TYPEABBREV}$potrf
@@ -37,7 +37,7 @@ module scalapack_module
     import
     character, intent(in) :: uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     ${FTYPES}$, intent(inout) :: aa(desca(LLD_), *)
     integer, intent(out) :: info
   end subroutine p${TYPEABBREV}$potri
@@ -53,7 +53,7 @@ module scalapack_module
     import
     character, intent(in) :: uplo, diag
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     ${FTYPE}$, intent(inout) :: aa(desca(LLD_), *)
     integer, intent(out) :: info
   end subroutine p${TYPEABBREV}$trtri
@@ -69,7 +69,7 @@ module scalapack_module
     import
     integer, intent(in) :: mm
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     ${FTYPES}$, intent(inout) :: aa(desca(LLD_), *)
     integer, intent(out) :: ipiv(*)
     integer, intent(out) :: info
@@ -91,9 +91,9 @@ module scalapack_module
     integer, intent(in) :: ibtype
     character, intent(in) :: uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     real(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: ib, jb, descb(DLEN_)
+    integer, intent(in) :: ib, jb, descb(*)
     real(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     real(${KIND}$), intent(out) :: scale
     integer, intent(out) :: info
@@ -113,9 +113,9 @@ module scalapack_module
     integer, intent(in) :: ibtype
     character, intent(in) :: uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     complex(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: ib, jb, descb(DLEN_)
+    integer, intent(in) :: ib, jb, descb(*)
     complex(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     real(${KIND}$), intent(out) :: scale
     integer, intent(out) :: info
@@ -133,9 +133,9 @@ module scalapack_module
     import
     character, intent(in) :: jobz, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     real(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: iz, jz, descz(DLEN_)
+    integer, intent(in) :: iz, jz, descz(*)
     real(${KIND}$), intent(out) :: ww(nn), zz(descz(LLD_),*)
     real(${KIND}$), intent(inout) :: work(*)
     integer, intent(in) :: lwork
@@ -154,9 +154,9 @@ module scalapack_module
     import
     character, intent(in) :: jobz, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     complex(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: iz, jz, descz(DLEN_)
+    integer, intent(in) :: iz, jz, descz(*)
     real(${KIND}$), intent(out) :: ww(nn)
     complex(${KIND}$), intent(out) ::  zz(descz(LLD_),*)
     complex(${KIND}$), intent(inout) :: work(*)
@@ -178,9 +178,9 @@ module scalapack_module
     import
     character, intent(in) :: jobz, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     real(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: iz, jz, descz(DLEN_)
+    integer, intent(in) :: iz, jz, descz(*)
     real(${KIND}$), intent(out) :: ww(nn), zz(descz(LLD_),*)
     real(${KIND}$), intent(inout) :: work(*)
     integer, intent(in) :: lwork
@@ -201,9 +201,9 @@ module scalapack_module
     import
     character, intent(in) :: jobz, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     complex(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
-    integer, intent(in) :: iz, jz, descz(DLEN_)
+    integer, intent(in) :: iz, jz, descz(*)
     real(${KIND}$), intent(out) :: ww(nn)
     complex(${KIND}$), intent(out) ::  zz(descz(LLD_),*)
     complex(${KIND}$), intent(inout) :: work(*)
@@ -227,14 +227,14 @@ module scalapack_module
     import
     character, intent(in) :: jobz, range, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     real(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
     real(${KIND}$), intent(in) :: vl, vu
     integer, intent(in) :: il, iu
     integer, intent(out) :: mm, nz
     real(${KIND}$), intent(out) :: ww(nn)
-    integer, intent(in) :: descz(DLEN_)
+    integer, intent(in) :: descz(*)
     real(${KIND}$), intent(out) :: zz(descz(LLD_),*)
     integer, intent(in) :: iz, jz
     real(${KIND}$), intent(inout) :: work(*)
@@ -258,14 +258,14 @@ module scalapack_module
     import
     character, intent(in) :: jobz, range, uplo
     integer, intent(in) :: nn
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     complex(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
     real(${KIND}$), intent(in) :: vl, vu
     integer, intent(in) :: il, iu
     integer, intent(out) :: mm, nz
     real(${KIND}$), intent(out) :: ww(nn)
-    integer, intent(in) :: descz(DLEN_)
+    integer, intent(in) :: descz(*)
     complex(${KIND}$), intent(out) ::  zz(descz(LLD_),*)
     integer, intent(in) :: iz, jz
     complex(${KIND}$), intent(inout) :: work(*)
@@ -289,12 +289,12 @@ module scalapack_module
     import
     character, intent(in) :: jobu, jobvt
     integer, intent(in) :: mm, nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     real(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
     real(${KIND}$), intent(out) :: sigma(*)
-    integer, intent(in) :: iu, ju, descu(DLEN_)
+    integer, intent(in) :: iu, ju, descu(*)
     real(${KIND}$), intent(out) :: uu(descu(LLD_), *)
-    integer, intent(in) :: ivt, jvt, descvt(DLEN_)
+    integer, intent(in) :: ivt, jvt, descvt(*)
     real(${KIND}$), intent(out) :: vt(descvt(LLD_), *)
     real(${KIND}$), intent(inout) :: work(*)
     integer, intent(in) :: lwork
@@ -313,12 +313,12 @@ module scalapack_module
     import
     character, intent(in) :: jobu, jobvt
     integer, intent(in) :: mm, nn
-    integer, intent(in) :: ia, ja, desca(DLEN_)
+    integer, intent(in) :: ia, ja, desca(*)
     complex(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
     real(${KIND}$), intent(out) :: sigma(*)
-    integer, intent(in) :: iu, ju, descu(DLEN_)
+    integer, intent(in) :: iu, ju, descu(*)
     complex(${KIND}$), intent(out) :: uu(descu(LLD_), *)
-    integer, intent(in) :: ivt, jvt, descvt(DLEN_)
+    integer, intent(in) :: ivt, jvt, descvt(*)
     complex(${KIND}$), intent(out) :: vt(descvt(LLD_), *)
     complex(${KIND}$), intent(inout) :: work(*)
     integer, intent(in) :: lwork
@@ -339,10 +339,10 @@ module scalapack_module
     character, intent(in) :: side, uplo, transa, diag
     integer, intent(in) :: mm, nn
     ${FTYPE}$, intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${FTYPE}$, intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
-    integer, intent(in) :: descb(DLEN_)
+    integer, intent(in) :: descb(*)
     ${FTYPE}$, intent(inout) :: bb(descb(LLD_), *)
     integer, intent(in) :: ib, jb
   end subroutine p${TYPEABBREV}$trsm
@@ -505,8 +505,7 @@ module scalapack_module
     !> Converts global matrix index into local.
     subroutine infog2l(grindx, gcindx, desc, nprow, npcol, myrow, mycol,&
         & lrindx, lcindx, rsrc, csrc)
-      import DLEN_
-      integer, intent(in) :: grindx, gcindx, desc(DLEN_)
+      integer, intent(in) :: grindx, gcindx, desc(*)
       integer, intent(in) :: nprow, npcol, myrow, mycol
       integer, intent(out) :: lrindx, lcindx, rsrc, csrc
     end subroutine infog2l
@@ -519,8 +518,7 @@ module scalapack_module
 
     !> Initializes a descriptor for a distributed array.
     subroutine descinit(desc, mm, nn, mb, nb, irsrc, icsrc, ictxt, lld, info)
-      import DLEN_
-      integer, intent(out) :: desc(DLEN_)
+      integer, intent(out) :: desc(*)
       integer, intent(in) :: mm, nn, mb, nb, irsrc, icsrc, ictxt, lld
       integer, intent(out) :: info
     end subroutine descinit
