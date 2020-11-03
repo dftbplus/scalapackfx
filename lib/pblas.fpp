@@ -12,11 +12,11 @@
     character, intent(in) :: uplo
     integer, intent(in) :: nn
     real(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: descx(DLEN_)
+    integer, intent(in) :: descx(*)
     ${TYPE}$(${KIND}$), intent(in) :: xx(descx(LLD_), *)
     integer, intent(in) :: ix, jx
     integer, intent(in) :: incx
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(inout) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
   end subroutine ${NAME}$
@@ -38,11 +38,11 @@
     character, intent(in) :: uplo, trans
     integer, intent(in) :: nn, kk
     real(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
     real(${KIND}$), intent(in) :: beta
-    integer, intent(in) :: descc(DLEN_)
+    integer, intent(in) :: descc(*)
     ${TYPE}$(${KIND}$), intent(inout) :: cc(descc(LLD_), *)
     integer, intent(in) :: ic, jc
   end subroutine ${NAME}$
@@ -64,14 +64,14 @@
     character, intent(in) :: uplo
     integer, intent(in) :: nn
     ${TYPE}$(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
-    integer, intent(in) :: descx(DLEN_)
+    integer, intent(in) :: descx(*)
     ${TYPE}$(${KIND}$), intent(in) :: xx(descx(LLD_), *)
     integer, intent(in) :: ix, jx, incx
     ${TYPE}$(${KIND}$), intent(in) :: beta
-    integer, intent(in) :: descy(DLEN_)
+    integer, intent(in) :: descy(*)
     ${TYPE}$(${KIND}$), intent(inout) :: yy(descy(LLD_), *)
     integer, intent(in) :: iy, jy, incy
   end subroutine ${NAME}$
@@ -95,14 +95,14 @@
     integer, intent(in) :: mm
     integer, intent(in) :: nn
     ${TYPE}$(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
     ${TYPE}$(${KIND}$), intent(in) :: beta
-    integer, intent(in) :: descb(DLEN_)
+    integer, intent(in) :: descb(*)
     ${TYPE}$(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     integer, intent(in) :: ib, jb
-    integer, intent(in) :: descc(DLEN_)
+    integer, intent(in) :: descc(*)
     ${TYPE}$(${KIND}$), intent(in) :: cc(descc(LLD_), *)
     integer, intent(in) :: ic, jc
   end subroutine ${NAME}$
@@ -123,10 +123,10 @@
     character, intent(in) :: side, uplo, transa, diag
     integer, intent(in) :: mm, nn
     ${TYPE}$(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
-    integer, intent(in) :: descb(DLEN_)
+    integer, intent(in) :: descb(*)
     ${TYPE}$(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     integer, intent(in) :: ib, jb
   end subroutine ${NAME}$
@@ -147,14 +147,14 @@
     character, intent(in) :: transa, transb
     integer, intent(in) :: mm, nn, kk
     ${TYPE}$(${KIND}$), intent(in) :: alpha
-    integer, intent(in) :: desca(DLEN_)
+    integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
-    integer, intent(in) :: descb(DLEN_)
+    integer, intent(in) :: descb(*)
     ${TYPE}$(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     integer, intent(in) :: ib, jb
     ${TYPE}$(${KIND}$), intent(in) :: beta
-    integer, intent(in) :: descc(DLEN_)
+    integer, intent(in) :: descc(*)
     ${TYPE}$(${KIND}$), intent(inout) :: cc(descb(LLD_), *)
     integer, intent(in) :: ic, jc
   end subroutine ${NAME}$
@@ -174,11 +174,11 @@
     integer, intent(in)   :: mm, nn
     ${TYPE}$(${KIND}$), intent(in)    :: alpha
     integer, intent(in)   :: ia, ja
-    integer, intent(in)   :: desca(DLEN_)
+    integer, intent(in)   :: desca(*)
     ${TYPE}$(${KIND}$), intent(in)    :: aa(desca(LLD_), *)
     ${TYPE}$(${KIND}$), intent(in)    :: beta
     integer, intent(in)   :: ic, jc
-    integer, intent(in)   :: descc(DLEN_)
+    integer, intent(in)   :: descc(*)
     ${TYPE}$(${KIND}$), intent(inout) :: cc(descc(LLD_), *)
   end subroutine ${NAME}$
 
