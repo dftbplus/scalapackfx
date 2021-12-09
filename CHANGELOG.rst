@@ -4,6 +4,17 @@ Change Log
 
 Notable project changes in various releases.
 
+
+1.0.2
+=====
+
+Fixed
+-----
+
+* ScaLAPACK finder exports (also) the target name "scalapack" to be compatible
+  with the CMake export file distributed with ScaLAPACK.
+
+
 1.0.1
 =====
 
