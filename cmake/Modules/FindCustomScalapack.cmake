@@ -25,7 +25,7 @@ This module provides the following imported targets, if found:
   export file (which is unfortunately broken in several binary packages).
 
 ``Scalapack::Scalapack``
-  Name spaced (and CMake-style capitalized) variant of the scalapack target.
+  Name space (and CMake-style capitalized) variant of the scalapack target.
 
 
 Result Variables
