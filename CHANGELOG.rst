@@ -4,6 +4,14 @@ Change Log
 
 Notable project changes in various releases.
 
+Unreleased
+==========
+
+Added
+-----
+
+* p?gemr2d routines
+
 
 1.0.2
 =====

@@ -16,6 +16,7 @@ module blacsfx_module
   public :: blacsfx_gebs, blacsfx_gebr
   public :: blacsfx_gesd, blacsfx_gerv
   public :: blacsfx_gsum
+  public :: blacsfx_gemr2d
   public :: blacsfx_barrier
   public :: blacsfx_pinfo, blacsfx_pcoord, blacsfx_pnum, blacsfx_exit
 
@@ -65,6 +66,12 @@ module blacsfx_module
     #:endfor
   end interface blacsfx_gsum
 
+  interface blacsfx_gemr2d
+    #:for TYPE in TYPES
+        #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+        module procedure blacsfx_gemr2d_${TYPEABBREV}$
+    #:endfor
+  end interface blacsfx_gemr2d
 
 contains
 
@@ -500,6 +507,47 @@ contains
   #:endfor
 #:endfor
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Matrix copy/redistribution
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#:def blacsfx_gemr2d_template(SUFFIX, TYPE)
+
+  !> Copies/redistributes matrix (${TYPE}$).
+  !! \param mm number of rows of AA to copy.
+  !! \param mm number of columns of AA to copy.
+  !! \param aa distributed matrix AA from which to copy.
+  !! \param ia first row of AA from which to copy.
+  !! \param ja first column of AA from which to copy.
+  !! \param descA BLACS descriptor for source matrix.
+  !! \param bb distributed matrix BB into which data is copied.
+  !! \param ib first row of BB at which to copy.
+  !! \param jb first column of BB at which to copy.
+  !! \param descB BLACS descriptor for destination matrix.
+  !! \param ictxt Context for for union of all processes holding A or B
+  !! \see BLACS documentation (routine p?gemr2d).
+  subroutine blacsfx_gemr2d_${SUFFIX}$(mm, nn, aa, ia, ja, descA, bb, ib, jb, descB, ictxt)
+    integer, intent(in) :: descA(DLEN_)
+    integer, intent(in) :: descB(DLEN_)
+    ${TYPE}$, intent(in) :: aa(:,:)
+    ${TYPE}$, intent(inout) :: bb(:,:)
+    integer, intent(in) :: mm, nn, ia, ja, ib, jb, ictxt
+
+    ! AA and BB should be references to starting corner of matrices
+    call gemr2d(mm, nn, aa, ia, ja, descA, bb, ib, jb, descB, ictxt)
+
+  end subroutine blacsfx_gemr2d_${SUFFIX}$
+
+#:enddef blacsfx_gemr2d_template
+
+#:for TYPE in TYPES
+  #:set FTYPE = FORTRAN_TYPES[TYPE]
+  #:set SUFFIX = TYPE_ABBREVS[TYPE]
+  $:blacsfx_gemr2d_template(SUFFIX, FTYPE)
+#:endfor
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! Barrier
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -520,6 +568,9 @@ contains
 
   end subroutine blacsfx_barrier
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Grid information
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   !> Delivers process information.
   !!
@@ -567,6 +618,9 @@ contains
 
   end function blacsfx_pnum
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! Stop
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   !> Stops BLACS communication.
   !!
