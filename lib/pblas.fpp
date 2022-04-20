@@ -51,6 +51,37 @@
 
 
 
+
+! ************************************************************************
+! *** psyr2k / pher2k
+! ************************************************************************
+
+#:def interface_psyr2k_pher2k_template(COMMENT, NAME, TYPE, KIND)
+
+  !> Symmetric/hermitian rank-k update (${COMMENT}$).
+  subroutine ${NAME}$(uplo, trans, nn, kk, alpha, aa, ia, ja, desca, bb, ib, jb, descb, beta, cc,&
+      & ic, jc, descc)
+    import
+    character, intent(in) :: uplo, trans
+    integer, intent(in) :: nn, kk
+    real(${KIND}$), intent(in) :: alpha
+    integer, intent(in) :: desca(*)
+    ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
+    integer, intent(in) :: ia, ja
+    integer, intent(in) :: descb(*)
+    ${TYPE}$(${KIND}$), intent(in) :: bb(descb(LLD_), *)
+    integer, intent(in) :: ib, jb
+    real(${KIND}$), intent(in) :: beta
+    integer, intent(in) :: descc(*)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(descc(LLD_), *)
+    integer, intent(in) :: ic, jc
+  end subroutine ${NAME}$
+
+#:enddef interface_psyr2k_pher2k_template
+
+
+
+
 ! ************************************************************************
 ! *** psymv / phemv
 ! ************************************************************************
@@ -194,6 +225,7 @@ module pblas_module
 
   public :: psyr, pher
   public :: psyrk, pherk
+  public :: psyr2k, pher2k
   public :: psymv, phemv
   public :: psymm, phemm
   public :: pgemm
@@ -224,6 +256,18 @@ module pblas_module
     @:interface_psyrk_pherk_template(complex, pcherk, complex, sp)
     @:interface_psyrk_pherk_template(dcomplex, pzherk, complex, dp)
   end interface pherk
+
+  !> Symmetric rank-k update.
+  interface psyr2k
+    @:interface_psyr2k_pher2k_template(real, pssyr2k, real, sp)
+    @:interface_psyr2k_pher2k_template(dreal, pdsyr2k, real, dp)
+  end interface psyr2k
+
+  !> Hermitian rank-k update.
+  interface pher2k
+    @:interface_psyr2k_pher2k_template(complex, pcher2k, complex, sp)
+    @:interface_psyr2k_pher2k_template(dcomplex, pzher2k, complex, dp)
+  end interface pher2k
 
   !> Symmetric matrix vector product
   interface psymv

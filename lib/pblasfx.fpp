@@ -137,6 +137,66 @@
 
 
 
+#!************************************************************************
+#!*** psyr2k/pher2k
+#!************************************************************************
+
+#:def pblasfx_psyr2k_pher2k_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
+
+  !> Symmetric/Hermitian rank-2k update.
+  !! \param aa  Matrix to update with.
+  !! \param desca  Descriptor of aa.
+  !! \param bb  Matrix to update with.
+  !! \param descb  Descriptor of bb.
+  !! \param cc  Matrix to be updated.
+  !! \param desccc Descriptor of cc.
+  !! \param uplo "U" for for upper, "L" for lower triangle matrix (default: "L").
+  !! \param trans  "N" for normal, "T" for transposed aa (default: "N").
+  !! \param alpha  Prefactor.
+  subroutine pblasfx_${SUFFIX}$(aa, desca, bb, descb, cc, descc, uplo, trans, alpha, beta,&
+      & nn, kk, ia, ja, ib, jb, ic, jc)
+    ${TYPE}$(${KIND}$), intent(in) :: aa(:,:)
+    integer, intent(in) :: desca(DLEN_)
+    ${TYPE}$(${KIND}$), intent(in) :: bb(:,:)
+    integer, intent(in) :: descb(DLEN_)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(:,:)
+    integer, intent(in) :: descc(DLEN_)
+    character, intent(in), optional :: uplo, trans
+    real(${KIND}$), intent(in), optional :: alpha, beta
+    integer, intent(in), optional :: nn, kk
+    integer, intent(in), optional :: ia, ja, ib, jb, ic, jc
+
+    real(${KIND}$) :: alpha0, beta0
+    character :: uplo0, trans0
+    integer :: nn0, kk0, ia0, ja0, ib0, jb0, ic0, jc0
+
+    @:inoptflags(alpha0, alpha, real(1, kind=${KIND}$))
+    @:inoptflags(beta0, beta, real(0, kind=${KIND}$))
+    @:inoptflags(uplo0, uplo, "L")
+    @:inoptflags(trans0, trans, "N")
+    if (trans0 == "N") then
+      @:inoptflags(nn0, nn, desca(M_))
+      @:inoptflags(kk0, kk, desca(N_))
+    else
+      @:inoptflags(nn0, nn, desca(N_))
+      @:inoptflags(kk0, kk, desca(M_))
+    end if
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(ib0, ib, 1)
+    @:inoptflags(jb0, jb, 1)
+    @:inoptflags(ic0, ic, 1)
+    @:inoptflags(jc0, jc, 1)
+    call ${NAME}$(uplo0, trans0, nn0, kk0, alpha0, aa, ia0, ja0, desca, bb, ib0, jb0, descb, beta0,&
+        & cc, ic0, jc0, descc)
+
+  end subroutine pblasfx_${SUFFIX}$
+
+#:enddef pblasfx_psyr2k_pher2k_template
+
+
+
+
 #! ************************************************************************
 #! *** psymm/phemm
 #! ************************************************************************
@@ -520,6 +580,7 @@ module pblasfx_module
 
   public :: pblasfx_psyr, pblasfx_pher
   public :: pblasfx_psyrk, pblasfx_pherk
+  public :: pblasfx_psyr2k, pblasfx_pher2k
   public :: pblasfx_psymv, pblasfx_phemv
   public :: pblasfx_psymm, pblasfx_phemm
   public :: pblasfx_pgemm
@@ -542,6 +603,14 @@ module pblasfx_module
   interface pblasfx_pherk
     module procedure pblasfx_pherk_complex, pblasfx_pherk_dcomplex
   end interface pblasfx_pherk
+
+  interface pblasfx_psyr2k
+    module procedure pblasfx_psyr2k_real, pblasfx_psyr2k_dreal
+  end interface pblasfx_psyr2k
+
+  interface pblasfx_pher2k
+    module procedure pblasfx_pher2k_complex, pblasfx_pher2k_dcomplex
+  end interface pblasfx_pher2k
 
   interface pblasfx_psymv
     module procedure pblasfx_psymv_real, pblasfx_psymv_dreal
@@ -592,6 +661,11 @@ contains
   @:pblasfx_psyrk_pherk_template(psyrk_dreal, real, dp, real, psyrk)
   @:pblasfx_psyrk_pherk_template(pherk_complex, complex, sp, cmplx, pherk)
   @:pblasfx_psyrk_pherk_template(pherk_dcomplex, complex, dp, cmplx, pherk)
+
+  @:pblasfx_psyr2k_pher2k_template(psyr2k_real, real, sp, real, psyr2k)
+  @:pblasfx_psyr2k_pher2k_template(psyr2k_dreal, real, dp, real, psyr2k)
+  @:pblasfx_psyr2k_pher2k_template(pher2k_complex, complex, sp, cmplx, pher2k)
+  @:pblasfx_psyr2k_pher2k_template(pher2k_dcomplex, complex, dp, cmplx, pher2k)
 
   @:pblasfx_psymv_phemv_template(psymv_real, real, sp, real, psymv)
   @:pblasfx_psymv_phemv_template(psymv_dreal, real, dp, real, psymv)
