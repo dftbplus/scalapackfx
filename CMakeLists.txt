@@ -8,7 +8,7 @@ include(ScalapackFxUtils)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/config.cmake)
 
-project(ScalapackFx VERSION 1.0.2 LANGUAGES Fortran)
+project(ScalapackFx VERSION 1.1.0 LANGUAGES Fortran)
 
 setup_build_type()
 
