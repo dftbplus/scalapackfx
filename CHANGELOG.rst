@@ -12,6 +12,9 @@ Added
 
 * p?gemr2d routines
 
+* psyr2k and pher2k routines
+
+
 
 1.0.2
 =====
