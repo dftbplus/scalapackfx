@@ -9,9 +9,21 @@ module blacs_module
 
   public :: blacs_pinfo, blacs_get, blacs_gridinfo, blacs_gridinit
   public :: blacs_barrier, blacs_exit, blacs_abort, blacs_pnum
-  public :: gebs2d, gebr2d, gesd2d, gerv2d, gsum2d
+  public :: gebs2d, gebr2d, gesd2d, gerv2d, gsum2d, gemr2d
+
+
+  !> Performs 2d copy from data in matrix to another, potentially with different distribution
+  !> patterns.
+  !> See BLACS documentation for details.
+  interface gemr2d
+  #:for TYPE in TYPES
+    #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+    module procedure ${TYPEABBREV}$gemr2d
+  #:endfor
+  end interface gemr2d
 
   interface
+
     !> Returns the number of processes available for use.
     !! \see BLACS documentation for details.
     subroutine blacs_pinfo(id, nproc)
@@ -80,6 +92,7 @@ module blacs_module
       integer, intent(in) :: ictxt, pnum
       integer, intent(out) :: prow, pcol
     end subroutine blacs_pcoord
+
   end interface
 
 !##########################################################################
@@ -163,6 +176,7 @@ module blacs_module
 
   #:enddef blacs_gsum2d_interface
 
+
 !##########################################################################
 !##########################################################################
 !##########################################################################
@@ -217,5 +231,26 @@ module blacs_module
     #:endfor
   end interface gsum2d
 
-end module blacs_module
+contains
 
+#:for TYPE in TYPES
+  #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+  #:set FTYPE = FORTRAN_TYPES[TYPE]
+  #:set PREFIX = TYPE_ABBREVS[TYPE]
+  !> Interface for ${TYPEABBREV}$ case of the p?gemr2d routine, explictly wrapped to work around the
+  !> lack of assumed size in interfaces (Fortran2018)
+  subroutine ${TYPEABBREV}$gemr2d(mm, nn, aa, ia, ja, descA, bb, ib, jb, descB, ictxt)
+    integer, intent(in) :: mm, nn, ia, ja, ib, jb
+    integer, intent(in) :: descA(DLEN_), descB(DLEN_)
+    ${FTYPE}$, intent(in) :: aa(:,:)
+    ${FTYPE}$, intent(inout) :: bb(:,:)
+    integer, intent(in) :: ictxt
+    external p${TYPEABBREV}$gemr2d
+
+    call p${TYPEABBREV}$gemr2d(mm, nn, aa, ia, ja, descA, bb, ib, jb, descB, ictxt)
+
+  end subroutine ${TYPEABBREV}$gemr2d
+
+#:endfor
+
+end module blacs_module

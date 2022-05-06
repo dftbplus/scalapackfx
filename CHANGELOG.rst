@@ -4,6 +4,17 @@ Change Log
 
 Notable project changes in various releases.
 
+1.1
+===
+
+Added
+-----
+
+* p?gemr2d routines
+
+* psyr2k and pher2k routines
+
+
 
 1.0.2
 =====
