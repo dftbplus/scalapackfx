@@ -153,6 +153,11 @@ module scalapackfx_module
     module procedure scalafx_creatematrix_complex, scalafx_creatematrix_dcomplex
   end interface scalafx_creatematrix
 
+  !> Maps global position in a distributed matrix to local one.
+  interface scalafx_infog2l
+    module procedure scalafx_infog2l_single, scalafx_infog2l_array
+  end interface scalafx_infog2l
+
 !************************************************************************
 !*** ppotrf
 !************************************************************************
@@ -1965,7 +1970,8 @@ contains
   !! \param rsrc  Row of the process owning the local matrix.
   !! \param csrc  Column of the process owning the local matrix.
   !!
-  subroutine scalafx_infog2l(mygrid, desc, grow, gcol, lrow, lcol, rsrc, csrc)
+  subroutine scalafx_infog2l_single(mygrid, desc, grow, gcol,&
+      & lrow, lcol, rsrc, csrc)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: desc(DLEN_)
     integer, intent(in) :: grow, gcol
@@ -1975,8 +1981,92 @@ contains
     call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
         & mygrid%mycol, lrow, lcol, rsrc, csrc)
 
-  end subroutine scalafx_infog2l
+  end subroutine scalafx_infog2l_single
 
+  !> Maps global positions in a distributed matrix to local one.
+  !!
+  !! \param mygrid  BLACS descriptor.
+  !! \param desc  Descriptor of the distributed matrix.
+  !! \param grow  Global row indices.
+  !! \param gcol  Global column indices.
+  !! \param lrow  Local row indices on output.
+  !! \param lcol  Local column indices on output.
+  !! \param rsrc  Rows of the process owning the local matrix.
+  !! \param csrc  Columns of the process owning the local matrix.
+  !! \param calcAllIndices  Whether to calculate all lrow and lcol,
+  !!     even if the current process does not own them. (default: true)
+  !!
+  subroutine scalafx_infog2l_array(mygrid, desc, grow, gcol,&
+      & lrow, lcol, rsrc, csrc, calcAllIndices)
+    type(blacsgrid), intent(in) :: mygrid
+    integer, intent(in) :: desc(DLEN_)
+    integer, intent(in) :: grow(:), gcol(:)
+    integer, intent(out) :: lrow(:), rsrc(:)
+    integer, intent(out) :: lcol(:), csrc(:)
+    logical, intent(in), optional :: calcAllIndices
+
+    call scalapackfx_infog2l_helper(grow, desc(MB_), desc(RSRC_),&
+        & mygrid%myrow, mygrid%nrow, lrow, rsrc, calcAllIndices)
+
+    call scalapackfx_infog2l_helper(gcol, desc(NB_), desc(CSRC_),&
+        & mygrid%mycol, mygrid%ncol, lcol, csrc, calcAllIndices)
+
+  end subroutine scalafx_infog2l_array
+
+  !> Helper routine for scalafx_infog2l_array.
+  !!
+  !! \param globalInd  Global row/column indices.
+  !! \param descB  Either desc(MB_) or desc(NB_).
+  !! \param descSRC  Either desc(RSRC_) or desc(CSRC_).
+  !! \param myPos  Row/column of the current process.
+  !! \param nPos  Number of rows/columns.
+  !! \param localInd  Local row/column indices on output.
+  !! \param localPos  Rows/columns of the process owning the local matrix.
+  !! \param calcAllIndices  Whether to calculate all local indices,
+  !!     even if the current process does not own them. (default: true)
+  !!
+  subroutine scalapackfx_infog2l_helper(globalInd, descB, descSRC,&
+      & myPos, nPos, localInd, localPos, calcAllIndices)
+    integer, intent(in) :: globalInd(:)
+    integer, intent(in) :: descB, descSRC
+    integer, intent(in) :: myPos, nPos
+    integer, intent(out) :: localInd(:), localPos(:)
+    logical, intent(in), optional :: calcAllIndices
+
+    real(dp) :: inv
+    integer, dimension(size(globalInd)) :: blk
+    integer :: check, i
+    logical :: calcAllIndices_
+
+    ! Note that we explicitly multiply with a double here instead of
+    ! dividing by an integer to enhance performance.
+    inv = 1.0_dp / real(descB, kind=dp)
+    blk = (globalInd - 1) * inv
+
+    check = modulo(myPos - descSRC, nPos)
+
+    localPos = mod(blk + descSRC, nPos)
+
+    calcAllIndices_ = .true.
+    if (present(calcAllIndices)) then
+      calcAllIndices_ = calcAllIndices
+    end if
+
+    do i = 1, size(globalInd)
+      if (calcAllIndices_ .or. myPos == localPos(i)) then
+        localInd(i) = (blk(i) / nPos + 1) * descB + 1
+        if (check >= mod(blk(i), nPos)) then
+          if (myPos == localPos(i)) then
+            localInd(i) = localInd(i) + mod(globalInd(i) - 1, descB)
+          end if
+          localInd(i) = localInd(i) - descB
+        end if
+      else
+        localInd(i) = -1
+      end if
+    end do
+
+  end subroutine scalapackfx_infog2l_helper
 
   !> Maps local row or column index onto global matrix position.
   !!

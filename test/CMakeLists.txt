@@ -3,6 +3,7 @@ set(targets
   test_subgrids)
 
 set(common-dep-targets
+  test_cpg2l
   test_det
   test_diag
   test_gemr2d
