@@ -68,15 +68,33 @@
     integer, intent(in) :: ii, jj
     ${FTYPE}$, intent(inout) :: glob(:,:)
   
-    integer :: i2, j2, iloc, jloc, prow, pcol
+    integer :: i2, j2, nr, nc
+    integer, dimension(size(loc, dim=1)) :: irows, iloc, prow
+    integer, dimension(size(loc, dim=2)) :: icols, jloc, pcol
+
+    nr = size(loc, dim=1)
+    nc = size(loc, dim=2)
+
+    do i2 = 1, nr
+      irows(i2) = i2 + ii - 1
+    end do
+
+    do j2 = 1, nc
+      icols(j2) = j2 + jj - 1
+    end do
+
+    call scalafx_infog2l(mygrid, desc, irows, icols, iloc, jloc,&
+        & prow, pcol, .false.)
   
-    do j2 = 1, size(loc, dim=2)
-      do i2 = 1, size(loc, dim=1)
-        call scalafx_infog2l(mygrid, desc, i2 + ii - 1, j2 + jj - 1, &
-            & iloc, jloc, prow, pcol)
-        if (prow == mygrid%myrow .and. pcol == mygrid%mycol) then
-          glob(iloc, jloc) = glob(iloc, jloc) + loc(i2, j2)
+    do j2 = 1, nc
+      if (pcol(j2) /= mygrid%mycol) then
+        cycle
+      end if
+      do i2 = 1, nr
+        if (prow(i2) /= mygrid%myrow) then
+          cycle
         end if
+        glob(iloc(i2), jloc(j2)) = glob(iloc(i2), jloc(j2)) + loc(i2, j2)
       end do
     end do
     
@@ -109,17 +127,36 @@
     ${FTYPE}$, intent(in) :: glob(:,:)
     ${FTYPE}$, intent(out) :: loc(:,:)
     
-    integer :: i2, j2, iloc, jloc, prow, pcol
+    integer :: i2, j2, nr, nc
+    integer, dimension(size(loc, dim=1)) :: irows, iloc, prow
+    integer, dimension(size(loc, dim=2)) :: icols, jloc, pcol
+
+    nr = size(loc, dim=1)
+    nc = size(loc, dim=2)
+
+    do i2 = 1, nr
+      irows(i2) = i2 + ii - 1
+    end do
+
+    do j2 = 1, nc
+      icols(j2) = j2 + jj - 1
+    end do
+
+    call scalafx_infog2l(mygrid, desc, irows, icols, iloc, jloc,&
+        & prow, pcol, .false.)
   
-    loc(:,:) = 0.0_dp
-    do j2 = 1, size(loc, dim=2)
-      do i2 = 1, size(loc, dim=1)
-        call scalafx_infog2l(mygrid, desc, i2 + ii - 1, j2 + jj - 1, &
-            & iloc, jloc, prow, pcol)
-        if (prow == mygrid%myrow .and. pcol == mygrid%mycol) then
-          loc(i2, j2) = glob(iloc, jloc)
-        end if
-      end do
+    do j2 = 1, nc
+      if (pcol(j2) == mygrid%mycol) then
+        do i2 = 1, nr
+          if (prow(i2) == mygrid%myrow) then
+            loc(i2, j2) = glob(iloc(i2), jloc(j2))
+          else
+            loc(i2, j2) = 0.0_dp
+          end if
+        end do
+      else
+        loc(:, j2) = 0.0_dp
+      end if
     end do
     
   end subroutine cpg2l_${SUFFIX}$
