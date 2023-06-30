@@ -4,6 +4,15 @@ Change Log
 
 Notable project changes in various releases.
 
+1.2
+===
+
+Added
+-----
+
+* infog2l accepts also an array of indices
+
+
 1.1
 ===
 
