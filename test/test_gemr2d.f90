@@ -14,7 +14,7 @@ program test_gemr2d
 
 contains
 
-  ! number elements in global matrix
+  ! number up the elements in the global matrix
   pure function numelem(iGlob, jGlob, mm)
     integer, intent(in) :: iGlob, jGlob, mm
     integer :: numelem
@@ -22,10 +22,10 @@ contains
   end function numelem
 
   subroutine main()
-    type(blacsgrid) :: mygridA, mygridB
+    type(blacsgrid) :: myGridA, myGridB
     integer, allocatable :: AA(:,:), BB(:,:)
     integer :: descA(DLEN_), descB(DLEN_)
-    integer :: nprow, npcol, mm, nn, iproc, nproc, ii, jj, iGlob, jGlob
+    integer :: nprow, npcol, mm, nn, iproc, nproc, ii, jj, iGlob, jGlob, iprow, ipcol
     integer, allocatable :: iErr(:)
 
     ! Block size for matrix B
@@ -42,94 +42,161 @@ contains
       end if
     end do
     nprow = nproc / npcol
-    call mygridA%initgrid(nprow, npcol)
-    call mygridB%initgrid(1, nproc)
-    if (mygridA%lead) then
+    call myGridA%initgrid(nprow, npcol)
+    call myGridB%initgrid(1, nproc)
+    if (myGridA%lead) then
       write(stdout, "(A,2(1X,I0))") "# source processor grid:", nprow, npcol
     end if
-    if (mygridB%lead) then
+    if (myGridB%lead) then
       write(stdout, "(A,2(1X,I0))") "# destination processor grid:", 1, nproc
     end if
 
-    if (mygridA%lead) then
+    call blacsfx_barrier(myGridA)
+    call blacsfx_barrier(myGridB)
+
+    if (myGridA%lead) then
       write(stdOut, *)'# Matrix size to re-distrbute?'
       read(stdin, *) mm, nn
-      call blacsfx_gebs(mygridA, mm)
-      call blacsfx_gebs(mygridA, nn)
+      call blacsfx_gebs(myGridA, mm)
+      call blacsfx_gebs(myGridA, nn)
     else
-      call blacsfx_gebr(mygridA, mm)
-      call blacsfx_gebr(mygridA, nn)
+      call blacsfx_gebr(myGridA, mm)
+      call blacsfx_gebr(myGridA, nn)
     end if
 
     ! Block size for matrix B
     mbB = mm
     nbB = 1
 
-    if (mygridA%lead) then
+    if (myGridA%lead) then
       write(stdout, "(A,2(1X,I0))") "# A processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0,1X,I0)") "# A block size:", mbA, nbA
     end if
-    if (mygridB%lead) then
+    if (myGridB%lead) then
       write(stdout, "(A,2(1X,I0))") "# B processor grid:", nprow, npcol
       write(stdout, "(A,1X,I0,1X,I0)") "# B block size:", mbB, nbB
     end if
 
-    call scalafx_creatematrix(mygridA, mm, nn, mbA, nbA, AA, descA)
-    call scalafx_creatematrix(mygridB, mm, nn, mbB, nbB, BB, descB)
+    call scalafx_creatematrix(myGridA, mm, nn, mbA, nbA, AA, descA)
+    call scalafx_creatematrix(myGridB, mm, nn, mbB, nbB, BB, descB)
+
+    if (myGridA%lead) then
+      do ii = 0, nproc-1
+        call blacsfx_pcoord(myGridA, ii, iprow, ipcol)
+        write(stdout, "(A,I0,A,1X,I0,1X,I0)") "# A block (proc:",ii,"):",&
+            & max(1, scalafx_numroc(descA(M_), descA(MB_), iprow, descA(RSRC_), myGridA%nrow)),&
+            & scalafx_numroc(descA(N_), descA(NB_), ipcol, descA(CSRC_), myGridA%ncol)
+      end do
+
+      write(stdout,*)'Processor locations in the A BLACS grid'
+      do ii = 0, nproc - 1
+        call blacsfx_pcoord(myGridA, ii, iprow, ipcol)
+        write(stdout, "(X,A,I0,A,I0,X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
+      end do
+
+      write(stdout,*)'Matrix element locations in the A BLACS grid'
+      do ii = 1, nn
+        do jj = 1, mm
+          iprow = scalafx_indxg2p(jj, descA(MB_), descA(RSRC_), myGridA%nrow)
+          ipcol = scalafx_indxg2p(ii, descA(NB_), descA(CSRC_), myGridA%ncol)
+          write(stdout, "(I0,X,I0,A,I0,X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
+              & ' proc:', blacsfx_pnum(myGridA, iprow, ipcol)
+        end do
+      end do
+    end if
+
+    call blacsfx_barrier(myGridA)
+    call blacsfx_barrier(myGridB)
+
+    if (myGridB%lead) then
+      do ii = 0, nproc - 1
+        call blacsfx_pcoord(myGridB, ii, iprow, ipcol)
+        write(stdout, "(A,I0,A,1X,I0,1X,I0)") "# B block (proc:",ii,"):",&
+            & max(1, scalafx_numroc(descB(M_), descB(MB_), iprow, descB(RSRC_), myGridB%nrow)),&
+            & scalafx_numroc(descB(N_), descB(NB_), ipcol, descB(CSRC_), myGridB%ncol)
+      end do
+
+      write(stdout,*)'Processor locations in the B BLACS grid'
+      do ii = 0, nproc - 1
+        call blacsfx_pcoord(myGridB, ii, iprow, ipcol)
+        write(stdout, "(X,A,I0,A,I0,X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
+      end do
+
+      write(stdout,*)'Matrix element locations in the B BLACS grid'
+      do ii = 1, nn
+        do jj = 1, mm
+          iprow = scalafx_indxg2p(jj, descB(MB_), descB(RSRC_), myGridB%nrow)
+          ipcol = scalafx_indxg2p(ii, descB(NB_), descB(CSRC_), myGridB%ncol)
+          write(stdout, "(I0,X,I0,A,I0,X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
+              & ' proc:', blacsfx_pnum(myGridB, iprow, ipcol)
+        end do
+      end do
+
+    end if
+
+    call blacsfx_barrier(myGridA)
+    call blacsfx_barrier(myGridB)
 
     AA(:,:) = 0
     BB(:,:) = 0
 
-    write(stdOut,"(A,I0,A,I0,',',I0,A)")'Processor ', mygridA%iproc,' holds A(', shape(AA),&
-        & ') elements'
+    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,X,I0)")'Processor ', myGridA%iproc,' (grid A) holds A(',&
+        & shape(AA), ') elements vs ',&
+        & max(1, scalafx_numroc(descA(M_), descA(MB_), myGridA%myrow, descA(RSRC_), myGridA%nrow)),&
+        & scalafx_numroc(descA(N_), descA(NB_), myGridA%mycol, descA(CSRC_), myGridA%ncol)
 
-    write(stdOut,"(A,I0,A,I0,',',I0,A)")'Processor ', mygridB%iproc,' holds B(', shape(BB),&
-        & ') elements'
+    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,X,I0)")'Processor ', myGridB%iproc,' (grid B) holds B(',&
+        & shape(BB), ') elements vs ',&
+        & max(1, scalafx_numroc(descB(M_), descB(MB_), myGridB%myrow, descB(RSRC_), myGridB%nrow)),&
+        & scalafx_numroc(descB(N_), descB(NB_), myGridB%mycol, descB(CSRC_), myGridB%ncol)
 
-    ! number off elements in A
+    ! number off the elements in A
     do ii = 1, size(AA, dim=2)
-      iGlob = scalafx_indxl2g(ii, descA(NB_), mygridA%mycol, descA(CSRC_), mygridA%ncol)
+      iGlob = scalafx_indxl2g(ii, descA(NB_), myGridA%mycol, descA(CSRC_), myGridA%ncol)
       do jj = 1, size(AA, dim=1)
-        jGlob = scalafx_indxl2g(jj, descA(MB_), mygridA%myrow, descA(RSRC_), mygridA%nrow)
+        jGlob = scalafx_indxl2g(jj, descA(MB_), myGridA%myrow, descA(RSRC_), myGridA%nrow)
         AA(jj,ii) = numelem(iGlob, jGlob, mm)
       end do
     end do
 
+    call blacsfx_barrier(myGridA)
+    call blacsfx_barrier(myGridB)
+
     ! A -> B
-    call blacsfx_gemr2d(mm, nn, aa, 1, 1, descA, bb, 1, 1, descB, mygridA%ctxt)
+    call blacsfx_gemr2d(mm, nn, aa, 1, 1, descA, bb, 1, 1, descB, myGridA%ctxt)
 
     aa(:,:) = 0
 
     ! B -> A
-    call blacsfx_gemr2d(mm, nn, bb, 1, 1, descB, aa, 1, 1, descA, mygridA%ctxt)
+    call blacsfx_gemr2d(mm, nn, bb, 1, 1, descB, aa, 1, 1, descA, myGridA%ctxt)
 
     allocate(iErr(0:nProc-1))
     iErr(:) = 0
     ! check it's what is expected
     if (all(shape(AA) > [0,0])) then
       lpCol: do ii = 1, size(AA, dim=2)
-        iGlob = scalafx_indxl2g(ii, descA(NB_), mygridA%mycol, descA(CSRC_), mygridA%ncol)
+        iGlob = scalafx_indxl2g(ii, descA(NB_), myGridA%mycol, descA(CSRC_), myGridA%ncol)
         if (iGlob > nn) then
           cycle lpCol
         end if
         lpRow: do jj = 1, size(AA, dim=1)
-          jGlob = scalafx_indxl2g(jj, descA(MB_), mygridA%myrow, descA(RSRC_), mygridA%nrow)
+          jGlob = scalafx_indxl2g(jj, descA(MB_), myGridA%myrow, descA(RSRC_), myGridA%nrow)
           if (jGlob > mm) then
             cycle lpRow
           end if
           if (AA(jj,ii) /= numelem(iGlob, jGlob, mm)) then
-            write(stdOut,*) "Error on processor ", mygridA%iproc, " Mismatch in element ", jGlob,&
+            write(stdOut,*) "Error on processor ", myGridA%iproc, " Mismatch in element ", jGlob,&
                 & iGlob
-            iErr(mygridA%iproc) = numelem(iGlob, jGlob, mm)
+            iErr(myGridA%iproc) = numelem(iGlob, jGlob, mm)
             exit lpcol
           end if
         end do lpRow
       end do lpCol
     end if
 
-    call blacsfx_gsum(mygridA, iErr)
+    call blacsfx_gsum(myGridA, iErr)
 
-    if (mygridB%lead) then
+    if (myGridB%lead) then
       if (any(iErr /= 0)) then
         write(stdOut,*)"Errors for matrix elements"
         write(stdOut,*) iErr

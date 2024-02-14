@@ -9,7 +9,7 @@ module scalapack_module
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
   public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgesvd
-  public :: sl_init, numroc, infog2l, indxl2g, descinit
+  public :: sl_init, numroc, infog2l, indxl2g, descinit, indxg2p
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! ppotrf
@@ -515,6 +515,12 @@ module scalapack_module
       integer :: indxl2g
       integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs
     end function indxl2g
+
+    !> Finds processor id where global index is stored.
+    function indxg2p(indxglob, nb, iproc, isrcproc, nprocs)
+      integer :: indxg2p
+      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs
+    end function indxg2p
 
     !> Initializes a descriptor for a distributed array.
     subroutine descinit(desc, mm, nn, mb, nb, irsrc, icsrc, ictxt, lld, info)

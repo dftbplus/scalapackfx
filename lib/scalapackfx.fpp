@@ -35,6 +35,8 @@ module scalapackfx_module
   public :: scalafx_localindices
   public :: scalafx_creatematrix
   public :: scalafx_pgesvd
+  public :: scalafx_numroc
+  public :: scalafx_indxg2p
 
   !> Cholesky factorization of a symmetric/Hermitian positive definite matrix.
   interface scalafx_ppotrf
@@ -2071,16 +2073,37 @@ contains
   !> Maps local row or column index onto global matrix position.
   !!
   !! \param indxloc  Local index on input.
-  !! \param mygrid  BLACS descriptor.
-  !! \param blocksize  Block size for direction (row or column)
+  !! \param nb  Block size for the column/row
+  !! \param iproc  Local array index
+  !! \param isrcproc coordinate of the process that possesses the first row/column of the
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
   !!
-  function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
+  function scalafx_indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
     integer :: scalafx_indxl2g
-    integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
+    integer, intent(in) :: indxloc, nb, iproc, isrcproc, nprocs
 
-    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    scalafx_indxl2g = indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
 
   end function scalafx_indxl2g
+
+
+  !> Maps global matrix position onto processor.
+  !!
+  !! \param indxloc  Global index on input.
+  !! \param nb  Block size for the column/row
+  !! \param isrcproc coordinate of the process that possesses the first row/column of thexs
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
+  !!
+  function scalafx_indxg2p(indxglob, nb, isrcproc, nprocs)
+    integer :: scalafx_indxg2p
+    integer, intent(in) :: indxglob, nb, isrcproc, nprocs
+    integer :: iDummy
+
+    scalafx_indxg2p = indxg2p(indxglob, nb, iDummy, isrcproc, nprocs)
+
+  end function scalafx_indxg2p
 
   !> Maps a global position in a distributed matrix to local one.
   !!
@@ -2121,5 +2144,19 @@ contains
 
   end subroutine scalafx_localindices
 
+
+  !> Number of rows or columns of distributed matrix owned by a specific process.
+  !!
+  !! \param nn Number of columns (or rows) of global matrix.
+  !! \param nb Column (or row) block size.
+  !! \param iproc The coordinate of the process whose local array row or column is to be determined.
+  !! \param nproc The total number processes over which the matrix is distributed.
+  function scalafx_numroc(nn, nb, iproc, isrcproc, nproc)
+    integer :: scalafx_numroc
+    integer, intent(in) :: nn, nb, iproc, isrcproc, nproc
+
+    scalafx_numroc = numroc(nn, nb, iproc, isrcproc, nproc)
+
+  end function scalafx_numroc
 
 end module scalapackfx_module
