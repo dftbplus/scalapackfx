@@ -18,6 +18,7 @@ module blacsgrid_module
     integer :: nproc = -1  !< Nr. of processes in the grid.
     integer :: myrow = -1  !< Row of the current process.
     integer :: mycol = -1  !< Column of the current process.
+    integer :: leadproc = -1  !< Id of the lead process.
     integer :: leadrow = -1   !< Row of the lead process.
     integer :: leadcol = -1   !< Column of the lead process.
     logical :: lead = .false. !< Whether the current process is the lead.
@@ -137,8 +138,8 @@ contains
       end if
       self%leadrow = leadrow0
       self%leadcol = leadcol0
-      self%lead = (self%myrow == self%leadrow &
-          & .and. self%mycol == self%leadcol)
+      self%leadproc = blacs_pnum(self%ctxt, self%leadrow, self%leadcol)
+      self%lead = (self%myrow == self%leadrow .and. self%mycol == self%leadcol)
     end if
 
   end subroutine initgrid
