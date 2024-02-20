@@ -94,15 +94,6 @@ $:code
 #:enddef move_minoptalloc
 
 
-#! Sets an optional output argument (aa) if present to a certain value (bb).
-#!
-#:def handle_outoptflag(aa, bb)
-  if (present(${aa}$)) then
-    ${aa}$ = ${bb}$
-  end if
-#:enddef
-
-
 #! Moves allocation from an array (aa) to an optional target (bb).
 #!
 #:def optmovealloc(aa, bb)
