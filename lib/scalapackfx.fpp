@@ -30,11 +30,15 @@ module scalapackfx_module
   public :: scalafx_ptrsm
   public :: scalafx_getdescriptor
   public :: scalafx_getlocalshape
+  public :: scalafx_getremoteshape
   public :: scalafx_infog2l
   public :: scalafx_indxl2g
   public :: scalafx_localindices
   public :: scalafx_creatematrix
   public :: scalafx_pgesvd
+  public :: scalafx_numroc
+  public :: scalafx_indxg2p
+  public :: scalafx_infog2p
 
   !> Cholesky factorization of a symmetric/Hermitian positive definite matrix.
   interface scalafx_ppotrf
@@ -1959,6 +1963,45 @@ contains
 
   end subroutine scalafx_getlocalshape
 
+
+  !> Returns the shape of a remote part of a distributed array, given the processor number
+  !!
+  !! \param mygrid  BLACS grid descriptor.
+  !! \param desc  Global matrix descriptor.
+  !! \param iproc  Processor number
+  !! \param nrowloc  Nr. of local rows, returns 0 if iproc outside of grid.
+  !! \param ncolloc  Nr. of local columns, returns 0 if iproc outside of grid.
+  !!
+  subroutine scalafx_getremoteshape(mygrid, desc, iproc, nrowloc, ncolloc, storage)
+    type(blacsgrid), intent(in) :: mygrid
+    integer, intent(in) :: desc(DLEN_), iproc
+    integer, intent(out) :: nrowloc, ncolloc
+    logical, intent(in), optional :: storage
+
+    integer :: iprow, ipcol
+    logical :: isStorage
+
+    isStorage = .false.
+    if (present(storage)) then
+      isStorage = storage
+    end if
+
+    if (iproc < 0 .or. iproc >= mygrid%nproc) then
+      nrowloc = 0
+      ncolloc = 0
+    else
+      call blacsfx_pcoord(myGrid, iproc, iprow, ipcol)
+      if (isStorage) then
+        nrowloc = max(1,numroc(desc(M_), desc(MB_), iprow, desc(RSRC_), mygrid%nrow))
+      else
+        nrowloc = numroc(desc(M_), desc(MB_), iprow, desc(RSRC_), mygrid%nrow)
+      end if
+      ncolloc = numroc(desc(N_), desc(NB_), ipcol, desc(CSRC_), mygrid%ncol)
+    end if
+
+  end subroutine scalafx_getremoteshape
+
+
   !> Maps global position in a distributed matrix to local one.
   !!
   !! \param mygrid  BLACS descriptor.
@@ -2071,16 +2114,71 @@ contains
   !> Maps local row or column index onto global matrix position.
   !!
   !! \param indxloc  Local index on input.
-  !! \param mygrid  BLACS descriptor.
-  !! \param blocksize  Block size for direction (row or column)
+  !! \param nb  Block size for the column/row
+  !! \param iproc  Local array index
+  !! \param isrcproc coordinate of the process that possesses the first row/column of the
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
   !!
-  function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
+  function scalafx_indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
     integer :: scalafx_indxl2g
-    integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
+    integer, intent(in) :: indxloc, nb, iproc, isrcproc, nprocs
 
-    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    scalafx_indxl2g = indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
 
   end function scalafx_indxl2g
+
+
+  !> Maps global matrix position onto processor.
+  !!
+  !! \param indxloc  Global index on input.
+  !! \param nb  Block size for the column/row
+  !! \param isrcproc coordinate of the process that possesses the first row/column of thexs
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
+  !!
+  function scalafx_indxg2p(indxglob, nb, isrcproc, nprocs)
+    integer :: scalafx_indxg2p
+    integer, intent(in) :: indxglob, nb, isrcproc, nprocs
+    integer :: iDummy
+
+    scalafx_indxg2p = indxg2p(indxglob, nb, iDummy, isrcproc, nprocs)
+
+  end function scalafx_indxg2p
+
+
+  !> Processor grid location holding a global matrix element. If the element is outside of the
+  !! matrix, returns location (-1,-1)
+  subroutine scalafx_infog2p(mygrid, desc, grow, gcol, prow, pcol)
+
+    !> BLACS descriptor.
+    type(blacsgrid), intent(in) :: mygrid
+
+    !> Descriptor of the distributed matrix.
+    integer, intent(in) :: desc(DLEN_)
+
+    !> Global row index.
+    integer, intent(in) :: grow
+
+    !> Global column index
+    integer, intent(in) :: gcol
+
+    !> Row index in the BLACS grid
+    integer, intent(out) :: prow
+
+    !> Column index in BLACS grid
+    integer, intent(out) :: pcol
+
+    if (grow < 0 .or. grow > desc(M_) .or. gcol < 0 .or. gcol > desc(N_)) then
+      prow = -1
+      pcol = -1
+    else
+      prow = scalafx_indxg2p(grow, desc(MB_), desc(RSRC_), myGrid%nrow)
+      pcol = scalafx_indxg2p(gcol, desc(NB_), desc(CSRC_), myGrid%ncol)
+    end if
+
+  end subroutine scalafx_infog2p
+
 
   !> Maps a global position in a distributed matrix to local one.
   !!
@@ -2098,28 +2196,46 @@ contains
     !> Global column index
     integer, intent(in) :: gcol
 
-    !> Indicates whether given global index is local for the process.
+    !> Indicates whether given global index is local for the calling process.
     logical, intent(out) :: local
 
-    !> Row index in the local matrix (or 0 if global index is not local)
+    !> Row index in the local matrix on the process holding that matrix, if outside the matrix
+    !> returns 0
     integer, intent(out) :: lrow
 
-    !> Column index in the local matrix (or 0 if global index is not local)
+    !> Column index in the local matrix on the process holding that matrix, if outside the matrix
+    !> returns 0
     integer, intent(out) :: lcol
 
     !------------------------------------------------------------------------
 
     integer :: rsrc, csrc
 
-    call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
-        & mygrid%mycol, lrow, lcol, rsrc, csrc)
-    local = (rsrc == mygrid%myrow .and. csrc == mygrid%mycol)
-    if (.not. local) then
+    if (grow < 0 .or. grow > desc(M_) .or. gcol < 0 .or. gcol > desc(N_)) then
       lrow = 0
       lcol = 0
+      local = .false.
+    else
+      call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
+          & mygrid%mycol, lrow, lcol, rsrc, csrc)
+      local = (rsrc == mygrid%myrow .and. csrc == mygrid%mycol)
     end if
 
   end subroutine scalafx_localindices
 
+
+  !> Number of rows or columns of distributed matrix owned by a specific process.
+  !!
+  !! \param nn Number of columns (or rows) of global matrix.
+  !! \param nb Column (or row) block size.
+  !! \param iproc The coordinate of the process whose local array row or column is to be determined.
+  !! \param nproc The total number processes over which the matrix is distributed.
+  function scalafx_numroc(nn, nb, iproc, isrcproc, nproc)
+    integer :: scalafx_numroc
+    integer, intent(in) :: nn, nb, iproc, isrcproc, nproc
+
+    scalafx_numroc = numroc(nn, nb, iproc, isrcproc, nproc)
+
+  end function scalafx_numroc
 
 end module scalapackfx_module
