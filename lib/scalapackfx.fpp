@@ -13,6 +13,7 @@ module scalapackfx_module
   public :: scalafx_ppotri
   public :: scalafx_ptrtri
   public :: scalafx_pgetrf
+  public :: scalafx_pgetri
   public :: scalafx_psygst
   public :: scalafx_phegst
   public :: scalafx_psyev
@@ -63,6 +64,12 @@ module scalapackfx_module
     module procedure scalafx_pgetrf_real, scalafx_pgetrf_dreal
     module procedure scalafx_pgetrf_complex, scalafx_pgetrf_dcomplex
   end interface scalafx_pgetrf
+
+  !> Inverse of a LU decomposed general matrix.
+  interface scalafx_pgetri
+    module procedure scalafx_pgetri_real, scalafx_pgetri_dreal
+    module procedure scalafx_pgetri_complex, scalafx_pgetri_dcomplex
+  end interface scalafx_pgetri
 
   !> Reduces symmetric definite generalized eigenvalue problem to standard form.
   interface scalafx_psygst
@@ -352,6 +359,75 @@ module scalapackfx_module
   end subroutine scalafx_pgetrf_${TYPE}$
 
 #:enddef scalafx_pgetrf_template
+
+
+!************************************************************************
+!*** pgetri
+!************************************************************************
+
+#:def scalafx_pgetri_template(TYPE, FTYPE)
+
+  !> Inversion of a LU-factorized general matrix with pivoting
+  !!
+  subroutine scalafx_pgetri_${TYPE}$(aa, desca, ipiv, ia, ja, nn, work, iwork, info)
+
+    !> Inverse exit, pivoted by ipiv
+    ${FTYPE}$, intent(inout) :: aa(:,:)
+
+    !> Descriptor of A.
+    integer, intent(in) :: desca(DLEN_)
+
+    !> Pivot matrix
+    integer, intent(out) :: ipiv(:)
+
+    !> First row of the submatrix of A. Default: 1
+    integer, intent(in), optional :: ia
+
+    !> First column of the submatrix of A. Default: 1
+    integer, intent(in), optional :: ja
+
+    !> Number of rows in the submatrix of A. Default: desca(N_)
+    integer, intent(in), optional :: nn
+
+    !> Work array, if provided externally
+    ${FTYPE}$, intent(inout), allocatable, optional :: work(:)
+
+    !> Integer work array, if provided externally
+    integer, intent(inout), allocatable, optional :: iwork(:)
+
+    !> Info flag. If not specified and error occurs, the subroutine stops.
+    integer, intent(out), optional :: info
+
+    !------------------------------------------------------------------------
+
+    ${FTYPE}$, allocatable :: work0(:)
+    integer, allocatable :: iwork0(:)
+    integer :: lwork, liwork, info0
+    integer :: ia0, ja0, nn0
+    ${FTYPE}$ :: rtmp(1)
+    integer :: itmp(1)
+
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(nn0, nn, desca(N_))
+
+    ! Allocate  workspace
+    nn0 = desca(M_)
+    call pgetri(nn0, aa, ia0, ja0, desca, ipiv, rtmp, -1, itmp, -1, info0)
+    call handle_infoflag(info0, "pgetri in scalafx_pgetri_${TYPE}$", info)
+    @:move_minoptalloc(work0, int(rtmp(1)), lwork, work)
+    @:move_minoptalloc(iwork0, itmp(1), liwork, iwork)
+
+    call pgetri(nn0, aa, ia0, ja0, desca, ipiv, work0, lwork, iwork0, liwork, info0)
+    call handle_infoflag(info0, "pgetri in scalafx_pgetri_${TYPE}$", info)
+
+    ! Save work space allocations, if dummy argument present
+    @:optmovealloc(work0, work)
+    @:optmovealloc(iwork0, iwork)
+
+  end subroutine scalafx_pgetri_${TYPE}$
+
+#:enddef scalafx_pgetri_template
 
 
 !************************************************************************
@@ -1879,6 +1955,7 @@ contains
     $:scalafx_ppotri_template(TYPE, FTYPE)
     $:scalafx_ptrtri_template(TYPE, FTYPE)
     $:scalafx_pgetrf_template(TYPE, FTYPE)
+    $:scalafx_pgetri_template(TYPE, FTYPE)
     $:scalafx_psygst_phegst_template(TYPE, FTYPE)
 
     #:if TYPE in REAL_TYPES

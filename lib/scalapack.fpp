@@ -8,7 +8,7 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgesvd
+  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgetri, pgesvd
   public :: sl_init, numroc, infog2l, indxl2g, descinit, indxg2p
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -76,12 +76,30 @@ module scalapack_module
   end subroutine p${TYPEABBREV}$getrf
 #:enddef interface_pgetrf_template
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! pgetri
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#:def interface_pgetri_template(TYPEABBREV, FTYPES)
+  !> Inverse of an LU factorized general matrix (${TYPE}$).
+  subroutine p${TYPEABBREV}$getri(nn, aa, ia, ja, desca, ipiv, work, lwork, iwork, liwork, info)
+    import
+    integer, intent(in) :: nn
+    integer, intent(in) :: ia, ja, desca(*)
+    ${FTYPES}$, intent(inout) :: aa(desca(LLD_), *)
+    integer, intent(out) :: ipiv(*)
+    ${FTYPES}$, intent(inout) :: work(*)
+    integer, intent(inout) :: iwork(*)
+    integer, intent(in) :: lwork, liwork
+    integer, intent(out) :: info
+  end subroutine p${TYPEABBREV}$getri
+#:enddef interface_pgetri_template
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! psygst
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
 
 #:def interface_psygst_template(TYPEABBREV, KIND)
   !> Reduces generalized symmetric eigenvalue problem to standard form (${TYPE}$).
@@ -388,6 +406,15 @@ module scalapack_module
     #:endfor
   end interface pgetrf
 
+  !> Inversion of an LU-decomposed general matrix with pivoting
+  interface pgetri
+    #:for TYPE in TYPES
+      #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+      #:set FTYPE = FORTRAN_TYPES[TYPE]
+      $:interface_pgetri_template(TYPEABBREV, FTYPE)
+    #:endfor
+  end interface pgetri
+
   !> Reduces generalized symmetric eigenvalue problem to standard form.
   interface psygst
     #:for TYPE in REAL_TYPES
@@ -533,4 +560,3 @@ module scalapack_module
 
 
 end module scalapack_module
-
