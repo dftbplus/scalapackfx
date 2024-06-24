@@ -404,8 +404,10 @@ contains
   !! \param aa  Matrix to sum up.
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
-  !! \param rdest  Row of the destination (default: row of lead process).
-  !! \param rcol  Column of the destination (default: column of lead process).
+  !! \param rdest Row of the destination (default: row of lead process, if
+  !! rdest or cdest = -1, all in-scope procs receive result).
+  !! \param cdest Column of the destination (default: column of lead
+  !! process, if rdest or cdest = -1, all in-scope procs receive result).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid
@@ -436,7 +438,7 @@ contains
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
   !! \param rdest  Row of the destination (default: row of lead process).
-  !! \param rcol  Column of the destination (default: column of lead process).
+  !! \param cdest  Column of the destination (default: column of lead process).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid
@@ -462,7 +464,7 @@ contains
   !! \param scope  Scope of the broadcast (default: "A").
   !! \param top  Topology of the broadcast (default: " ").
   !! \param rdest  Row of the destination (default: row of lead process).
-  !! \param rcol  Column of the destination (default: column of lead process).
+  !! \param cdest  Column of the destination (default: column of lead process).
   !! \see BLACS documentation (routine ?gsum2d).
   subroutine blacsfx_gsum_${SUFFIX}$(mygrid, aa, scope, top, rdest, cdest)
     class(blacsgrid), intent(in) :: mygrid
