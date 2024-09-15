@@ -9,6 +9,7 @@ module scalapackfx_module
   private
 
   public :: DLEN_, DT_, CTXT_, M_, N_, MB_, NB_, RSRC_, CSRC_, LLD_
+  public :: numroc
   public :: scalafx_ppotrf
   public :: scalafx_ppotri
   public :: scalafx_ptrtri
