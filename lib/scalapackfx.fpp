@@ -29,6 +29,7 @@ module scalapackfx_module
   public :: scalafx_psygvr
   public :: scalafx_phegvr
   public :: scalafx_ptrsm
+  public :: scalafx_pposv
   public :: scalafx_getdescriptor
   public :: scalafx_getlocalshape
   public :: scalafx_getremoteshape
@@ -156,6 +157,12 @@ module scalapackfx_module
     module procedure scalafx_ptrsm_real, scalafx_ptrsm_dreal
     module procedure scalafx_ptrsm_complex, scalafx_ptrsm_dcomplex
   end interface scalafx_ptrsm
+
+  !> Solves symmetric/hermitian matrix equation.
+  interface scalafx_pposv
+    module procedure scalafx_pposv_real, scalafx_pposv_dreal
+    module procedure scalafx_pposv_complex, scalafx_pposv_dcomplex
+  end interface scalafx_pposv
 
   !> Creates a distributed matrix and allocates local storage.
   interface scalafx_creatematrix
@@ -1905,6 +1912,54 @@ module scalapackfx_module
 #:enddef scalafx_ptrsm_template
 
 
+!************************************************************************
+!*** pposv
+!************************************************************************
+
+#:def scalafx_pposv_template(TYPE, KIND)
+
+  !> Solves A X = B problem for a positive definite symmetric/hermitian A.
+  !!
+  !! \param aa  Left side matrix
+  !! \param desca  Descriptor of matrix A.
+
+  !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+  !!     subroutine stops.
+  !!
+  !! \see SCALAPACK documentation (routine p?osvd).
+  !!
+  subroutine scalafx_pposv_${TYPE}$(aa, desca, bb, descb, uplo, nn, nrhs, ia, ja, ib, jb, info)
+    character, intent(in), optional :: uplo
+    integer, intent(in), optional :: nn, nrhs, ia, ja, ib, jb
+    ${FTYPE}$, intent(inout) :: aa(:,:)
+    integer, intent(in) :: desca(DLEN_)
+    ${FTYPE}$, intent(inout) :: bb(:,:)
+    integer, intent(in) :: descb(DLEN_)
+    integer, intent(out), optional :: info
+
+    character :: uplo0
+    integer :: nn0, nrhs0, ia0, ja0, ib0, jb0, info0
+
+    ! Handle optional flags
+    @:inoptflags(nn0, nn, min(desca(M_), desca(N_)))
+    @:inoptflags(nrhs0, nrhs, descb(N_))
+    @:inoptflags(uplo0, uplo, "L")
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(ib0, ib, 1)
+    @:inoptflags(jb0, jb, 1)
+
+    if (descb(M_) > nn0) call error("B matrix rows too large for A matrix solution")
+
+    call pposv(uplo0, nn0, nrhs0, aa, ia0, ja0, desca, bb, ib0, jb0, descb, info0)
+
+    call handle_infoflag(info0, "pposv in scalafx_pposv_${TYPE}$", info)
+
+  end subroutine scalafx_pposv_${TYPE}$
+
+#:enddef scalafx_pposv_template
+
+
 #! ************************************************************************
 #! *** creatematrix
 #! ************************************************************************
@@ -1966,6 +2021,7 @@ contains
       $:scalafx_psygvr_template(TYPE, KIND)
       $:scalafx_psyev_template(TYPE, KIND)
       $:scalafx_r_pgesvd_template(TYPE, KIND)
+      $:scalafx_pposv_template(TYPE, KIND)
       $:scalafx_ptrsm_template(TYPE, FTYPE, "real(1.0, " + str(KIND) + ")")
     #:else
       $:scalafx_pheevr_template(TYPE, KIND)
@@ -1975,6 +2031,7 @@ contains
       $:scalafx_phegvr_template(TYPE, KIND)
       $:scalafx_pheev_template(TYPE, KIND)
       $:scalafx_c_pgesvd_template(TYPE, KIND)
+      $:scalafx_pposv_template(TYPE, KIND)
       $:scalafx_ptrsm_template(TYPE, FTYPE, "cmplx(1, 0, " + str(KIND) + ")")
     #:endif
 
