@@ -8,7 +8,7 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgetri, pgesvd
+  public :: ptrsm, pposv, ppotrf, ppotri, ptrtri, pgetrf, pgetri, pgesvd
   public :: sl_init, numroc, infog2l, indxl2g, descinit, indxg2p
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -367,6 +367,26 @@ module scalapack_module
 #:enddef interface_ptrsm_template
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! pposv
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#:def interface_pposv_template()
+  !> Solves a symmetric/hermitian matrix equation (${TYPE}$).
+  subroutine p${TYPEABBREV}$posv(uplo, nn, nrhs, aa, ia, ja, desca, bb, ib, jb, descb, info)
+    import
+    character, intent(in) :: uplo
+    integer, intent(in) :: nn, nrhs
+    integer, intent(in) :: desca(*)
+    ${FTYPE}$, intent(in) :: aa(desca(LLD_), *)
+    integer, intent(in) :: ia, ja
+    integer, intent(in) :: descb(*)
+    ${FTYPE}$, intent(inout) :: bb(descb(LLD_), *)
+    integer, intent(in) :: ib, jb
+    integer, intent(out) :: info
+  end subroutine p${TYPEABBREV}$posv
+#:enddef interface_pposv_template
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! SCALAPACK CORE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -510,6 +530,14 @@ module scalapack_module
     #:endfor
   end interface ptrsm
 
+  !> Linear system of equation for hermitian/symmetric matrix
+  interface pposv
+    #:for TYPE in TYPES
+      #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+      #:set FTYPE = FORTRAN_TYPES[TYPE]
+      $:interface_pposv_template()
+    #:endfor
+  end interface pposv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! SCALAPACK TOOLS
