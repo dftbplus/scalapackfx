@@ -91,7 +91,7 @@ contains
       write(stdout,*)'Processor locations in the A BLACS grid'
       do ii = 0, nproc - 1
         call blacsfx_pcoord(myGridA, ii, iprow, ipcol)
-        write(stdout, "(X,A,I0,A,I0,X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
+        write(stdout, "(1X,A,I0,A,I0,1X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
       end do
 
       write(stdout,*)'Matrix element locations in the A BLACS grid'
@@ -99,7 +99,7 @@ contains
         do jj = 1, mm
           iprow = scalafx_indxg2p(jj, descA(MB_), descA(RSRC_), myGridA%nrow)
           ipcol = scalafx_indxg2p(ii, descA(NB_), descA(CSRC_), myGridA%ncol)
-          write(stdout, "(I0,X,I0,A,I0,X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
+          write(stdout, "(I0,1X,I0,A,I0,1X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
               & ' proc:', blacsfx_pnum(myGridA, iprow, ipcol)
         end do
       end do
@@ -119,7 +119,7 @@ contains
       write(stdout,*)'Processor locations in the B BLACS grid'
       do ii = 0, nproc - 1
         call blacsfx_pcoord(myGridB, ii, iprow, ipcol)
-        write(stdout, "(X,A,I0,A,I0,X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
+        write(stdout, "(1X,A,I0,A,I0,1X,I0)")'Proc ', ii, ' is at BLACS grid loc. ', iprow, ipcol
       end do
 
       write(stdout,*)'Matrix element locations in the B BLACS grid'
@@ -127,7 +127,7 @@ contains
         do jj = 1, mm
           iprow = scalafx_indxg2p(jj, descB(MB_), descB(RSRC_), myGridB%nrow)
           ipcol = scalafx_indxg2p(ii, descB(NB_), descB(CSRC_), myGridB%ncol)
-          write(stdout, "(I0,X,I0,A,I0,X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
+          write(stdout, "(I0,1X,I0,A,I0,1X,I0,A,I0)")jj, ii, ' is at BLACS location ', ipcol, iprow,&
               & ' proc:', blacsfx_pnum(myGridB, iprow, ipcol)
         end do
       end do
@@ -140,12 +140,12 @@ contains
     AA(:,:) = 0
     BB(:,:) = 0
 
-    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,X,I0)")'Processor ', myGridA%iproc,' (grid A) holds A(',&
+    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,1X,I0)")'Processor ', myGridA%iproc,' (grid A) holds A(',&
         & shape(AA), ') elements vs ',&
         & max(1, scalafx_numroc(descA(M_), descA(MB_), myGridA%myrow, descA(RSRC_), myGridA%nrow)),&
         & scalafx_numroc(descA(N_), descA(NB_), myGridA%mycol, descA(CSRC_), myGridA%ncol)
 
-    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,X,I0)")'Processor ', myGridB%iproc,' (grid B) holds B(',&
+    write(stdOut,"(A,I0,A,I0,',',I0,A,I0,1X,I0)")'Processor ', myGridB%iproc,' (grid B) holds B(',&
         & shape(BB), ') elements vs ',&
         & max(1, scalafx_numroc(descB(M_), descB(MB_), myGridB%myrow, descB(RSRC_), myGridB%nrow)),&
         & scalafx_numroc(descB(N_), descB(NB_), myGridB%mycol, descB(CSRC_), myGridB%ncol)
