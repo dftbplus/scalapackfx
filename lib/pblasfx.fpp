@@ -445,7 +445,7 @@
 
 #:def pblasfx_ptran_template(SUFFIX, TYPE, KIND, FUNCTION, NAME)
 
-  !> Real matrix transpose.
+  !> Real matrix transpose. cc = alpha * cc + beta * aa^dag
   !! \param aa  Matrix to update with.
   !! \param desca  Descriptor of aa.
   !! \param cc  Matrix to be updated.
