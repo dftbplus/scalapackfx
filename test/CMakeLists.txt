@@ -1,29 +1,28 @@
-set(targets
-  test_desc
-  test_subgrids)
+# Folder for generated mod-files
+set(moduledir "${CMAKE_CURRENT_BINARY_DIR}/modules")
 
-set(common-dep-targets
-  test_cpg2l
-  test_det
-  test_diag
-  test_gemr2d
-  test_linecomm
-  test_matinv
-  test_pposv
-  test_psyr_pher
-  test_remoteelements
-  test_svd
-  test_tran)
+#  test_cpg2l
+#  test_det
+#  test_diag
+#  test_gemr2d
+#  test_linecomm
+#  test_matinv
+#  test_pposv
+#  test_psyr_pher
+#  test_remoteelements
+#  test_svd
+#  test_tran)
 
-add_library(common OBJECT test_common.f90)
-target_link_libraries(common PRIVATE ScalapackFx)
+add_executable(test_desc)
+target_sources(test_desc PRIVATE test_desc.f90)
+set_target_properties(
+  test_desc PROPERTIES Fortran_MODULE_DIRECTORY "${moduledir}"
+)
+target_link_libraries(test_desc PRIVATE scalapackfx)
+target_link_libraries(test_desc PRIVATE Fortuno::fortuno_mpi MPI::MPI_Fortran)
+target_link_libraries(test_desc PRIVATE Scalapack::Scalapack)
 
-foreach(target IN LISTS targets)
-  add_executable(${target} ${target}.f90)
-  target_link_libraries(${target} ScalapackFx)
-endforeach()
-
-foreach(target IN LISTS common-dep-targets)
-  add_executable(${target} ${target}.f90 $<TARGET_OBJECTS:common>)
-  target_link_libraries(${target} ScalapackFx)
-endforeach()
+add_test(
+  NAME test_desc
+  COMMAND test_desc
+)
