@@ -56,6 +56,27 @@ option(
   OFF
 )
 
+set(
+  SCALAPACKFX_TEST_OMP_THREADS
+  "1"
+  CACHE STRING
+  "Nr. of OpenMP-threads used for testing"
+)
+
+set(SCALAPACKFX_TEST_MPI_PROCS
+  "1"
+  CACHE STRING
+  "Nr. of MPI processes used for testing"
+)
+
+set(
+  SCALAPACKFX_MPIEXEC_POSTFLAGS
+  ""
+  CACHE STRING
+  "Additional flags for the mpiexec command (to be added after the mpiexec command name)"
+)
+
+
 #[=============================================================================[
 #                  Project configuration                                      #
 ]=============================================================================]
@@ -73,6 +94,13 @@ set(BUILD_SHARED_LIBS ${SCALAPACKFX_BUILD_SHARED_LIBS})
 scalapackfx_setup_build_type("RelWithDebInfo")
 
 find_package(MPI REQUIRED)
+
+set(
+  MPI_TEST_RUNNER
+  ${MPIEXEC_PREFLAGS} ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${SCALAPACKFX_TEST_MPI_PROCS}
+  ${MPIEXEC_POSTFLAGS} ${SCALAPACKFX_MPIEXEC_POSTFLAGS}
+)
+
 
 #
 # Prerequisites
