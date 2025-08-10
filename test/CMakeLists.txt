@@ -24,9 +24,9 @@ list(APPEND tests
 foreach(test IN LISTS tests)
   add_executable(${test})
   target_sources(${test} PRIVATE ${test}.f90)
-  set_target_properties(
-    ${test} PROPERTIES Fortran_MODULE_DIRECTORY "${moduledir}"
-  )
+  #set_target_properties(
+  #  ${test} PROPERTIES Fortran_MODULE_DIRECTORY "${moduledir}"
+  #)
   target_link_libraries(${test} PRIVATE blacstestutils)
   target_link_libraries(${test} PRIVATE scalapackfx)
   target_link_libraries(${test} PRIVATE Fortuno::fortuno_mpi MPI::MPI_Fortran)
