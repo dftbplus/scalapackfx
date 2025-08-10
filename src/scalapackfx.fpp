@@ -2056,8 +2056,7 @@ contains
   !!     (default: lead column).
   !! \param info  Info flag.
   !!
-  subroutine scalafx_getdescriptor(mygrid, mm, nn, mb, nb, desc, rsrc, csrc, &
-      & info)
+  subroutine scalafx_getdescriptor(mygrid, mm, nn, mb, nb, desc, rsrc, csrc, info)
     type(blacsgrid), intent(in) :: mygrid
     integer, intent(in) :: mm, nn, mb, nb
     integer, intent(out) :: desc(DLEN_)

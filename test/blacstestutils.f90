@@ -9,7 +9,7 @@ module blacstestutils
   public :: blacs_grid_env, get_grid_or_fail
 
 
-  !> Implements a test class with BLACS initialization and destruction
+  !> Implements a test class with BLACS initialization and then destruction
   type, extends(mpi_case) :: blacs_case
   contains
     procedure :: run => blacs_case_run
@@ -57,6 +57,10 @@ contains
 
 
   !> Wraps a blacs_case instance as test_item suitable for array constructors.
+  !!
+  !! Note: This routine must be called from within fortuno MPI test procedures and can invoke test
+  !! failue internally
+  !!
   function blacs_test(name, proc) result(testitem)
     character(*), intent(in) :: name
     procedure(blacs_test_procedure) :: proc
@@ -86,7 +90,8 @@ contains
 
   !> Returns a grid environment or sets the calling test to failed if not possible
   !!
-  !! Note: This routine must be called from within fortuno MPI test procedures.
+  !! Note: This routine must be called from within fortuno MPI test procedures and can invoke test
+  !! failue internally
   !!
   subroutine get_grid_or_fail(this, nrow, ncol, includeall)
 
