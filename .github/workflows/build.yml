@@ -1,0 +1,121 @@
+name: CI
+on:
+  push:
+    paths:
+      - '.github/workflows/**'
+      - 'cmake/**'
+      - 'example/**'
+      - 'include/**'
+      - 'src/**'
+      - 'subprojects/**'
+      - 'test/**'
+      - 'CMakeLists.txt'
+      - 'config.cmake'
+  pull_request:
+    paths:
+      - '.github/workflows/**'
+      - 'cmake/**'
+      - 'example/**'
+      - 'include/**'
+      - 'src/**'
+      - 'subprojects/**'
+      - 'test/**'
+      - 'CMakeLists.txt'
+      - 'config.cmake'
+
+env:
+  CI: "ON"
+  HOMEBREW_NO_ANALYTICS: "ON"
+  HOMEBREW_NO_AUTO_UPDATE: "ON"
+  HOMEBREW_NO_BOTTLE_SOURCE_FALLBACK: "ON"
+  HOMEBREW_NO_GITHUB_API: "ON"
+  HOMEBREW_NO_INSTALL_CLEANUP: "ON"
+  BUILD_DIR: _build
+  CMAKE_OPTIONS: >-
+    -DWITH_UNIT_TESTS=true
+
+jobs:
+
+  gfortran-build:
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      FC: gfortran
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        mpi: [openmpi] # mpich
+        config: [Debug]
+        version: [13]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Get the number of available processes
+      run: |
+        NPROC=$(nproc)
+        echo "NPROC=$NPROC" >> $GITHUB_ENV
+
+    - name: Install gfortran (Linux)
+      run: |
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install -y gfortran-${{ matrix.version }}
+        sudo update-alternatives \
+          --install /usr/bin/gfortran gfortran /usr/bin/gfortran-${{ matrix.version }} 100
+
+    - name: Enable MPI build
+      if: contains(matrix.mpi, 'openmpi') || contains(matrix.mpi, 'mpich')
+      run: echo "WITH_MPI=true" >> $GITHUB_ENV
+
+    - name: Set Compiler
+      run: |
+        echo "FC=${FC}" >> ${GITHUB_ENV}
+
+    - name: Install LAPACK/BLAS
+      run: |
+        sudo apt-get install liblapack-dev libblas-dev
+
+    - name: Install OpenMPI
+      if: contains(matrix.mpi, 'openmpi')
+      run: |
+        sudo apt-get update
+        sudo apt-get install libopenmpi-dev libscalapack-openmpi-dev
+        echo "CMAKE_OPTIONS=${CMAKE_OPTIONS} -DSCALAPACK_LIBRARY='scalapack-openmpi'" >> $GITHUB_ENV
+        echo "CMAKE_DEP_OPTIONS=-DSCALAPACK_LIBRARY='scalapack-openmpi'" >> $GITHUB_ENV
+
+#    - name: Install MPICH
+#      if: contains(matrix.mpi, 'mpich')
+#      run: |
+#        sudo apt-get update
+#        sudo apt-get install mpich libscalapack-mpich-dev
+#        echo "CMAKE_OPTIONS=${CMAKE_OPTIONS}" >> $GITHUB_ENV
+#        echo "CMAKE_DEP_OPTIONS=-DSCALAPACK_LIBRARY='scalapack-mpich'" >> $GITHUB_ENV
+
+    - name: Set extra CMake flags
+      run: |
+        echo "CMAKE_OPTIONS=${CMAKE_OPTIONS} -DENABLE_DYNAMIC_LOADING=true" >> $GITHUB_ENV
+        if [[ "${{ matrix.mpi }}" == "openmpi" || "${{ matrix.mpi }}" == "mpich" ]]; then
+          echo "CMAKE_OPTIONS=${CMAKE_OPTIONS} -DTEST_MPI_PROCS=${NPROC}" >> $GITHUB_ENV
+        fi
+
+    - name: Configure build
+      run: >-
+        cmake -B ${BUILD_DIR} -G Ninja
+        -DCMAKE_INSTALL_PREFIX=${PWD}/${INSTALL_DIR}
+        -DCMAKE_BUILD_TYPE=${{ matrix.config }}
+        ${CMAKE_OPTIONS}
+        -DWITH_MPI=${WITH_MPI}
+
+    - name: Build project
+      run: cmake --build ${BUILD_DIR} -j
+
+    - name: Run regression tests
+      run: |
+        echo "SCALAPACKFX_TEST_OMP_THREADS=1" >> $GITHUB_ENV
+        echo "TEST_UUID=$(uuidgen)" >> ${GITHUB_ENV}
+        ctest -j ${SCALAPACKFX_TEST_OMP_THREADS} --output-on-failure --test-dir ${BUILD_DIR}

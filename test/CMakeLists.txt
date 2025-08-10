@@ -1,29 +1,40 @@
-set(targets
+# Folder for generated mod-files
+set(moduledir "${CMAKE_CURRENT_BINARY_DIR}/modules")
+
+add_library(blacstestutils blacstestutils.f90)
+target_link_libraries(blacstestutils PRIVATE scalapackfx)
+target_link_libraries(blacstestutils PRIVATE Fortuno::fortuno_mpi)
+
+list(APPEND tests
   test_desc
-  test_subgrids)
+#  test_cpg2l
+#  test_det
+#  test_diag
+#  test_gemr2d
+#  test_linecomm
+#  test_matinv
+#  test_pposv
+#  test_psyr_pher
+#  test_remoteelements
+#  test_svd
+  test_subgrids
+#  test_tran
+)
 
-set(common-dep-targets
-  test_cpg2l
-  test_det
-  test_diag
-  test_gemr2d
-  test_linecomm
-  test_matinv
-  test_pposv
-  test_psyr_pher
-  test_remoteelements
-  test_svd
-  test_tran)
 
-add_library(common OBJECT test_common.f90)
-target_link_libraries(common PRIVATE ScalapackFx)
-
-foreach(target IN LISTS targets)
-  add_executable(${target} ${target}.f90)
-  target_link_libraries(${target} ScalapackFx)
-endforeach()
-
-foreach(target IN LISTS common-dep-targets)
-  add_executable(${target} ${target}.f90 $<TARGET_OBJECTS:common>)
-  target_link_libraries(${target} ScalapackFx)
+foreach(test IN LISTS tests)
+  add_executable(${test})
+  target_sources(${test} PRIVATE ${test}.f90)
+  target_link_libraries(${test} PRIVATE blacstestutils)
+  target_link_libraries(${test} PRIVATE scalapackfx)
+  target_link_libraries(${test} PRIVATE Fortuno::fortuno_mpi MPI::MPI_Fortran)
+  target_link_libraries(${test} PRIVATE Scalapack::Scalapack)
+  add_test(
+    NAME ${test}
+    COMMAND  ${MPI_TEST_RUNNER} ./${test}
+  )
+  set_tests_properties(
+    ${test}
+    PROPERTIES ENVIRONMENT OMP_NUM_THREADS=${SCALAPACKFX_TEST_OMP_THREADS}
+  )
 endforeach()
