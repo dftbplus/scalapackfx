@@ -17,6 +17,7 @@ list(APPEND tests
 #  test_psyr_pher
 #  test_remoteelements
 #  test_svd
+  test_subgrids
 #  test_tran
 )
 

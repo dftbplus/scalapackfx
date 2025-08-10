@@ -1,4 +1,4 @@
-!> Test app driving Fortuno unit tests.
+!> Test BLACS descriptor setup
 module test_scalapackfx
   use libscalapackfx_module
   use fortuno_mpi, only : fortuno_check => mpi_check, fortuno_failed => mpi_failed,&
