@@ -557,7 +557,8 @@ contains
   !> Holds up execution of all processes within given scope.
   !!
   !! \param self  BLACS group descriptor
-  !! \param scope  Scope of the barrier (default: "A")
+  !! \param scope Scope of the barrier, indicating row ('R'), column ('C'), or entire grid ('A')
+  !! (default: "A")
   !!
   subroutine blacsfx_barrier(mygrid, scope)
     type(blacsgrid), intent(in) :: mygrid
