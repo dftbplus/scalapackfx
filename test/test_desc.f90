@@ -56,8 +56,8 @@ contains
       do ii = 1, size(blist)
         ! Loop over local blocks of the matrix of this proc.
         call blist%getblock(ii, iGlob, iLoc, nElem)
-        print "(6(A,1X,I0,2X))", "PROW: ", env%myrow, "PCOL:", env%mycol,&
-            & "II:", ii, "GLOB:", iGlob, "LOC:", iLoc, "NEL:", nElem
+        print "(6(A,1X,I0,2X))", "PROW: ", env%myrow, "PCOL:", env%mycol, "II:", ii,&
+            & "GLOB:", iGlob, "LOC:", iLoc, "NEL:", nElem
       end do
 
     end if
@@ -96,8 +96,8 @@ contains
       do ii = 1, size(blist)
         ! Loop over local blocks of the matrix of this proc.
         call blist%getblock(ii, iGlob, iLoc, nElem)
-        print "(6(A,1X,I0,2X))", "PROW: ", env%myrow, "PCOL:", env%mycol,&
-            & "II:", ii, "GLOB:", iGlob, "LOC:", iLoc, "NEL:", nElem
+        print "(6(A,1X,I0,2X))", "PROW: ", env%myrow, "PCOL:", env%mycol, "II:", ii,&
+            & "GLOB:", iGlob, "LOC:", iLoc, "NEL:", nElem
       end do
 
     end if
@@ -105,7 +105,7 @@ contains
   end subroutine test_desc_nonsquare
 
 
-  !> Calculate side of a square grid of nProc processors
+  !> Calculate side of a square grid containing nProc processors
   function gridSide(nProc)
 
     !> Number of processors
