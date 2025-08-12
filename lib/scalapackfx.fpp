@@ -2161,11 +2161,11 @@ contains
     ! Note that we explicitly multiply with a double here instead of
     ! dividing by an integer to enhance performance.
     inv = 1.0_dp / real(descB, kind=dp)
-    blk = (globalInd - 1) * inv
+    blk(:) = (globalInd - 1) * inv
 
     check = modulo(myPos - descSRC, nPos)
 
-    localPos = mod(blk + descSRC, nPos)
+    localPos(:) = mod(blk + descSRC, nPos)
 
     calcAllIndices_ = .true.
     if (present(calcAllIndices)) then
