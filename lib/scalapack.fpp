@@ -8,8 +8,8 @@ module scalapack_module
   private
 
   public :: psygst, phegst, psyev, pheev, psyevd, pheevd, psyevr, pheevr
-  public :: ptrsm, ppotrf, ppotri, ptrtri, pgetrf, pgesvd
-  public :: sl_init, numroc, infog2l, indxl2g, descinit
+  public :: ptrsm, pposv, ppotrf, ppotri, ptrtri, pgetrf, pgetri, pgesvd
+  public :: sl_init, numroc, infog2l, indxl2g, descinit, indxg2p
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! ppotrf
@@ -76,12 +76,30 @@ module scalapack_module
   end subroutine p${TYPEABBREV}$getrf
 #:enddef interface_pgetrf_template
 
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! pgetri
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#:def interface_pgetri_template(TYPEABBREV, FTYPES)
+  !> Inverse of an LU factorized general matrix (${TYPE}$).
+  subroutine p${TYPEABBREV}$getri(nn, aa, ia, ja, desca, ipiv, work, lwork, iwork, liwork, info)
+    import
+    integer, intent(in) :: nn
+    integer, intent(in) :: ia, ja, desca(*)
+    ${FTYPES}$, intent(inout) :: aa(desca(LLD_), *)
+    integer, intent(out) :: ipiv(*)
+    ${FTYPES}$, intent(inout) :: work(*)
+    integer, intent(inout) :: iwork(*)
+    integer, intent(in) :: lwork, liwork
+    integer, intent(out) :: info
+  end subroutine p${TYPEABBREV}$getri
+#:enddef interface_pgetri_template
+
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! psygst
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-
 
 #:def interface_psygst_template(TYPEABBREV, KIND)
   !> Reduces generalized symmetric eigenvalue problem to standard form (${TYPE}$).
@@ -349,6 +367,26 @@ module scalapack_module
 #:enddef interface_ptrsm_template
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!! pposv
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#:def interface_pposv_template()
+  !> Solves a symmetric/hermitian matrix equation (${TYPE}$).
+  subroutine p${TYPEABBREV}$posv(uplo, nn, nrhs, aa, ia, ja, desca, bb, ib, jb, descb, info)
+    import
+    character, intent(in) :: uplo
+    integer, intent(in) :: nn, nrhs
+    integer, intent(in) :: desca(*)
+    ${FTYPE}$, intent(in) :: aa(desca(LLD_), *)
+    integer, intent(in) :: ia, ja
+    integer, intent(in) :: descb(*)
+    ${FTYPE}$, intent(inout) :: bb(descb(LLD_), *)
+    integer, intent(in) :: ib, jb
+    integer, intent(out) :: info
+  end subroutine p${TYPEABBREV}$posv
+#:enddef interface_pposv_template
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! SCALAPACK CORE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -387,6 +425,15 @@ module scalapack_module
       $:interface_pgetrf_template(TYPEABBREV, FTYPE)
     #:endfor
   end interface pgetrf
+
+  !> Inversion of an LU-decomposed general matrix with pivoting
+  interface pgetri
+    #:for TYPE in TYPES
+      #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+      #:set FTYPE = FORTRAN_TYPES[TYPE]
+      $:interface_pgetri_template(TYPEABBREV, FTYPE)
+    #:endfor
+  end interface pgetri
 
   !> Reduces generalized symmetric eigenvalue problem to standard form.
   interface psygst
@@ -483,6 +530,14 @@ module scalapack_module
     #:endfor
   end interface ptrsm
 
+  !> Linear system of equation for hermitian/symmetric matrix
+  interface pposv
+    #:for TYPE in TYPES
+      #:set TYPEABBREV = TYPE_ABBREVS[TYPE]
+      #:set FTYPE = FORTRAN_TYPES[TYPE]
+      $:interface_pposv_template()
+    #:endfor
+  end interface pposv
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!! SCALAPACK TOOLS
@@ -516,6 +571,12 @@ module scalapack_module
       integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs
     end function indxl2g
 
+    !> Finds processor id where global index is stored.
+    function indxg2p(indxglob, nb, iproc, isrcproc, nprocs)
+      integer :: indxg2p
+      integer, intent(in) :: indxglob, nb, iproc, isrcproc, nprocs
+    end function indxg2p
+
     !> Initializes a descriptor for a distributed array.
     subroutine descinit(desc, mm, nn, mb, nb, irsrc, icsrc, ictxt, lld, info)
       integer, intent(out) :: desc(*)
@@ -527,4 +588,3 @@ module scalapack_module
 
 
 end module scalapack_module
-

@@ -9,10 +9,12 @@ module scalapackfx_module
   private
 
   public :: DLEN_, DT_, CTXT_, M_, N_, MB_, NB_, RSRC_, CSRC_, LLD_
+  public :: numroc
   public :: scalafx_ppotrf
   public :: scalafx_ppotri
   public :: scalafx_ptrtri
   public :: scalafx_pgetrf
+  public :: scalafx_pgetri
   public :: scalafx_psygst
   public :: scalafx_phegst
   public :: scalafx_psyev
@@ -28,13 +30,18 @@ module scalapackfx_module
   public :: scalafx_psygvr
   public :: scalafx_phegvr
   public :: scalafx_ptrsm
+  public :: scalafx_pposv
   public :: scalafx_getdescriptor
   public :: scalafx_getlocalshape
+  public :: scalafx_getremoteshape
   public :: scalafx_infog2l
   public :: scalafx_indxl2g
   public :: scalafx_localindices
   public :: scalafx_creatematrix
   public :: scalafx_pgesvd
+  public :: scalafx_numroc
+  public :: scalafx_indxg2p
+  public :: scalafx_infog2p
 
   !> Cholesky factorization of a symmetric/Hermitian positive definite matrix.
   interface scalafx_ppotrf
@@ -59,6 +66,12 @@ module scalapackfx_module
     module procedure scalafx_pgetrf_real, scalafx_pgetrf_dreal
     module procedure scalafx_pgetrf_complex, scalafx_pgetrf_dcomplex
   end interface scalafx_pgetrf
+
+  !> Inverse of a LU decomposed general matrix.
+  interface scalafx_pgetri
+    module procedure scalafx_pgetri_real, scalafx_pgetri_dreal
+    module procedure scalafx_pgetri_complex, scalafx_pgetri_dcomplex
+  end interface scalafx_pgetri
 
   !> Reduces symmetric definite generalized eigenvalue problem to standard form.
   interface scalafx_psygst
@@ -145,6 +158,12 @@ module scalapackfx_module
     module procedure scalafx_ptrsm_real, scalafx_ptrsm_dreal
     module procedure scalafx_ptrsm_complex, scalafx_ptrsm_dcomplex
   end interface scalafx_ptrsm
+
+  !> Solves symmetric/hermitian matrix equation.
+  interface scalafx_pposv
+    module procedure scalafx_pposv_real, scalafx_pposv_dreal
+    module procedure scalafx_pposv_complex, scalafx_pposv_dcomplex
+  end interface scalafx_pposv
 
   !> Creates a distributed matrix and allocates local storage.
   interface scalafx_creatematrix
@@ -348,6 +367,75 @@ module scalapackfx_module
   end subroutine scalafx_pgetrf_${TYPE}$
 
 #:enddef scalafx_pgetrf_template
+
+
+!************************************************************************
+!*** pgetri
+!************************************************************************
+
+#:def scalafx_pgetri_template(TYPE, FTYPE)
+
+  !> Inversion of a LU-factorized general matrix with pivoting
+  !!
+  subroutine scalafx_pgetri_${TYPE}$(aa, desca, ipiv, ia, ja, nn, work, iwork, info)
+
+    !> Inverse exit, pivoted by ipiv
+    ${FTYPE}$, intent(inout) :: aa(:,:)
+
+    !> Descriptor of A.
+    integer, intent(in) :: desca(DLEN_)
+
+    !> Pivot matrix
+    integer, intent(out) :: ipiv(:)
+
+    !> First row of the submatrix of A. Default: 1
+    integer, intent(in), optional :: ia
+
+    !> First column of the submatrix of A. Default: 1
+    integer, intent(in), optional :: ja
+
+    !> Number of rows in the submatrix of A. Default: desca(N_)
+    integer, intent(in), optional :: nn
+
+    !> Work array, if provided externally
+    ${FTYPE}$, intent(inout), allocatable, optional :: work(:)
+
+    !> Integer work array, if provided externally
+    integer, intent(inout), allocatable, optional :: iwork(:)
+
+    !> Info flag. If not specified and error occurs, the subroutine stops.
+    integer, intent(out), optional :: info
+
+    !------------------------------------------------------------------------
+
+    ${FTYPE}$, allocatable :: work0(:)
+    integer, allocatable :: iwork0(:)
+    integer :: lwork, liwork, info0
+    integer :: ia0, ja0, nn0
+    ${FTYPE}$ :: rtmp(1)
+    integer :: itmp(1)
+
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(nn0, nn, desca(N_))
+
+    ! Allocate  workspace
+    nn0 = desca(M_)
+    call pgetri(nn0, aa, ia0, ja0, desca, ipiv, rtmp, -1, itmp, -1, info0)
+    call handle_infoflag(info0, "pgetri in scalafx_pgetri_${TYPE}$", info)
+    @:move_minoptalloc(work0, int(rtmp(1)), lwork, work)
+    @:move_minoptalloc(iwork0, itmp(1), liwork, iwork)
+
+    call pgetri(nn0, aa, ia0, ja0, desca, ipiv, work0, lwork, iwork0, liwork, info0)
+    call handle_infoflag(info0, "pgetri in scalafx_pgetri_${TYPE}$", info)
+
+    ! Save work space allocations, if dummy argument present
+    @:optmovealloc(work0, work)
+    @:optmovealloc(iwork0, iwork)
+
+  end subroutine scalafx_pgetri_${TYPE}$
+
+#:enddef scalafx_pgetri_template
 
 
 !************************************************************************
@@ -1825,6 +1913,54 @@ module scalapackfx_module
 #:enddef scalafx_ptrsm_template
 
 
+!************************************************************************
+!*** pposv
+!************************************************************************
+
+#:def scalafx_pposv_template(TYPE, KIND)
+
+  !> Solves A X = B problem for a positive definite symmetric/hermitian A.
+  !!
+  !! \param aa  Left side matrix
+  !! \param desca  Descriptor of matrix A.
+
+  !! \param info  Info flag. If not specified and SCALAPACK calls returns nozero,
+  !!     subroutine stops.
+  !!
+  !! \see SCALAPACK documentation (routine p?osvd).
+  !!
+  subroutine scalafx_pposv_${TYPE}$(aa, desca, bb, descb, uplo, nn, nrhs, ia, ja, ib, jb, info)
+    character, intent(in), optional :: uplo
+    integer, intent(in), optional :: nn, nrhs, ia, ja, ib, jb
+    ${FTYPE}$, intent(inout) :: aa(:,:)
+    integer, intent(in) :: desca(DLEN_)
+    ${FTYPE}$, intent(inout) :: bb(:,:)
+    integer, intent(in) :: descb(DLEN_)
+    integer, intent(out), optional :: info
+
+    character :: uplo0
+    integer :: nn0, nrhs0, ia0, ja0, ib0, jb0, info0
+
+    ! Handle optional flags
+    @:inoptflags(nn0, nn, min(desca(M_), desca(N_)))
+    @:inoptflags(nrhs0, nrhs, descb(N_))
+    @:inoptflags(uplo0, uplo, "L")
+    @:inoptflags(ia0, ia, 1)
+    @:inoptflags(ja0, ja, 1)
+    @:inoptflags(ib0, ib, 1)
+    @:inoptflags(jb0, jb, 1)
+
+    if (descb(M_) > nn0) call error("B matrix rows too large for A matrix solution")
+
+    call pposv(uplo0, nn0, nrhs0, aa, ia0, ja0, desca, bb, ib0, jb0, descb, info0)
+
+    call handle_infoflag(info0, "pposv in scalafx_pposv_${TYPE}$", info)
+
+  end subroutine scalafx_pposv_${TYPE}$
+
+#:enddef scalafx_pposv_template
+
+
 #! ************************************************************************
 #! *** creatematrix
 #! ************************************************************************
@@ -1875,6 +2011,7 @@ contains
     $:scalafx_ppotri_template(TYPE, FTYPE)
     $:scalafx_ptrtri_template(TYPE, FTYPE)
     $:scalafx_pgetrf_template(TYPE, FTYPE)
+    $:scalafx_pgetri_template(TYPE, FTYPE)
     $:scalafx_psygst_phegst_template(TYPE, FTYPE)
 
     #:if TYPE in REAL_TYPES
@@ -1885,6 +2022,7 @@ contains
       $:scalafx_psygvr_template(TYPE, KIND)
       $:scalafx_psyev_template(TYPE, KIND)
       $:scalafx_r_pgesvd_template(TYPE, KIND)
+      $:scalafx_pposv_template(TYPE, KIND)
       $:scalafx_ptrsm_template(TYPE, FTYPE, "real(1.0, " + str(KIND) + ")")
     #:else
       $:scalafx_pheevr_template(TYPE, KIND)
@@ -1894,6 +2032,7 @@ contains
       $:scalafx_phegvr_template(TYPE, KIND)
       $:scalafx_pheev_template(TYPE, KIND)
       $:scalafx_c_pgesvd_template(TYPE, KIND)
+      $:scalafx_pposv_template(TYPE, KIND)
       $:scalafx_ptrsm_template(TYPE, FTYPE, "cmplx(1, 0, " + str(KIND) + ")")
     #:endif
 
@@ -1958,6 +2097,45 @@ contains
         & mygrid%ncol)
 
   end subroutine scalafx_getlocalshape
+
+
+  !> Returns the shape of a remote part of a distributed array, given the processor number
+  !!
+  !! \param mygrid  BLACS grid descriptor.
+  !! \param desc  Global matrix descriptor.
+  !! \param iproc  Processor number
+  !! \param nrowloc  Nr. of local rows, returns 0 if iproc outside of grid.
+  !! \param ncolloc  Nr. of local columns, returns 0 if iproc outside of grid.
+  !!
+  subroutine scalafx_getremoteshape(mygrid, desc, iproc, nrowloc, ncolloc, storage)
+    type(blacsgrid), intent(in) :: mygrid
+    integer, intent(in) :: desc(DLEN_), iproc
+    integer, intent(out) :: nrowloc, ncolloc
+    logical, intent(in), optional :: storage
+
+    integer :: iprow, ipcol
+    logical :: isStorage
+
+    isStorage = .false.
+    if (present(storage)) then
+      isStorage = storage
+    end if
+
+    if (iproc < 0 .or. iproc >= mygrid%nproc) then
+      nrowloc = 0
+      ncolloc = 0
+    else
+      call blacsfx_pcoord(myGrid, iproc, iprow, ipcol)
+      if (isStorage) then
+        nrowloc = max(1,numroc(desc(M_), desc(MB_), iprow, desc(RSRC_), mygrid%nrow))
+      else
+        nrowloc = numroc(desc(M_), desc(MB_), iprow, desc(RSRC_), mygrid%nrow)
+      end if
+      ncolloc = numroc(desc(N_), desc(NB_), ipcol, desc(CSRC_), mygrid%ncol)
+    end if
+
+  end subroutine scalafx_getremoteshape
+
 
   !> Maps global position in a distributed matrix to local one.
   !!
@@ -2041,11 +2219,11 @@ contains
     ! Note that we explicitly multiply with a double here instead of
     ! dividing by an integer to enhance performance.
     inv = 1.0_dp / real(descB, kind=dp)
-    blk = (globalInd - 1) * inv
+    blk(:) = (globalInd - 1) * inv
 
     check = modulo(myPos - descSRC, nPos)
 
-    localPos = mod(blk + descSRC, nPos)
+    localPos(:) = mod(blk + descSRC, nPos)
 
     calcAllIndices_ = .true.
     if (present(calcAllIndices)) then
@@ -2071,16 +2249,71 @@ contains
   !> Maps local row or column index onto global matrix position.
   !!
   !! \param indxloc  Local index on input.
-  !! \param mygrid  BLACS descriptor.
-  !! \param blocksize  Block size for direction (row or column)
+  !! \param nb  Block size for the column/row
+  !! \param iproc  Local array index
+  !! \param isrcproc coordinate of the process that possesses the first row/column of the
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
   !!
-  function scalafx_indxl2g(indxloc, crB, mycr, crsrc, ncr)
+  function scalafx_indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
     integer :: scalafx_indxl2g
-    integer, intent(in) :: indxloc, crB, mycr, crsrc, ncr
+    integer, intent(in) :: indxloc, nb, iproc, isrcproc, nprocs
 
-    scalafx_indxl2g = indxl2g(indxloc, crB, mycr, crsrc, ncr)
+    scalafx_indxl2g = indxl2g(indxloc, nb, iproc, isrcproc, nprocs)
 
   end function scalafx_indxl2g
+
+
+  !> Maps global matrix position onto processor.
+  !!
+  !! \param indxloc  Global index on input.
+  !! \param nb  Block size for the column/row
+  !! \param isrcproc coordinate of the process that possesses the first row/column of thexs
+  !! distributed matrix
+  !! \param nprocs  Total number of processes over which the matrix is distributed
+  !!
+  function scalafx_indxg2p(indxglob, nb, isrcproc, nprocs)
+    integer :: scalafx_indxg2p
+    integer, intent(in) :: indxglob, nb, isrcproc, nprocs
+    integer :: iDummy
+
+    scalafx_indxg2p = indxg2p(indxglob, nb, iDummy, isrcproc, nprocs)
+
+  end function scalafx_indxg2p
+
+
+  !> Processor grid location holding a global matrix element. If the element is outside of the
+  !! matrix, returns location (-1,-1)
+  subroutine scalafx_infog2p(mygrid, desc, grow, gcol, prow, pcol)
+
+    !> BLACS descriptor.
+    type(blacsgrid), intent(in) :: mygrid
+
+    !> Descriptor of the distributed matrix.
+    integer, intent(in) :: desc(DLEN_)
+
+    !> Global row index.
+    integer, intent(in) :: grow
+
+    !> Global column index
+    integer, intent(in) :: gcol
+
+    !> Row index in the BLACS grid
+    integer, intent(out) :: prow
+
+    !> Column index in BLACS grid
+    integer, intent(out) :: pcol
+
+    if (grow < 0 .or. grow > desc(M_) .or. gcol < 0 .or. gcol > desc(N_)) then
+      prow = -1
+      pcol = -1
+    else
+      prow = scalafx_indxg2p(grow, desc(MB_), desc(RSRC_), myGrid%nrow)
+      pcol = scalafx_indxg2p(gcol, desc(NB_), desc(CSRC_), myGrid%ncol)
+    end if
+
+  end subroutine scalafx_infog2p
+
 
   !> Maps a global position in a distributed matrix to local one.
   !!
@@ -2098,28 +2331,46 @@ contains
     !> Global column index
     integer, intent(in) :: gcol
 
-    !> Indicates whether given global index is local for the process.
+    !> Indicates whether given global index is local for the calling process.
     logical, intent(out) :: local
 
-    !> Row index in the local matrix (or 0 if global index is not local)
+    !> Row index in the local matrix on the process holding that matrix, if outside the matrix
+    !> returns 0
     integer, intent(out) :: lrow
 
-    !> Column index in the local matrix (or 0 if global index is not local)
+    !> Column index in the local matrix on the process holding that matrix, if outside the matrix
+    !> returns 0
     integer, intent(out) :: lcol
 
     !------------------------------------------------------------------------
 
     integer :: rsrc, csrc
 
-    call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
-        & mygrid%mycol, lrow, lcol, rsrc, csrc)
-    local = (rsrc == mygrid%myrow .and. csrc == mygrid%mycol)
-    if (.not. local) then
+    if (grow < 0 .or. grow > desc(M_) .or. gcol < 0 .or. gcol > desc(N_)) then
       lrow = 0
       lcol = 0
+      local = .false.
+    else
+      call infog2l(grow, gcol, desc, mygrid%nrow, mygrid%ncol, mygrid%myrow,&
+          & mygrid%mycol, lrow, lcol, rsrc, csrc)
+      local = (rsrc == mygrid%myrow .and. csrc == mygrid%mycol)
     end if
 
   end subroutine scalafx_localindices
 
+
+  !> Number of rows or columns of distributed matrix owned by a specific process.
+  !!
+  !! \param nn Number of columns (or rows) of global matrix.
+  !! \param nb Column (or row) block size.
+  !! \param iproc The coordinate of the process whose local array row or column is to be determined.
+  !! \param nproc The total number processes over which the matrix is distributed.
+  function scalafx_numroc(nn, nb, iproc, isrcproc, nproc)
+    integer :: scalafx_numroc
+    integer, intent(in) :: nn, nb, iproc, isrcproc, nproc
+
+    scalafx_numroc = numroc(nn, nb, iproc, isrcproc, nproc)
+
+  end function scalafx_numroc
 
 end module scalapackfx_module

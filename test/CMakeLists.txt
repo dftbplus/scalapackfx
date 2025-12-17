@@ -8,7 +8,10 @@ set(common-dep-targets
   test_diag
   test_gemr2d
   test_linecomm
+  test_matinv
+  test_pposv
   test_psyr_pher
+  test_remoteelements
   test_svd
   test_tran)
 
