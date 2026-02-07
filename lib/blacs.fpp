@@ -3,14 +3,15 @@
 
 !> Interfaces to BLACS routines.
 module blacs_module
+  use, intrinsic :: iso_c_binding, only : c_int
   use scalapackfx_common_module
   implicit none
   private
 
-  public :: blacs_pinfo, blacs_get, blacs_gridinfo, blacs_gridinit
-  public :: blacs_barrier, blacs_exit, blacs_abort, blacs_pnum
-  public :: gebs2d, gebr2d, gesd2d, gerv2d, gsum2d, gemr2d
-
+  public :: blacs_abort, blacs_barrier, blacs_exit, blacs_get, blacs_gridexit, blacs_gridinfo
+  public :: blacs_gridinit, blacs_gridmap, blacs_pinfo, blacs_pnum, blacs_set
+  public :: gebr2d, gebs2d, gemr2d, gerv2d, gesd2d, gsum2d
+  public :: sys2blacs_handle
 
   !> Performs 2d copy from data in matrix to another, potentially with different distribution
   !> patterns.
@@ -36,6 +37,13 @@ module blacs_module
       integer, intent(in) :: ictxt, what
       integer, intent(out) :: val
     end subroutine blacs_get
+
+    !> Sets values that BLACS uses for internal defaults.
+    !! \see BLACS documentation for details.
+    subroutine blacs_set(ictxt, what, val)
+      integer, intent(in) :: ictxt, what
+      integer, intent(in) :: val(*)
+    end subroutine blacs_set
 
     !> Delivers information about the grid.
     !! \see BLACS documentation for details.
@@ -93,6 +101,18 @@ module blacs_module
       integer, intent(out) :: prow, pcol
     end subroutine blacs_pcoord
 
+    !> Frees a BLACS context.
+    !! \see BLACS documentation for details.
+    subroutine blacs_gridexit(ictxt)
+      integer, intent(in) :: ictxt
+    end subroutine blacs_gridexit
+
+    !> Returns a BLACS context handle corresponding to a specific MPI communicator.
+    function sys2blacs_handle(mpicomm) result(ictxt) bind(C, name="sys2blacs_handle_")
+      import :: c_int
+      integer(c_int), intent(in) :: mpicomm
+      integer(c_int) :: ictxt
+    end function sys2blacs_handle
   end interface
 
 !##########################################################################
