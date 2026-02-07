@@ -19,7 +19,7 @@ module blacsfx_module
   public :: blacsfx_gemr2d
   public :: blacsfx_barrier
   public :: blacsfx_pinfo, blacsfx_pcoord, blacsfx_pnum, blacsfx_exit
-
+  public :: sys2blacs_handle
 
   interface blacsfx_gebs
     #:for RANK in RANKS

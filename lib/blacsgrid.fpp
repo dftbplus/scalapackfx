@@ -297,10 +297,12 @@ contains
   !!     otherwise in row major order. (Default: .false.)
   !! \param leadrow  Lead row in each subgrid.
   !! \param leadcol  Lead column in each grid.
-  !! \param context  BLACS system context (default: default system context)
+  !! \param context  BLACS system context (default: default system context).
+  !!     Note: the sys2blacs_handle(mpicomm) function will convert an MPI
+  !!     communicator, mpicomm, into a suitable blacs context.
   !! \param leadgrid  If present, an additional (1, ngrid) shaped grid is
   !!     created which contains only the lead nodes from all grids.
-  !! \param repeatable if present and T, forces topologies to be repeatable.
+  !! \param repeatable  If present and T, forces topologies to be repeatable.
   !!     May degrade performance in this case.
   !!
   subroutine initmappedgrids(self, gridmap, context, repeatable)
@@ -342,7 +344,7 @@ contains
   end subroutine initmappedgrids
 
 
-  !> Destructs processor grid.
+  !> Destroys processor grid.
   !!
   !! \param mygrid BLACS grid descriptor.
   !!
