@@ -4,6 +4,21 @@ Change Log
 
 Notable project changes in various releases.
 
+
+1.3
+===
+
+Added
+-----
+
+* ScaLAPACK routines indxg2p and numroc exported
+
+Fixed
+-----
+
+* Various minor cosmetic fixes.
+
+
 1.2
 ===
 
