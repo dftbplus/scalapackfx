@@ -134,7 +134,7 @@
     ${TYPE}$(${KIND}$), intent(in) :: bb(descb(LLD_), *)
     integer, intent(in) :: ib, jb
     integer, intent(in) :: descc(*)
-    ${TYPE}$(${KIND}$), intent(in) :: cc(descc(LLD_), *)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(descc(LLD_), *)
     integer, intent(in) :: ic, jc
   end subroutine ${NAME}$
 
