@@ -4,6 +4,12 @@ Change Log
 
 Notable project changes in various releases.
 
+Unreleased
+==========
+
+* Fix alpha type and C matrix intent for rank-2k updates
+
+* Fix leading dimension size for GEMM matrix output
 
 1.3
 ===
