@@ -162,15 +162,17 @@
     ${TYPE}$(${KIND}$), intent(inout) :: cc(:,:)
     integer, intent(in) :: descc(DLEN_)
     character, intent(in), optional :: uplo, trans
-    real(${KIND}$), intent(in), optional :: alpha, beta
+    ${TYPE}$(${KIND}$), intent(in), optional :: alpha
+    real(${KIND}$), intent(in), optional :: beta
     integer, intent(in), optional :: nn, kk
     integer, intent(in), optional :: ia, ja, ib, jb, ic, jc
 
-    real(${KIND}$) :: alpha0, beta0
+    ${TYPE}$(${KIND}$) :: alpha0
+    real(${KIND}$) :: beta0
     character :: uplo0, trans0
     integer :: nn0, kk0, ia0, ja0, ib0, jb0, ic0, jc0
 
-    @:inoptflags(alpha0, alpha, real(1, kind=${KIND}$))
+    @:inoptflags(alpha0, alpha, ${FUNCTION}$(1, kind=${KIND}$))
     @:inoptflags(beta0, beta, real(0, kind=${KIND}$))
     @:inoptflags(uplo0, uplo, "L")
     @:inoptflags(trans0, trans, "N")
