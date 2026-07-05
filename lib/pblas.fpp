@@ -186,7 +186,7 @@
     integer, intent(in) :: ib, jb
     ${TYPE}$(${KIND}$), intent(in) :: beta
     integer, intent(in) :: descc(*)
-    ${TYPE}$(${KIND}$), intent(inout) :: cc(descb(LLD_), *)
+    ${TYPE}$(${KIND}$), intent(inout) :: cc(descc(LLD_), *)
     integer, intent(in) :: ic, jc
   end subroutine ${NAME}$
 
