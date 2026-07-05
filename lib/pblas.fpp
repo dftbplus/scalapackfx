@@ -64,7 +64,7 @@
     import
     character, intent(in) :: uplo, trans
     integer, intent(in) :: nn, kk
-    real(${KIND}$), intent(in) :: alpha
+    ${TYPE}$(${KIND}$), intent(in) :: alpha
     integer, intent(in) :: desca(*)
     ${TYPE}$(${KIND}$), intent(in) :: aa(desca(LLD_), *)
     integer, intent(in) :: ia, ja
