@@ -11,7 +11,7 @@ module blacs_module
   public :: blacs_abort, blacs_barrier, blacs_exit, blacs_get, blacs_gridexit, blacs_gridinfo
   public :: blacs_gridinit, blacs_gridmap, blacs_pinfo, blacs_pnum, blacs_set
   public :: gebr2d, gebs2d, gemr2d, gerv2d, gesd2d, gsum2d
-  public :: sys2blacs_handle
+  public :: blacs2sys_handle, sys2blacs_handle
 
   !> Performs 2d copy from data in matrix to another, potentially with different distribution
   !> patterns.
@@ -113,6 +113,14 @@ module blacs_module
       integer(c_int), intent(in) :: mpicomm
       integer(c_int) :: ictxt
     end function sys2blacs_handle
+
+    !> Returns an MPI communicator corresponding to a specific BLACS context handle.
+    function blacs2sys_handle(ictxt) result(mpicomm) bind(C, name="blacs2sys_handle_")
+      import :: c_int
+      integer(c_int), intent(in) :: ictxt
+      integer(c_int) :: mpicomm
+    end function blacs2sys_handle
+
   end interface
 
 !##########################################################################
