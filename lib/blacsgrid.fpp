@@ -290,18 +290,11 @@ contains
   !! they belong to.
   !!
   !! \param self  BLACS grid descriptor
-  !! \param ngrid  Nr. of grids
-  !! \param nrow  Number of rows in every grid
-  !! \param ncol  Number of columns in every grid
-  !! \param colmajor  If .true., processes will be aligned in column major order
-  !!     otherwise in row major order. (Default: .false.)
-  !! \param leadrow  Lead row in each subgrid.
-  !! \param leadcol  Lead column in each grid.
+  !! \param gridmap  Process location in the grid indicating the process-to-
+  !!     grid mapping.
   !! \param context  BLACS system context (default: default system context).
   !!     Note: the sys2blacs_handle(mpicomm) function will convert an MPI
   !!     communicator, mpicomm, into a suitable blacs context.
-  !! \param leadgrid  If present, an additional (1, ngrid) shaped grid is
-  !!     created which contains only the lead nodes from all grids.
   !! \param repeatable  If present and T, forces topologies to be repeatable.
   !!     May degrade performance in this case.
   !!
