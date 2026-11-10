@@ -48,8 +48,8 @@ module blacs_module
     !> Delivers information about the grid.
     !! \see BLACS documentation for details.
     subroutine blacs_gridinfo(ictxt, nprow, npcol, myrow, mycol)
-      integer, intent(in) :: ictxt,nprow, npcol
-      integer, intent(out) :: myrow, mycol
+      integer, intent(in) :: ictxt
+      integer, intent(out) :: nprow, npcol, myrow, mycol
     end subroutine blacs_gridinfo
 
     !> Assigns available processes into BLACS process grid.
